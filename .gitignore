@@ -50,3 +50,6 @@ artifacts/
 .env.*
 appsettings.Development.json
 appsettings.Local.json
+
+## Local reference files
+*.html
