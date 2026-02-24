@@ -24,8 +24,11 @@ namespace Mobizon.Net.Internal
                 new StringToIntConverter(),
                 new StringToFloatConverter(),
                 new StringToDecimalConverter(),
+                new StringToBoolConverter(),
+                new StringMinutesToTimeSpanConverter(),
                 new SmsStatusConverter(),
                 new CampaignCommonStatusConverter(),
+                new MessageTypeConverter(),
                 new StringToNumericEnumConverter<CampaignType>(),
                 new MobizonDateTimeConverter()
             }

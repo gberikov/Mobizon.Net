@@ -14,14 +14,10 @@ namespace Mobizon.Contracts.Models.Campaign
         /// <summary>Gets or sets the unique ID of the campaign.</summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the moderation status of the campaign.
-        /// </summary>
+        /// <summary>Gets or sets the moderation status of the campaign.</summary>
         public CampaignCommonStatus? ModerationStatus { get; set; }
 
-        /// <summary>
-        /// Gets or sets the common (overall) status of the campaign.
-        /// </summary>
+        /// <summary>Gets or sets the common (overall) status of the campaign.</summary>
         public CampaignCommonStatus? CommonStatus { get; set; }
 
         /// <summary>
@@ -30,13 +26,12 @@ namespace Mobizon.Contracts.Models.Campaign
         /// </summary>
         public IReadOnlyList<CampaignGroupInfo>? GroupsList { get; set; }
 
-        /// <summary>
-        /// Gets or sets the campaign type (Single, Bulk, Template).
-        /// </summary>
+        /// <summary>Gets or sets the campaign type (Single, Bulk, Template).</summary>
         public CampaignType? Type { get; set; }
 
-        /// <summary>Gets or sets the message type. Currently only <c>SMS</c> is supported.</summary>
-        public string? MsgType { get; set; }
+        /// <summary>Gets or sets the message type (e.g. SMS).</summary>
+        [JsonPropertyName("msgType")]
+        public MessageType? MessageType { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of messages sent per <see cref="RatePeriod"/> seconds.
@@ -50,25 +45,25 @@ namespace Mobizon.Contracts.Models.Campaign
         public CampaignCommonStatus? SendStatus { get; set; }
 
         /// <summary>
-        /// Gets or sets the deletion flag:
-        /// <c>0</c> — available; <c>1</c> — deleted.
+        /// Gets or sets whether the campaign has been deleted.
         /// </summary>
-        public int IsDeleted { get; set; }
+        public bool IsDeleted { get; set; }
 
-        /// <summary>
-        /// Gets or sets the deferred send date and time.
-        /// </summary>
+        /// <summary>Gets or sets the deferred send date and time.</summary>
         [JsonPropertyName("deferredToTs")]
         public DateTime? DeferredTo { get; set; }
 
         /// <summary>Gets or sets the campaign creation date and time.</summary>
-        public DateTime? CreateTs { get; set; }
+        [JsonPropertyName("createTs")]
+        public DateTime? Created { get; set; }
 
         /// <summary>Gets or sets the date and time when sending actually started.</summary>
-        public DateTime? StartSendTs { get; set; }
+        [JsonPropertyName("startSendTs")]
+        public DateTime? SendStarted { get; set; }
 
         /// <summary>Gets or sets the date and time when all messages were sent.</summary>
-        public DateTime? EndSendTs { get; set; }
+        [JsonPropertyName("endSendTs")]
+        public DateTime? SendEnded { get; set; }
 
         /// <summary>Gets or sets the campaign name.</summary>
         public string? Name { get; set; }
@@ -80,30 +75,24 @@ namespace Mobizon.Contracts.Models.Campaign
         public string? Text { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum message delivery wait time in minutes.
+        /// Gets or sets the maximum message delivery wait time.
+        /// The API represents this value in minutes (e.g. <c>"1440"</c> = 24 hours).
         /// </summary>
-        public int? Validity { get; set; }
+        public TimeSpan? Validity { get; set; }
 
-        /// <summary>
-        /// Gets or sets the SMS message class (Flash or Normal).
-        /// </summary>
+        /// <summary>Gets or sets the SMS message class (Flash or Normal).</summary>
         [JsonPropertyName("mclass")]
         public MessageClass? MessageClass { get; set; }
 
         /// <summary>
-        /// Gets or sets whether recipient click-tracking on short links is enabled:
-        /// <c>0</c> — disabled; <c>1</c> — enabled.
+        /// Gets or sets whether recipient click-tracking on short links is enabled.
         /// </summary>
         public bool? TrackShortLinkRecipients { get; set; }
 
-        /// <summary>
-        /// Gets or sets the comma-separated contact group IDs used in the campaign.
-        /// </summary>
-        public string? Groups { get; set; }
+        /// <summary>Gets or sets the contact group IDs used in the campaign.</summary>
+        public IReadOnlyList<int>? Groups { get; set; }
 
-        /// <summary>
-        /// Gets or sets the moderator's comment if the campaign was declined.
-        /// </summary>
+        /// <summary>Gets or sets the moderator's comment if the campaign was declined.</summary>
         public string? GlobalComment { get; set; }
     }
 
