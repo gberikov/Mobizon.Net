@@ -8,32 +8,29 @@ namespace Mobizon.Net.ConsoleSample.Samples
 {
     static class MessageSamples
     {
-        // Change this to a real number before running
-        private const string TestRecipient = "77017221502";
-
         // POST /service/Message/SendSmsMessage  (minimal params)
-        public static async Task QuickSendAsync(MobizonClient client)
+        public static async Task QuickSendAsync(MobizonClient client, string recipient, string text)
         {
             Console.WriteLine("=== Message.QuickSend ===");
-            var result = await client.Messages.QuickSendAsync(TestRecipient, "Hello from Mobizon.Net SDK!");
+            var result = await client.Messages.QuickSendAsync(recipient, text);
             Console.WriteLine($"MessageId : {result.Data.MessageId}");
             Console.WriteLine($"CampaignId: {result.Data.CampaignId}");
             Console.WriteLine($"Status    : {result.Data.Status}");
         }
 
         // POST /service/Message/SendSmsMessage  (with optional params)
-        public static async Task SendWithParamsAsync(MobizonClient client)
+        public static async Task SendWithParamsAsync(MobizonClient client, string recipient, string text)
         {
             Console.WriteLine("=== Message.SendSmsMessage (with params) ===");
             var result = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
             {
-                Recipient = TestRecipient,
-                Text      = "Test with params",
+                Recipient = recipient,
+                Text      = text,
                 Parameters = new SmsMessageParameters
                 {
                     Validity     = TimeSpan.FromHours(1),
                     MessageClass = MessageClass.Normal,
-                    // DeferredTo = DateTime.Now.AddHours(2),
+                    DeferredTo = DateTime.Now.AddMinutes(2),
                 }
             });
             Console.WriteLine($"MessageId : {result.Data.MessageId}");

@@ -23,8 +23,10 @@ namespace Mobizon.Net.ConsoleSample
                 .AddEnvironmentVariables()
                 .Build();
 
-            var apiKey = configuration["Mobizon:ApiKey"];
-            var apiUrl = configuration["Mobizon:ApiUrl"] ?? "https://api.mobizon.kz";
+            var apiKey        = configuration["Mobizon:ApiKey"];
+            var apiUrl        = configuration["Mobizon:ApiUrl"] ?? "https://api.mobizon.kz";
+            var testRecipient = configuration["Mobizon:TestRecipient"] ?? "";
+            var testMessage   = configuration["Mobizon:TestMessage"]   ?? "Hello from Mobizon.Net SDK!";
 
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -46,8 +48,8 @@ namespace Mobizon.Net.ConsoleSample
                 // await UserSamples.GetBalanceAsync(client);
 
                 // ── Message ───────────────────────────────────────────────────────
-                // await MessageSamples.QuickSendAsync(client);
-                // await MessageSamples.SendWithParamsAsync(client);
+                await MessageSamples.QuickSendAsync(client, testRecipient, testMessage);
+                // await MessageSamples.SendWithParamsAsync(client, testRecipient, testMessage);
                 // await MessageSamples.GetStatusAsync(client);
                 // await MessageSamples.ListAsync(client);
 
