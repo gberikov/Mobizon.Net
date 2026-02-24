@@ -2,8 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
 using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Message;
 using Mobizon.Net;
+using Mobizon.Net.ConsoleSample.Samples;
 using Microsoft.Extensions.Configuration;
 
 namespace Mobizon.Net.ConsoleSample
@@ -28,53 +28,69 @@ namespace Mobizon.Net.ConsoleSample
 
             if (string.IsNullOrEmpty(apiKey))
             {
-                Console.WriteLine("API key is not configured. Please set it in one of:");
-                Console.WriteLine($"  - appsettings.{environment}.json -> Mobizon:ApiKey");
-                Console.WriteLine("  - Environment variable: MOBIZON__ApiKey");
+                Console.WriteLine("API key is not configured. Set it in:");
+                Console.WriteLine($"  appsettings.{environment}.json  ->  Mobizon:ApiKey");
+                Console.WriteLine("  or environment variable: Mobizon__ApiKey");
                 return;
             }
 
-            var options = new MobizonClientOptions
+            using var client = new MobizonClient(new MobizonClientOptions
             {
                 ApiKey = apiKey,
                 ApiUrl = apiUrl
-            };
-
-            using var client = new MobizonClient(options);
+            });
 
             try
             {
-                // Check balance
-                Console.WriteLine("Checking balance...");
-                var balance = await client.User.GetOwnBalanceAsync();
-                Console.WriteLine($"Balance: {balance.Data.Balance} {balance.Data.Currency}");
+                // ── User ──────────────────────────────────────────────────────────
+                // await UserSamples.GetBalanceAsync(client);
 
-                // Send SMS
-                Console.WriteLine("\nSending SMS...");
-                var smsResult = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
-                {
-                    Recipient = "77017221502",
-                    Text = "Hello from Mobizon.Net SDK!"
-                });
-                Console.WriteLine($"Message sent. ID: {smsResult.Data.MessageId}, " +
-                                  $"Campaign: {smsResult.Data.CampaignId}");
+                // ── Message ───────────────────────────────────────────────────────
+                // await MessageSamples.QuickSendAsync(client);
+                // await MessageSamples.SendWithParamsAsync(client);
+                // await MessageSamples.GetStatusAsync(client);
+                // await MessageSamples.ListAsync(client);
 
-                // Check status
-                Console.WriteLine("\nChecking message status...");
-                var status = await client.Messages.GetSmsStatusAsync(
-                    new[] { smsResult.Data.MessageId });
-                foreach (var s in status.Data)
-                {
-                    Console.WriteLine($"  Message {s.Id}: status={s.Status}, segments={s.SegNum}");
-                }
+                // ── Campaign ──────────────────────────────────────────────────────
+                // await CampaignSamples.ListAsync(client);
+                // await CampaignSamples.GetAsync(client);
+                // await CampaignSamples.GetInfoAsync(client);
+                // await CampaignSamples.CreateSendDeleteAsync(client);
+                // await CampaignSamples.AddRecipientsAsync(client);
+
+                // ── Link ──────────────────────────────────────────────────────────
+                // await LinkSamples.ListAsync(client);
+                // await LinkSamples.CreateGetUpdateDeleteAsync(client);
+                // await LinkSamples.GetStatsAsync(client);
+
+                // ── Contact Groups ────────────────────────────────────────────────
+                // await ContactGroupSamples.ListAsync(client);
+                // await ContactGroupSamples.CreateUpdateDeleteAsync(client);
+                // await ContactGroupSamples.GetCardsCountAsync(client);
+
+                // ── Contact Cards ─────────────────────────────────────────────────
+                // await ContactCardSamples.ListAsync(client);
+                // await ContactCardSamples.ListByGroupAsync(client);
+                // await ContactCardSamples.GetAsync(client);
+                // await ContactCardSamples.CreateAndSetGroupAsync(client);
+                // await ContactCardSamples.UpdateAsync(client);
+                // await ContactCardSamples.GetGroupsAsync(client);
+
+                // ── Number Stop List ──────────────────────────────────────────────
+                // await NumberStopListSamples.ListAsync(client);
+                // await NumberStopListSamples.AddNumberAsync(client);
+                // await NumberStopListSamples.AddRangeAsync(client);
+                // await NumberStopListSamples.DeleteAsync(client);
+
+                Console.WriteLine("Uncomment a block in Program.cs to run a sample.");
             }
             catch (MobizonApiException ex)
             {
-                Console.WriteLine($"API Error {ex.RawCode}: {ex.ApiMessage}");
+                Console.WriteLine($"[API Error {ex.RawCode}] {ex.ApiMessage}");
             }
             catch (MobizonException ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"[Error] {ex.Message}");
             }
         }
     }
