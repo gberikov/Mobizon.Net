@@ -188,6 +188,26 @@ namespace Mobizon.Net.Tests.Internal
                 new MobizonApiClient(httpClient, options));
         }
 
+        [Fact]
+        public async Task SendAsync_FloatFieldAsString_IsDeserialized()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""segUserBuy"":""0.05""},""message"":""""}");
+
+            var client = CreateClient(mockHttp);
+            var result = await client.SendAsync<TestSegResult>(
+                HttpMethod.Post, "message", "list", null);
+
+            Assert.Equal(0.05f, result.Data.SegUserBuy, 4);
+        }
+
+        private class TestSegResult
+        {
+            public float SegUserBuy { get; set; }
+        }
+
         private class TestSendResult
         {
             public int MessageId { get; set; }

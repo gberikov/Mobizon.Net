@@ -48,10 +48,10 @@ namespace Mobizon.Net.ConsoleSample
                 // await UserSamples.GetBalanceAsync(client);
 
                 // ── Message ───────────────────────────────────────────────────────
-                await MessageSamples.QuickSendAsync(client, testRecipient, testMessage);
-                // await MessageSamples.SendWithParamsAsync(client, testRecipient, testMessage);
+                // await MessageSamples.QuickSendAsync(client, testRecipient, testMessage);
+                // await MessageSamples.SendSmsMessageAsync(client, testRecipient, testMessage);
                 // await MessageSamples.GetStatusAsync(client);
-                // await MessageSamples.ListAsync(client);
+                await MessageSamples.ListAsync(client);
 
                 // ── Campaign ──────────────────────────────────────────────────────
                 // await CampaignSamples.ListAsync(client);

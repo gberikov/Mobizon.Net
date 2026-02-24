@@ -1,3 +1,7 @@
+using System;
+using System.Text.Json.Serialization;
+using Mobizon.Contracts.Models.Campaign;
+
 namespace Mobizon.Contracts.Models.Message
 {
     /// <summary>
@@ -18,7 +22,8 @@ namespace Mobizon.Contracts.Models.Message
         /// <summary>
         /// Gets or sets the number of SMS segments the message was split into.
         /// </summary>
-        public int SegNum { get; set; }
+        [JsonPropertyName("segNum")]
+        public int Segments { get; set; }
 
         /// <summary>
         /// Gets or sets the segment cost in user currency.
@@ -43,7 +48,7 @@ namespace Mobizon.Contracts.Models.Message
         /// <summary>
         /// Gets or sets the current delivery status of the message.
         /// </summary>
-        public int Status { get; set; }
+        public SmsStatus Status { get; set; }
 
         /// <summary>
         /// Gets or sets the contact group IDs associated with this message.
@@ -58,12 +63,14 @@ namespace Mobizon.Contracts.Models.Message
         /// <summary>
         /// Gets or sets the timestamp when the message was first submitted for sending.
         /// </summary>
-        public string? StartSendTs { get; set; }
+        [JsonPropertyName("startSendTs")]
+        public DateTime? SendStarted { get; set; }
 
         /// <summary>
         /// Gets or sets the timestamp of the last delivery status update.
         /// </summary>
-        public string? StatusUpdateTs { get; set; }
+        [JsonPropertyName("statusUpdateTs")]
+        public DateTime? StatusUpdated { get; set; }
 
         /// <summary>
         /// Gets or sets the ISO-3166 alpha-2 country code of the recipient.
@@ -76,5 +83,11 @@ namespace Mobizon.Contracts.Models.Message
         /// Only populated when <c>withNumberInfo</c> is set to 1.
         /// </summary>
         public string? OperatorName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the campaign this message belongs to.
+        /// Populated when the API returns the nested campaign object.
+        /// </summary>
+        public CampaignData? Campaign { get; set; }
     }
 }

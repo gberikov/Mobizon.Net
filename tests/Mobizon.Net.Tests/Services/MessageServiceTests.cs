@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models;
@@ -177,7 +176,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("ids[0]", "100")
                 .WithFormData("ids[1]", "200")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[{""id"":100,""status"":2,""segNum"":1,""startSendTs"":""2024-01-01 12:00:00"",""statusUpdateTs"":""2024-01-01 12:05:00""},{""id"":200,""status"":1,""segNum"":1,""startSendTs"":""2024-01-01 12:01:00"",""statusUpdateTs"":null}],""message"":""""}");
+                    @"{""code"":0,""data"":[{""id"":""100"",""status"":""DELIVRD"",""segNum"":""1"",""startSendTs"":""2024-01-01 12:00:00"",""statusUpdateTs"":""2024-01-01 12:05:00""},{""id"":""200"",""status"":""NEW"",""segNum"":""1"",""startSendTs"":"" "",""statusUpdateTs"":"" ""}],""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.GetSmsStatusAsync(new[] { 100, 200 });
@@ -185,8 +184,12 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Equal(2, result.Data.Count);
             Assert.Equal(100, result.Data[0].Id);
-            Assert.Equal(2, result.Data[0].Status);
-            Assert.Equal("2024-01-01 12:05:00", result.Data[0].StatusUpdateTs);
+            Assert.Equal(SmsStatus.Delivered, result.Data[0].Status);
+            Assert.Equal(new DateTime(2024, 1, 1, 12, 5, 0), result.Data[0].StatusUpdated);
+            Assert.Equal(new DateTime(2024, 1, 1, 12, 0, 0), result.Data[0].SendStarted);
+            Assert.Null(result.Data[1].StatusUpdated);
+            Assert.Null(result.Data[1].SendStarted);
+            Assert.Equal(SmsStatus.New, result.Data[1].Status);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -202,7 +205,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]", "10")
                 .WithFormData("sort[campaignId]", "DESC")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""items"":[{""id"":1,""campaignId"":5,""segNum"":1,""from"":""Alpha"",""to"":""77001234567"",""status"":2,""text"":""Hi""}],""totalItemCount"":1},""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":1,""campaignId"":5,""segNum"":1,""from"":""Alpha"",""to"":""77001234567"",""status"":""DELIVRD"",""text"":""Hi""}],""totalItemCount"":1},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new MessageListRequest

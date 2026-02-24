@@ -1,3 +1,5 @@
+using System;
+
 namespace Mobizon.Contracts.Models.Campaign
 {
     /// <summary>
@@ -24,13 +26,15 @@ namespace Mobizon.Contracts.Models.Campaign
     /// </summary>
     public class CampaignCounters
     {
-        /// <summary>Gets or sets the timestamp of the last counter update. Format: <c>YYYY-MM-DD HH:MM:SS</c>.</summary>
-        public string? UpdateTs { get; set; }
+        /// <summary>Gets or sets the timestamp of the last counter update.</summary>
+        public DateTime? UpdateTs { get; set; }
 
         // ── Segment counters ────────────────────────────────────────────────
 
         /// <summary>Total segments with status NEW.</summary>
         public int TotalNewSegNum { get; set; }
+        /// <summary>Total segments with status ENQUEUD.</summary>
+        public int TotalEnqueudSegNum { get; set; }
         /// <summary>Total segments with status ACCEPTD.</summary>
         public int TotalAcceptdSegNum { get; set; }
         /// <summary>Total segments with status DELIVRD.</summary>
@@ -54,6 +58,8 @@ namespace Mobizon.Contracts.Models.Campaign
 
         /// <summary>Total messages with status NEW.</summary>
         public int TotalNewMsgNum { get; set; }
+        /// <summary>Total messages with status ENQUEUD.</summary>
+        public int TotalEnqueudMsgNum { get; set; }
         /// <summary>Total messages with status ACCEPTD.</summary>
         public int TotalAcceptdMsgNum { get; set; }
         /// <summary>Total messages with status DELIVRD.</summary>
@@ -77,6 +83,8 @@ namespace Mobizon.Contracts.Models.Campaign
 
         /// <summary>Total cost of all segments with status NEW.</summary>
         public decimal TotalNewMsgCost { get; set; }
+        /// <summary>Total cost of all segments with status ENQUEUD.</summary>
+        public decimal TotalEnqueudMsgCost { get; set; }
         /// <summary>Total cost of all segments with status ACCEPTD.</summary>
         public decimal TotalAcceptdMsgCost { get; set; }
         /// <summary>Total cost of all segments with status DELIVRD.</summary>
@@ -95,10 +103,11 @@ namespace Mobizon.Contracts.Models.Campaign
         public decimal TotalPdlivrdMsgCost { get; set; }
         /// <summary>Total cost of the campaign.</summary>
         public decimal TotalCost { get; set; }
+        /// <summary>Total cost at partner rate.</summary>
+        public decimal TotalPartnerCost { get; set; }
 
         /// <summary>
         /// Gets or sets the number of rejected recipients (not included in the campaign).
-        /// Updated when recipients are added.
         /// </summary>
         public int RecipientsRejected { get; set; }
     }

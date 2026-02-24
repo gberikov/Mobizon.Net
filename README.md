@@ -133,7 +133,7 @@ var status = await client.Messages.GetSmsStatusAsync(
     new[] { result.Data.MessageId });
 
 foreach (var item in status.Data)
-    Console.WriteLine($"ID={item.Id}  Status={item.Status}  Segments={item.SegNum}");
+    Console.WriteLine($"ID={item.Id}  Status={item.Status}  Segments={item.Segments}");
 ```
 
 **List messages with pagination:**

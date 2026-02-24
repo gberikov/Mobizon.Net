@@ -1,3 +1,6 @@
+using System;
+using System.Text.Json.Serialization;
+
 namespace Mobizon.Contracts.Models.Message
 {
     /// <summary>
@@ -11,25 +14,26 @@ namespace Mobizon.Contracts.Models.Message
         public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the current delivery status code of the message.
+        /// Gets or sets the current delivery status of the message.
         /// </summary>
-        public int Status { get; set; }
+        public SmsStatus Status { get; set; }
 
         /// <summary>
         /// Gets or sets the number of SMS segments the message was split into.
         /// </summary>
-        public int SegNum { get; set; }
+        [JsonPropertyName("segNum")]
+        public int Segments { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp when the message was first submitted for sending,
-        /// as a string in the format returned by the API (YYYY-MM-DD HH:MM:SS or null if not sent).
+        /// Gets or sets the timestamp when the message was first submitted for sending.
         /// </summary>
-        public string? StartSendTs { get; set; }
+        [JsonPropertyName("startSendTs")]
+        public DateTime? SendStarted { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp of the last delivery status update,
-        /// as a string in the format returned by the API (YYYY-MM-DD HH:MM:SS or null if not sent).
+        /// Gets or sets the timestamp of the last delivery status update.
         /// </summary>
-        public string? StatusUpdateTs { get; set; }
+        [JsonPropertyName("statusUpdateTs")]
+        public DateTime? StatusUpdated { get; set; }
     }
 }

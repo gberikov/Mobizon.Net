@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Mobizon.Contracts.Models.Message;
@@ -11,20 +12,17 @@ namespace Mobizon.Contracts.Models.Campaign
     public class CampaignData
     {
         /// <summary>Gets or sets the unique ID of the campaign.</summary>
-        public string? Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the moderation status of the campaign:
-        /// <c>MODERATION</c>, <c>DECLINED</c>, <c>READY_FOR_SEND</c>, <c>AUTO_READY_FOR_SEND</c>.
+        /// Gets or sets the moderation status of the campaign.
         /// </summary>
-        public string? ModerationStatus { get; set; }
+        public CampaignCommonStatus? ModerationStatus { get; set; }
 
         /// <summary>
-        /// Gets or sets the common (overall) status of the campaign:
-        /// <c>MODERATION</c>, <c>DECLINED</c>, <c>READY_FOR_SEND</c>, <c>RUNNING</c>,
-        /// <c>SENT</c>, <c>DONE</c>.
+        /// Gets or sets the common (overall) status of the campaign.
         /// </summary>
-        public string? CommonStatus { get; set; }
+        public CampaignCommonStatus? CommonStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the list of contact groups included in the campaign.
@@ -33,10 +31,9 @@ namespace Mobizon.Contracts.Models.Campaign
         public IReadOnlyList<CampaignGroupInfo>? GroupsList { get; set; }
 
         /// <summary>
-        /// Gets or sets the campaign type:
-        /// <c>1</c> — Single, <c>2</c> — Bulk, <c>3</c> — Template, <c>7</c> — Functional.
+        /// Gets or sets the campaign type (Single, Bulk, Template).
         /// </summary>
-        public int Type { get; set; }
+        public CampaignType? Type { get; set; }
 
         /// <summary>Gets or sets the message type. Currently only <c>SMS</c> is supported.</summary>
         public string? MsgType { get; set; }
@@ -49,8 +46,8 @@ namespace Mobizon.Contracts.Models.Campaign
         /// <summary>Gets or sets the rate-limit period in seconds.</summary>
         public int? RatePeriod { get; set; }
 
-        /// <summary>Gets or sets the send status: <c>SENT</c> or <c>DONE</c>.</summary>
-        public string? SendStatus { get; set; }
+        /// <summary>Gets or sets the send status of the campaign.</summary>
+        public CampaignCommonStatus? SendStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the deletion flag:
@@ -60,28 +57,18 @@ namespace Mobizon.Contracts.Models.Campaign
 
         /// <summary>
         /// Gets or sets the deferred send date and time.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
         /// </summary>
         [JsonPropertyName("deferredToTs")]
-        public string? DeferredTo { get; set; }
+        public DateTime? DeferredTo { get; set; }
 
-        /// <summary>
-        /// Gets or sets the campaign creation date and time.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? CreateTs { get; set; }
+        /// <summary>Gets or sets the campaign creation date and time.</summary>
+        public DateTime? CreateTs { get; set; }
 
-        /// <summary>
-        /// Gets or sets the date and time when sending actually started.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? StartSendTs { get; set; }
+        /// <summary>Gets or sets the date and time when sending actually started.</summary>
+        public DateTime? StartSendTs { get; set; }
 
-        /// <summary>
-        /// Gets or sets the date and time when all messages were sent.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? EndSendTs { get; set; }
+        /// <summary>Gets or sets the date and time when all messages were sent.</summary>
+        public DateTime? EndSendTs { get; set; }
 
         /// <summary>Gets or sets the campaign name.</summary>
         public string? Name { get; set; }

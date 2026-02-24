@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
 using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Campaign;
 
 namespace Mobizon.Net.Internal
 {
@@ -18,7 +19,16 @@ namespace Mobizon.Net.Internal
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            Converters = { new StringToIntConverter() }
+            Converters =
+            {
+                new StringToIntConverter(),
+                new StringToFloatConverter(),
+                new StringToDecimalConverter(),
+                new SmsStatusConverter(),
+                new CampaignCommonStatusConverter(),
+                new StringToNumericEnumConverter<CampaignType>(),
+                new MobizonDateTimeConverter()
+            }
         };
 
         private static readonly JsonSerializerOptions JsonWriteOptions = new JsonSerializerOptions

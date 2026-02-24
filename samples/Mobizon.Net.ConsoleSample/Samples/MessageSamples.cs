@@ -19,18 +19,18 @@ namespace Mobizon.Net.ConsoleSample.Samples
         }
 
         // POST /service/Message/SendSmsMessage  (with optional params)
-        public static async Task SendWithParamsAsync(MobizonClient client, string recipient, string text)
+        public static async Task SendSmsMessageAsync(MobizonClient client, string recipient, string text)
         {
             Console.WriteLine("=== Message.SendSmsMessage (with params) ===");
             var result = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
             {
                 Recipient = recipient,
-                Text      = text,
+                Text = text,
                 Parameters = new SmsMessageParameters
                 {
-                    Validity     = TimeSpan.FromHours(1),
+                    Validity = TimeSpan.FromHours(1),
                     MessageClass = MessageClass.Normal,
-                    DeferredTo = DateTime.Now.AddMinutes(2),
+                    DeferredTo = DateTime.Now.AddHours(2),
                 }
             });
             Console.WriteLine($"MessageId : {result.Data.MessageId}");
@@ -41,9 +41,12 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== Message.GetSmsStatus ===");
             // Replace with a real message ID
-            var result = await client.Messages.GetSmsStatusAsync(new[] { 1, 2 });
-            foreach (var s in result.Data)
-                Console.WriteLine($"  Id={s.Id}  Status={s.Status}  Segments={s.SegNum}");
+            var singleResult = await client.Messages.GetSmsStatusAsync(799740734);
+            foreach (var s in singleResult.Data)
+                Console.WriteLine($"Single:  Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
+            var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 799476047, 799463450 });
+            foreach (var s in multiResult.Data)
+                Console.WriteLine($"Multi:   Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
         }
 
         // POST /service/Message/List
@@ -53,7 +56,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.Messages.ListAsync(new MessageListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
-                Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
             });
             Console.WriteLine($"Total: {result.Data.TotalItemCount}");
             foreach (var m in result.Data.Items)
