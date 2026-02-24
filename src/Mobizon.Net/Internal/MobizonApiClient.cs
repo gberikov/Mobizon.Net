@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +16,13 @@ namespace Mobizon.Net.Internal
     {
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            Converters = { new StringToIntConverter() }
+        };
+
+        private static readonly JsonSerializerOptions JsonWriteOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
         private readonly HttpClient _httpClient;
@@ -33,16 +42,66 @@ namespace Mobizon.Net.Internal
             IDictionary<string, string>? parameters,
             CancellationToken cancellationToken = default)
         {
-            var url = $"{_options.ApiUrl.TrimEnd('/')}/service/{module}/{apiMethod}" +
-                      $"?output=json&api={_options.ApiVersion}&apiKey={_options.ApiKey}";
-
-            var request = new HttpRequestMessage(method, url);
+            var request = new HttpRequestMessage(method, BuildUrl(module, apiMethod));
 
             if (method == HttpMethod.Post && parameters != null && parameters.Count > 0)
-            {
                 request.Content = new FormUrlEncodedContent(parameters);
+
+            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<MobizonResponse<T>> SendJsonAsync<T>(
+            string module,
+            string apiMethod,
+            object? body,
+            CancellationToken cancellationToken = default)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
+
+            if (body != null)
+            {
+                var json = JsonSerializer.Serialize(body, JsonWriteOptions);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
+            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<MobizonResponse<T>> SendMultipartAsync<T>(
+            string module,
+            string apiMethod,
+            IDictionary<string, string> fields,
+            Stream? photo = null,
+            string? photoFileName = null,
+            CancellationToken cancellationToken = default)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
+
+            var multipart = new MultipartFormDataContent();
+
+            foreach (var kv in fields)
+                multipart.Add(new StringContent(kv.Value ?? string.Empty), kv.Key);
+
+            if (photo != null)
+            {
+                var fileContent = new StreamContent(photo);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                multipart.Add(fileContent, "data[photo]", photoFileName ?? "photo");
+            }
+
+            request.Content = multipart;
+
+            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        private string BuildUrl(string module, string apiMethod) =>
+            $"{_options.ApiUrl.TrimEnd('/')}/service/{module}/{apiMethod}" +
+            $"?output=json&api={_options.ApiVersion}&apiKey={_options.ApiKey}";
+
+        private async Task<MobizonResponse<T>> SendCoreAsync<T>(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
             HttpResponseMessage response;
             try
             {
@@ -66,8 +125,7 @@ namespace Mobizon.Net.Internal
             }
             catch (Exception ex)
             {
-                throw new MobizonException(
-                    "Failed to read Mobizon API response", ex);
+                throw new MobizonException("Failed to read Mobizon API response", ex);
             }
 
             MobizonResponse<T> result;
@@ -77,8 +135,7 @@ namespace Mobizon.Net.Internal
             }
             catch (Exception ex)
             {
-                throw new MobizonException(
-                    "Failed to deserialize Mobizon API response", ex);
+                throw new MobizonException("Failed to deserialize Mobizon API response", ex);
             }
 
             if (result.Code != MobizonResponseCode.Success &&

@@ -22,8 +22,14 @@ namespace Mobizon.Contracts.Models.Message
 
         /// <summary>
         /// Gets or sets the timestamp when the message was first submitted for sending,
-        /// as a string in the format returned by the API.
+        /// as a string in the format returned by the API (YYYY-MM-DD HH:MM:SS or null if not sent).
         /// </summary>
-        public string StartSendTs { get; set; } = string.Empty;
+        public string? StartSendTs { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp of the last delivery status update,
+        /// as a string in the format returned by the API (YYYY-MM-DD HH:MM:SS or null if not sent).
+        /// </summary>
+        public string? StatusUpdateTs { get; set; }
     }
 }

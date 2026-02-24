@@ -11,6 +11,36 @@ namespace Mobizon.Contracts.Services
     /// </summary>
     public interface IMessageService
     {
+
+        /// <summary>
+        /// Sends a single SMS message to the specified recipient using only a phone number and text.
+        /// </summary>
+        /// <param name="recipient">
+        /// The recipient phone number in international format (e.g. <c>79991234567</c>).
+        /// Non-digit characters, including a leading <c>+</c>, are stripped automatically.
+        /// </param>
+        /// <param name="text">The body text of the SMS message.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="SendSmsResult"/> with the
+        /// campaign ID, message ID, and initial delivery status.
+        /// </returns>
+        /// <exception cref="Exceptions.MobizonApiException">
+        /// Thrown when the API returns a non-success response code.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// var response = await client.Messages.QuickSendAsync("79991234567", "Hello from Mobizon!");
+        ///
+        /// if (response.Code == MobizonResponseCode.Success)
+        ///     Console.WriteLine($"Message ID: {response.Data.MessageId}");
+        /// </code>
+        /// </example>
+        Task<MobizonResponse<SendSmsResult>> QuickSendAsync(
+            string recipient,
+            string text,
+            CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Sends a single SMS message to the specified recipient.
         /// </summary>
@@ -41,6 +71,22 @@ namespace Mobizon.Contracts.Services
             CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Retrieves the current delivery status of a single SMS message by its ID.
+        /// </summary>
+        /// <param name="id">The message ID to query.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="SmsStatusResult"/> entries
+        /// with a single element for the requested message ID.
+        /// </returns>
+        /// <exception cref="Exceptions.MobizonApiException">
+        /// Thrown when the API returns a non-success response code.
+        /// </exception>
+        Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+            int id,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Retrieves the current delivery status of one or more SMS messages by their IDs.
         /// </summary>
         /// <param name="ids">An array of message IDs to query.</param>
@@ -57,17 +103,17 @@ namespace Mobizon.Contracts.Services
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Returns a paginated list of messages, optionally filtered by sender or status.
+        /// Returns a paginated list of messages, optionally filtered by various criteria.
         /// </summary>
         /// <param name="request">Optional filter, pagination, and sort criteria. Pass <see langword="null"/> to use API defaults.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="MessageInfo"/> items.
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MessageListResponse"/> with items and total count.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<MessageInfo>>> ListAsync(
+        Task<MobizonResponse<MessageListResponse>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default);
     }

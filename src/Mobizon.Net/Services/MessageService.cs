@@ -11,11 +11,22 @@ namespace Mobizon.Net.Services
 {
     internal class MessageService : IMessageService
     {
+        private const string ModuleName = "Message";
         private readonly MobizonApiClient _apiClient;
 
         public MessageService(MobizonApiClient apiClient)
         {
             _apiClient = apiClient;
+        }
+
+        public Task<MobizonResponse<SendSmsResult>> QuickSendAsync(
+            string recipient,
+            string text,
+            CancellationToken cancellationToken = default)
+        {
+            return SendSmsMessageAsync(
+                new SendSmsMessageRequest { Recipient = recipient, Text = text },
+                cancellationToken);
         }
 
         public Task<MobizonResponse<SendSmsResult>> SendSmsMessageAsync(
@@ -31,11 +42,32 @@ namespace Mobizon.Net.Services
             if (request.From != null)
                 parameters["from"] = request.From;
 
-            if (request.Validity.HasValue)
-                parameters["params[validity]"] = request.Validity.Value.ToString();
+            if (request.Parameters != null)
+            {
+                var p = request.Parameters;
+
+                if (p.Name != null)
+                    parameters["params[name]"] = p.Name;
+
+                if (p.DeferredTo.HasValue)
+                    parameters["params[deferredToTs]"] = p.DeferredTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+
+                if (p.MessageClass.HasValue)
+                    parameters["params[mclass]"] = ((int)p.MessageClass.Value).ToString();
+
+                if (p.Validity.HasValue)
+                    parameters["params[validity]"] = ((int)p.Validity.Value.TotalMinutes).ToString();
+            }
 
             return _apiClient.SendAsync<SendSmsResult>(
-                HttpMethod.Post, "message", "sendsmsmessage", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "SendSmsMessage", parameters, cancellationToken);
+        }
+
+        public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+            int id,
+            CancellationToken cancellationToken = default)
+        {
+            return GetSmsStatusAsync(new[] { id }, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
@@ -49,10 +81,10 @@ namespace Mobizon.Net.Services
             }
 
             return _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
-                HttpMethod.Post, "message", "getsmsstatus", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<MessageInfo>>> ListAsync(
+        public Task<MobizonResponse<MessageListResponse>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -62,11 +94,53 @@ namespace Mobizon.Net.Services
             {
                 parameters = new Dictionary<string, string>();
 
+                if (request.CampaignIds != null)
+                    parameters["criteria[campaignIds]"] = request.CampaignIds;
+
                 if (request.From != null)
                     parameters["criteria[from]"] = request.From;
 
+                if (request.To != null)
+                    parameters["criteria[to]"] = request.To;
+
+                if (request.Text != null)
+                    parameters["criteria[text]"] = request.Text;
+
                 if (request.Status.HasValue)
                     parameters["criteria[status]"] = request.Status.Value.ToString();
+
+                if (request.Groups != null)
+                    parameters["criteria[groups]"] = request.Groups;
+
+                if (request.CampaignStatus != null)
+                    parameters["criteria[campaignStatus]"] = request.CampaignStatus;
+
+                if (request.CampaignCreateTsFrom != null)
+                    parameters["criteria[campaignCreateTsFrom]"] = request.CampaignCreateTsFrom;
+
+                if (request.CampaignCreateTsTo != null)
+                    parameters["criteria[campaignCreateTsTo]"] = request.CampaignCreateTsTo;
+
+                if (request.CampaignSentTsFrom != null)
+                    parameters["criteria[campaignSentTsFrom]"] = request.CampaignSentTsFrom;
+
+                if (request.CampaignSentTsTo != null)
+                    parameters["criteria[campaignSentTsTo]"] = request.CampaignSentTsTo;
+
+                if (request.StartSendTsFrom != null)
+                    parameters["criteria[startSendTsFrom]"] = request.StartSendTsFrom;
+
+                if (request.StartSendTsTo != null)
+                    parameters["criteria[startSendTsTo]"] = request.StartSendTsTo;
+
+                if (request.StatusUpdateTsFrom != null)
+                    parameters["criteria[statusUpdateTsFrom]"] = request.StatusUpdateTsFrom;
+
+                if (request.StatusUpdateTsTo != null)
+                    parameters["criteria[statusUpdateTsTo]"] = request.StatusUpdateTsTo;
+
+                if (request.WithNumberInfo.HasValue)
+                    parameters["withNumberInfo"] = request.WithNumberInfo.Value.ToString();
 
                 if (request.Pagination != null)
                 {
@@ -80,8 +154,8 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<IReadOnlyList<MessageInfo>>(
-                HttpMethod.Post, "message", "list", parameters, cancellationToken);
+            return _apiClient.SendAsync<MessageListResponse>(
+                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
         }
     }
 }

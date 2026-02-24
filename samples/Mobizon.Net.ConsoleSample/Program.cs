@@ -4,6 +4,7 @@ using Mobizon.Contracts.Exceptions;
 using Mobizon.Contracts.Models;
 using Mobizon.Contracts.Models.Message;
 using Mobizon.Net;
+using Microsoft.Extensions.Configuration;
 
 namespace Mobizon.Net.ConsoleSample
 {
@@ -11,14 +12,25 @@ namespace Mobizon.Net.ConsoleSample
     {
         static async Task Main(string[] args)
         {
-            var apiKey = Environment.GetEnvironmentVariable("MOBIZON_API_KEY");
-            var apiUrl = Environment.GetEnvironmentVariable("MOBIZON_API_URL")
-                         ?? "https://api.mobizon.kz";
+            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+                              ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+                              ?? "Development";
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            var apiKey = configuration["Mobizon:ApiKey"];
+            var apiUrl = configuration["Mobizon:ApiUrl"] ?? "https://api.mobizon.kz";
 
             if (string.IsNullOrEmpty(apiKey))
             {
-                Console.WriteLine("Set MOBIZON_API_KEY environment variable to run this sample.");
-                Console.WriteLine("Optionally set MOBIZON_API_URL (default: https://api.mobizon.kz)");
+                Console.WriteLine("API key is not configured. Please set it in one of:");
+                Console.WriteLine($"  - appsettings.{environment}.json -> Mobizon:ApiKey");
+                Console.WriteLine("  - Environment variable: MOBIZON__ApiKey");
                 return;
             }
 
@@ -41,7 +53,7 @@ namespace Mobizon.Net.ConsoleSample
                 Console.WriteLine("\nSending SMS...");
                 var smsResult = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
                 {
-                    Recipient = "77001234567",
+                    Recipient = "77017221502",
                     Text = "Hello from Mobizon.Net SDK!"
                 });
                 Console.WriteLine($"Message sent. ID: {smsResult.Data.MessageId}, " +

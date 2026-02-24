@@ -10,6 +10,7 @@ namespace Mobizon.Net.Services
 {
     internal class UserService : IUserService
     {
+        private const string ModuleName = "user";
         private readonly MobizonApiClient _apiClient;
 
         public UserService(MobizonApiClient apiClient)
@@ -21,7 +22,7 @@ namespace Mobizon.Net.Services
             CancellationToken cancellationToken = default)
         {
             return _apiClient.SendAsync<BalanceResult>(
-                HttpMethod.Get, "user", "getownbalance", null, cancellationToken);
+                HttpMethod.Get, ModuleName, "getownbalance", null, cancellationToken);
         }
     }
 }

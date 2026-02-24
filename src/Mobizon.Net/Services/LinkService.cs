@@ -11,6 +11,7 @@ namespace Mobizon.Net.Services
 {
     internal class LinkService : ILinkService
     {
+        private const string ModuleName = "link";
         private readonly MobizonApiClient _apiClient;
 
         public LinkService(MobizonApiClient apiClient)
@@ -36,7 +37,7 @@ namespace Mobizon.Net.Services
                 parameters["data[comment]"] = request.Comment;
 
             return _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, "link", "create", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<object>> DeleteAsync(
@@ -49,7 +50,7 @@ namespace Mobizon.Net.Services
             }
 
             return _apiClient.SendAsync<object>(
-                HttpMethod.Post, "link", "delete", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<LinkData>> GetAsync(
@@ -61,7 +62,7 @@ namespace Mobizon.Net.Services
             };
 
             return _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, "link", "get", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<LinkData>>> GetLinksAsync(
@@ -73,7 +74,7 @@ namespace Mobizon.Net.Services
             };
 
             return _apiClient.SendAsync<IReadOnlyList<LinkData>>(
-                HttpMethod.Post, "link", "getlinks", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<LinkStatsResult>>> GetStatsAsync(
@@ -95,7 +96,7 @@ namespace Mobizon.Net.Services
                 parameters["criteria[dateTo]"] = request.DateTo;
 
             return _apiClient.SendAsync<IReadOnlyList<LinkStatsResult>>(
-                HttpMethod.Post, "link", "getstats", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<LinkData>>> ListAsync(
@@ -120,7 +121,7 @@ namespace Mobizon.Net.Services
             }
 
             return _apiClient.SendAsync<IReadOnlyList<LinkData>>(
-                HttpMethod.Post, "link", "list", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<object>> UpdateAsync(
@@ -144,7 +145,7 @@ namespace Mobizon.Net.Services
                 parameters["data[comment]"] = request.Comment;
 
             return _apiClient.SendAsync<object>(
-                HttpMethod.Post, "link", "update", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "update", parameters, cancellationToken);
         }
     }
 }

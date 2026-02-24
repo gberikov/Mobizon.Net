@@ -27,6 +27,7 @@ namespace Mobizon.Contracts.Services
 
         /// <summary>
         /// Deletes a campaign by its ID.
+        /// The campaign must not have started sending yet (or, if deferred, must be at least 5 minutes away).
         /// </summary>
         /// <param name="id">The ID of the campaign to delete.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
@@ -52,23 +53,31 @@ namespace Mobizon.Contracts.Services
             int id, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves delivery statistics (sent, delivered, failed counts) for a campaign.
+        /// Retrieves the full data and delivery statistics for a campaign.
         /// </summary>
         /// <param name="id">The ID of the campaign to query.</param>
+        /// <param name="getFilledTplCampaignText">
+        /// Controls the format of the returned campaign text for template campaigns:
+        /// <c>0</c> — return the text with placeholders;
+        /// <c>1</c> — return the text filled with real recipient data (default).
+        /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CampaignInfo"/> with delivery statistics.
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CampaignInfo"/> with full data and statistics.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<CampaignInfo>> GetInfoAsync(
-            int id, CancellationToken cancellationToken = default);
+            int id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Returns a paginated list of campaigns.
+        /// Returns a paginated, optionally filtered list of campaigns.
         /// </summary>
-        /// <param name="request">Optional pagination and sort criteria. Pass <see langword="null"/> to use API defaults.</param>
+        /// <param name="request">
+        /// Optional search criteria, pagination and sort parameters.
+        /// Pass <see langword="null"/> to use API defaults.
+        /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
         /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="CampaignData"/> items.
@@ -80,13 +89,13 @@ namespace Mobizon.Contracts.Services
             CampaignListRequest? request = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Schedules a campaign for immediate sending.
+        /// Schedules a campaign for immediate (or deferred) sending.
         /// </summary>
         /// <param name="id">The ID of the campaign to send.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
         /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CampaignSendResult"/> with the
-        /// resulting status and optional background task ID.
+        /// resulting send status.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
@@ -95,15 +104,30 @@ namespace Mobizon.Contracts.Services
             int id, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Adds one or more recipients to an existing campaign.
+        /// Adds recipients to an existing campaign.
+        /// Only one recipient type (<see cref="AddRecipientsRequest.Recipients"/>,
+        /// <see cref="AddRecipientsRequest.RecipientContacts"/>, or
+        /// <see cref="AddRecipientsRequest.RecipientGroups"/>) may be specified per call.
+        /// <para>
+        /// Phone-number and contact-card loads are synchronous. If the list exceeds 500 entries
+        /// the SDK automatically splits it into sequential batches of up to 500 and aggregates
+        /// the results into a single response. Group and file loads are asynchronous and return
+        /// a background task ID.
+        /// </para>
         /// </summary>
-        /// <param name="request">The recipient data to add, including the campaign ID and phone numbers.</param>
+        /// <param name="request">The recipient data to add, including the campaign ID.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>A <see cref="MobizonResponse{T}"/> confirming the operation.</returns>
+        /// <returns>
+        /// A <see cref="MobizonResponse{T}"/> containing an <see cref="AddRecipientsResult"/>
+        /// with per-recipient status entries (synchronous) or a background task ID (asynchronous).
+        /// When multiple batches are sent, the response aggregates all entries and reflects the
+        /// worst-case response code across batches.
+        /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<object>> AddRecipientsAsync(
+        Task<MobizonResponse<AddRecipientsResult>> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default);
     }
 }
+

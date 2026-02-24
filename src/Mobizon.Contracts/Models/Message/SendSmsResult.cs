@@ -16,8 +16,12 @@ namespace Mobizon.Contracts.Models.Message
         public int MessageId { get; set; }
 
         /// <summary>
-        /// Gets or sets the initial delivery status code of the message as returned by the API.
+        /// Gets or sets the dispatch status of the SMS campaign.
+        /// <list type="bullet">
+        /// <item><description><see cref="CampaignStatus.PendingModeration"/> – the campaign is awaiting moderation.</description></item>
+        /// <item><description><see cref="CampaignStatus.SentWithoutModeration"/> – the campaign was sent without moderation.</description></item>
+        /// </list>
         /// </summary>
-        public int Status { get; set; }
+        public CampaignStatus Status { get; set; }
     }
 }

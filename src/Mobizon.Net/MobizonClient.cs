@@ -47,6 +47,16 @@ namespace Mobizon.Net
         public ITaskQueueService TaskQueue { get; }
 
         /// <summary>
+        /// Gets the service for managing contact groups.
+        /// </summary>
+        public IContactGroupService ContactGroups { get; }
+
+        /// <summary>
+        /// Gets the service for managing contact cards.
+        /// </summary>
+        public IContactCardService ContactCards { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="MobizonClient"/> using a privately managed <see cref="HttpClient"/>.
         /// </summary>
         /// <param name="options">The configuration options including API key, URL, version, and timeout.</param>
@@ -81,6 +91,8 @@ namespace Mobizon.Net
             Links = new LinkService(apiClient);
             User = new UserService(apiClient);
             TaskQueue = new TaskQueueService(apiClient);
+            ContactGroups = new ContactGroupService(apiClient);
+            ContactCards = new ContactCardService(apiClient);
         }
 
         /// <summary>

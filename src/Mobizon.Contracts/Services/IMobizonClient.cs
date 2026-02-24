@@ -31,5 +31,15 @@ namespace Mobizon.Contracts.Services
         /// Gets the service for querying the status of background tasks.
         /// </summary>
         ITaskQueueService TaskQueue { get; }
+
+        /// <summary>
+        /// Gets the service for managing contact groups.
+        /// </summary>
+        IContactGroupService ContactGroups { get; }
+
+        /// <summary>
+        /// Gets the service for managing contact cards.
+        /// </summary>
+        IContactCardService ContactCards { get; }
     }
 }

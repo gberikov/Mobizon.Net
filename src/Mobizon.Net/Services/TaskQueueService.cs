@@ -11,6 +11,7 @@ namespace Mobizon.Net.Services
 {
     internal class TaskQueueService : ITaskQueueService
     {
+        private const string ModuleName = "taskqueue";
         private readonly MobizonApiClient _apiClient;
 
         public TaskQueueService(MobizonApiClient apiClient)
@@ -27,7 +28,7 @@ namespace Mobizon.Net.Services
             };
 
             return _apiClient.SendAsync<TaskQueueStatus>(
-                HttpMethod.Post, "taskqueue", "getstatus", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken);
         }
     }
 }

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Mobizon.Contracts.Models.Message
 {
     /// <summary>
@@ -5,10 +7,17 @@ namespace Mobizon.Contracts.Models.Message
     /// </summary>
     public class SendSmsMessageRequest
     {
+        private string _recipient = string.Empty;
+
         /// <summary>
         /// Gets or sets the recipient phone number in international format (e.g. <c>79991234567</c>).
+        /// Only digits are retained; any non-digit characters (including a leading <c>+</c>) are stripped automatically.
         /// </summary>
-        public string Recipient { get; set; } = string.Empty;
+        public string Recipient
+        {
+            get => _recipient;
+            set => _recipient = Regex.Replace(value ?? string.Empty, @"\D", string.Empty);
+        }
 
         /// <summary>
         /// Gets or sets the body text of the SMS message.
@@ -22,9 +31,12 @@ namespace Mobizon.Contracts.Models.Message
         public string? From { get; set; }
 
         /// <summary>
-        /// Gets or sets the message validity period in minutes.
-        /// When <see langword="null"/>, the platform default is used.
+        /// Gets or sets optional additional parameters (<c>params[…]</c>) such as campaign name,
+        /// scheduled send time, message class, and validity period.
+        /// When <see langword="null"/>, platform defaults are used.
         /// </summary>
-        public int? Validity { get; set; }
+        public SmsMessageParameters? Parameters { get; set; }
     }
 }
+
+

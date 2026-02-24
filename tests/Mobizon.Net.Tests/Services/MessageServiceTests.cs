@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/message/sendsmsmessage")
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
                 .WithFormData("recipient", "77001234567")
                 .WithFormData("text", "Hello world")
                 .Respond("application/json",
@@ -50,11 +51,47 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
+        public async Task QuickSendAsync_SendsRecipientAndText()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("recipient", "77001234567")
+                .WithFormData("text", "Hello world")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""campaignId"":1,""messageId"":42,""status"":0},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var result = await service.QuickSendAsync("77001234567", "Hello world");
+
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            Assert.Equal(42, result.Data.MessageId);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task QuickSendAsync_StripsNonDigitsFromRecipient()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("recipient", "77001234567")
+                .WithFormData("text", "Hi")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""campaignId"":1,""messageId"":55,""status"":0},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.QuickSendAsync("+7 (700) 123-45-67", "Hi");
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task SendSmsMessageAsync_WithOptionalParams_SendsAll()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/message/sendsmsmessage")
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
                 .WithFormData("recipient", "77001234567")
                 .WithFormData("text", "Hello")
                 .WithFormData("from", "Alpha")
@@ -68,7 +105,64 @@ namespace Mobizon.Net.Tests.Services
                 Recipient = "77001234567",
                 Text = "Hello",
                 From = "Alpha",
-                Validity = 60
+                Parameters = new SmsMessageParameters
+                {
+                    Validity = TimeSpan.FromMinutes(60)
+                }
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task SendSmsMessageAsync_WithDeferredTo_SendsFormattedTimestamp()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("recipient", "77001234567")
+                .WithFormData("text", "Hi")
+                .WithFormData("params[deferredToTs]", "2026-02-25 10:30:00")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""campaignId"":2,""messageId"":20,""status"":0},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.SendSmsMessageAsync(new SendSmsMessageRequest
+            {
+                Recipient = "77001234567",
+                Text = "Hi",
+                Parameters = new SmsMessageParameters
+                {
+                    DeferredTo = new DateTime(2026, 2, 25, 10, 30, 0)
+                }
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData(MessageClass.Flash, "0")]
+        [InlineData(MessageClass.Normal, "1")]
+        public async Task SendSmsMessageAsync_WithMessageClass_SendsIntValue(MessageClass messageClass, string expected)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("recipient", "77001234567")
+                .WithFormData("text", "Hi")
+                .WithFormData("params[mclass]", expected)
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""campaignId"":3,""messageId"":30,""status"":0},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.SendSmsMessageAsync(new SendSmsMessageRequest
+            {
+                Recipient = "77001234567",
+                Text = "Hi",
+                Parameters = new SmsMessageParameters
+                {
+                    MessageClass = messageClass
+                }
             });
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -79,11 +173,11 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/message/getsmsstatus")
+                    "https://api.mobizon.kz/service/Message/GetSMSStatus")
                 .WithFormData("ids[0]", "100")
                 .WithFormData("ids[1]", "200")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[{""id"":100,""status"":2,""segNum"":1,""startSendTs"":""2024-01-01 12:00:00""},{""id"":200,""status"":1,""segNum"":1,""startSendTs"":""2024-01-01 12:01:00""}],""message"":""""}");
+                    @"{""code"":0,""data"":[{""id"":100,""status"":2,""segNum"":1,""startSendTs"":""2024-01-01 12:00:00"",""statusUpdateTs"":""2024-01-01 12:05:00""},{""id"":200,""status"":1,""segNum"":1,""startSendTs"":""2024-01-01 12:01:00"",""statusUpdateTs"":null}],""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.GetSmsStatusAsync(new[] { 100, 200 });
@@ -92,6 +186,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(2, result.Data.Count);
             Assert.Equal(100, result.Data[0].Id);
             Assert.Equal(2, result.Data[0].Status);
+            Assert.Equal("2024-01-01 12:05:00", result.Data[0].StatusUpdateTs);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -100,14 +195,14 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/message/list")
+                    "https://api.mobizon.kz/service/Message/List")
                 .WithFormData("criteria[from]", "Alpha")
                 .WithFormData("criteria[status]", "2")
                 .WithFormData("pagination[currentPage]", "1")
                 .WithFormData("pagination[pageSize]", "10")
                 .WithFormData("sort[campaignId]", "DESC")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[{""id"":1,""campaignId"":5,""from"":""Alpha"",""status"":2,""text"":""Hi""}],""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":1,""campaignId"":5,""segNum"":1,""from"":""Alpha"",""to"":""77001234567"",""status"":2,""text"":""Hi""}],""totalItemCount"":1},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new MessageListRequest
@@ -119,8 +214,9 @@ namespace Mobizon.Net.Tests.Services
             });
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data);
-            Assert.Equal("Alpha", result.Data[0].From);
+            Assert.Single(result.Data.Items);
+            Assert.Equal("Alpha", result.Data.Items[0].From);
+            Assert.Equal(1, result.Data.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -129,15 +225,16 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/message/list")
+                    "https://api.mobizon.kz/service/Message/List")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[],""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[],""totalItemCount"":0},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data);
+            Assert.Empty(result.Data.Items);
+            Assert.Equal(0, result.Data.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }
