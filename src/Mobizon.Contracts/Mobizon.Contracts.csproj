@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Mobizon.Contracts</PackageId>
+    <Description>Contracts, DTOs, and interfaces for the Mobizon SMS gateway .NET SDK. Reference this package to depend on Mobizon types without pulling in the HTTP implementation.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+</Project>

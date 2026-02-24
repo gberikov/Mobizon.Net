@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd /c/Develop/mobizon && pwsh -NoProfile -File .specify/scripts/powershell/update-agent-context.ps1 -AgentType claude 2>&1)",
+      "Bash(tail:*)",
+      "Bash(cd /c/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests/ --verbosity normal 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet build 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests --filter \"CampaignServiceTests\" --no-build 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests --filter \"FullyQualifiedName~UserServiceTests|FullyQualifiedName~TaskQueueServiceTests\" --no-build 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests/Mobizon.Net.Tests.csproj --filter \"FullyQualifiedName~LinkServiceTests\" 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet build src/Mobizon.Net.Extensions.DependencyInjection/Mobizon.Net.Extensions.DependencyInjection.csproj 2>&1)",
+      "Bash(cd C:/Develop/mobizon && dotnet build src/Mobizon.Net.Extensions.Polly/Mobizon.Net.Extensions.Polly.csproj 2>&1)",
+      "Bash(cd C:/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests/Mobizon.Net.Tests.csproj --filter \"FullyQualifiedName~MobizonResilienceTests\" 2>&1)",
+      "Bash(cd /c/Develop/mobizon && dotnet test tests/Mobizon.Net.Tests/Mobizon.Net.Tests.csproj --filter \"FullyQualifiedName~ServiceCollectionExtensionsTests\" 2>&1)"
+    ]
+  }
+}

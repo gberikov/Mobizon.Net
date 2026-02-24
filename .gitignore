@@ -1,0 +1,52 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstats
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+## OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+## Build
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+## NuGet
+*.nupkg
+*.snupkg
+artifacts/
+
+## Environment
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json

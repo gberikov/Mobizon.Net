@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Mobizon.Net.Extensions.Polly</PackageId>
+    <Description>Polly resilience integration for Mobizon.Net SDK. Adds retry, circuit breaker, and timeout policies to HTTP calls via AddMobizonResilience() extension.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mobizon.Net\Mobizon.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.14" />
+  </ItemGroup>
+</Project>
