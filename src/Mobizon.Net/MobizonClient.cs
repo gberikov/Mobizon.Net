@@ -57,6 +57,11 @@ namespace Mobizon.Net
         public IContactCardService ContactCards { get; }
 
         /// <summary>
+        /// Gets the service for managing the number stop-list.
+        /// </summary>
+        public INumberStopListService NumberStopList { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="MobizonClient"/> using a privately managed <see cref="HttpClient"/>.
         /// </summary>
         /// <param name="options">The configuration options including API key, URL, version, and timeout.</param>
@@ -93,6 +98,7 @@ namespace Mobizon.Net
             TaskQueue = new TaskQueueService(apiClient);
             ContactGroups = new ContactGroupService(apiClient);
             ContactCards = new ContactCardService(apiClient);
+            NumberStopList = new NumberStopListService(apiClient);
         }
 
         /// <summary>

@@ -41,5 +41,10 @@ namespace Mobizon.Contracts.Services
         /// Gets the service for managing contact cards.
         /// </summary>
         IContactCardService ContactCards { get; }
+
+        /// <summary>
+        /// Gets the service for managing the number stop-list.
+        /// </summary>
+        INumberStopListService NumberStopList { get; }
     }
 }
