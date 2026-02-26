@@ -14,14 +14,14 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== ContactCard.List ===");
 
             var cards = await client.ContactCards
-                .Where(x => x.GroupId == 100847 && x.Mobile.Value == "77017221502" && x.Mobile.Type == ContactType.Main && x.Address.City.Contains("Алм"))
+                .Where(x => x.GroupId == 100847)
                 .Take(10)
-                .OrderBy(x => x.Mobile)
+                .OrderByDescending(x => x.Viber.Type)
                 .ToListAsync();
 
             Console.WriteLine($"Loaded: {cards.Count}");
             foreach (var c in cards)
-                Console.WriteLine($"  Id={c.Id}  Name={c.Name} {c.Surname}  Mobile={c.Mobile}");
+                Console.WriteLine($"  Id={c.Id}  Name={c.Name} {c.Surname}  Mobile={c.Mobile?.Value}");
         }
 
         // POST /service/contactcard/list  (filtered by group)
@@ -36,7 +36,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
 
             Console.WriteLine($"Total in group: {cards.Count}");
             foreach (var c in cards)
-                Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Mobile={c.Mobile}");
+                Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Mobile={c.Mobile?.Value}");
         }
 
         // POST /service/contactcard/get
@@ -52,8 +52,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
             }
             Console.WriteLine($"Id      : {card.Id}");
             Console.WriteLine($"Name    : {card.Name} {card.Surname}");
-            Console.WriteLine($"Mobile  : {card.Mobile}");
-            Console.WriteLine($"Email   : {card.Email}");
+            Console.WriteLine($"Mobile  : {card.Mobile?.Value}");
+            Console.WriteLine($"Email   : {card.Email?.Value}");
         }
 
         // POST /service/contactcard/list  →  First/Single
@@ -93,8 +93,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
             {
                 Name    = "SDK",
                 Surname = "Test",
-                Mobile  = "77017221502",
-                Email   = "sdk@example.com",
+                Mobile  = new MobileFieldInfo { Value = "77017221502" },
+                Email   = new ContactFieldInfo { Value = "sdk@example.com" },
                 Info    = "Created by Mobizon.Net SDK"
             };
 
@@ -121,6 +121,35 @@ namespace Mobizon.Net.ConsoleSample.Samples
             // Replace with real group IDs
             await client.ContactCards.SetGroupsAsync(cardId, new List<string> { "100604" });
             Console.WriteLine("Groups updated.");
+        }
+
+        // POST /service/contactcard/delete
+        public static async Task RemoveAsync(MobizonClient client)
+        {
+            Console.WriteLine("=== ContactCard.Remove ===");
+            // Replace with a real card ID to delete
+            const int cardId = 77885666;
+
+            await client.ContactCards.RemoveAsync(cardId);
+            Console.WriteLine($"Deleted card {cardId}.");
+        }
+
+        // POST /service/contactcard/list  →  ToPageAsync (pagination metadata)
+        public static async Task ToPageAsync(MobizonClient client)
+        {
+            Console.WriteLine("=== ContactCard.ToPage ===");
+
+            var page = await client.ContactCards
+                .Where(x => x.GroupId == 100604)
+                .Take(10)
+                .ToPageAsync();
+
+            Console.WriteLine($"Page size : {page.PageSize}");
+            Console.WriteLine($"Page index: {page.CurrentPage}");
+            Console.WriteLine($"Total     : {page.TotalCount}");
+            Console.WriteLine($"Loaded    : {page.Items.Count}");
+            foreach (var c in page.Items)
+                Console.WriteLine($"  Id={c.Id}  Name={c.Name} {c.Surname}");
         }
     }
 }

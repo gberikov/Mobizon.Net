@@ -31,8 +31,11 @@ namespace Mobizon.Net.Tests.Services
             ApiUrl = BaseUrl
         };
 
-        private ContactCardService CreateService(MockHttpMessageHandler mockHttp)
-            => new ContactCardService(new MobizonApiClient(mockHttp.ToHttpClient(), _options));
+        private const string PaginatedJson =
+            @"{""code"":0,""data"":{""items"":[{""id"":""100604"",""userId"":""88296"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""name"":""John"",""surname"":""Doe"",""mobile"":{""value"":""77001234567""}},""groups"":[]}],""totalItemCount"":""42"",""fullListItemCount"":""42""},""message"":""""}";
+
+        private ContactCardSet CreateSet(MockHttpMessageHandler mockHttp)
+            => new ContactCardSet(new ContactCardService(new MobizonApiClient(mockHttp.ToHttpClient(), _options)));
 
         // ── Where: equal ─────────────────────────────────────────────────────
 
@@ -46,7 +49,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "100604")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Where(x => x.GroupId == 100604).ToListAsync();
+            await CreateSet(mockHttp).Where(x => x.GroupId == 100604).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -62,7 +65,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][operator]", "empty")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Where(x => x.GroupId == null).ToListAsync();
+            await CreateSet(mockHttp).Where(x => x.GroupId == null).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -79,7 +82,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "Петр")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Where(x => x.Surname.Contains("Петр")).ToListAsync();
+            await CreateSet(mockHttp).Where(x => x.Surname.Contains("Петр")).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -102,7 +105,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[1][value]",    "2026-03-01 00:00:00")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.CreatedAt >= from && x.CreatedAt <= to)
                 .ToListAsync();
 
@@ -124,7 +127,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[1][value]",    "Петр")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 33 && x.Surname.Contains("Петр"))
                 .ToListAsync();
 
@@ -145,7 +148,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "100604")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Where(x => x.GroupId == groupId).ToListAsync();
+            await CreateSet(mockHttp).Where(x => x.GroupId == groupId).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -161,7 +164,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "10")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Take(10).ToListAsync();
+            await CreateSet(mockHttp).Take(10).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -175,7 +178,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).Take(25).Skip(50).ToListAsync();
+            await CreateSet(mockHttp).Take(25).Skip(50).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -190,7 +193,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("sort[surname]", "ASC")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).OrderBy(x => x.Surname).ToListAsync();
+            await CreateSet(mockHttp).OrderBy(x => x.Surname).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -203,7 +206,33 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("sort[surname]", "DESC")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp).OrderByDescending(x => x.Surname).ToListAsync();
+            await CreateSet(mockHttp).OrderByDescending(x => x.Surname).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task OrderByDescending_NestedProperty_SendsNestedSortField()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("sort[mobile.value]", "DESC")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).OrderByDescending(x => x.Mobile.Value).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task OrderBy_NestedProperty_SendsNestedSortField()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("sort[mobile.value]", "ASC")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).OrderBy(x => x.Mobile.Value).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -217,13 +246,13 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .Respond("application/json", SingleItemJson);
 
-            var cards = await CreateService(mockHttp).Where(x => x.GroupId == 100604).ToListAsync();
+            var cards = await CreateSet(mockHttp).Where(x => x.GroupId == 100604).ToListAsync();
 
             Assert.Single(cards);
             Assert.Equal(100604, cards[0].Id);
             Assert.Equal("John",        cards[0].Name);
             Assert.Equal("Doe",         cards[0].Surname);
-            Assert.Equal("77001234567", cards[0].Mobile);
+            Assert.Equal("77001234567", cards[0].Mobile?.Value);
         }
 
         // ── First / Single ────────────────────────────────────────────────────
@@ -237,7 +266,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "1")
                 .Respond("application/json", SingleItemJson);
 
-            var card = await CreateService(mockHttp)
+            var card = await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604)
                 .FirstOrDefaultAsync();
 
@@ -252,7 +281,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .Respond("application/json", EmptyListJson);
 
-            var card = await CreateService(mockHttp).Where(x => x.GroupId == 0).FirstOrDefaultAsync();
+            var card = await CreateSet(mockHttp).Where(x => x.GroupId == 0).FirstOrDefaultAsync();
 
             Assert.Null(card);
         }
@@ -265,7 +294,7 @@ namespace Mobizon.Net.Tests.Services
                 .Respond("application/json", EmptyListJson);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                CreateService(mockHttp).Where(x => x.GroupId == 0).FirstAsync());
+                CreateSet(mockHttp).Where(x => x.GroupId == 0).FirstAsync());
         }
 
         [Fact]
@@ -276,7 +305,7 @@ namespace Mobizon.Net.Tests.Services
                 .Respond("application/json", TwoItemsJson);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                CreateService(mockHttp).Where(x => x.GroupId == 100604).SingleOrDefaultAsync());
+                CreateSet(mockHttp).Where(x => x.GroupId == 100604).SingleOrDefaultAsync());
         }
 
         [Fact]
@@ -286,7 +315,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .Respond("application/json", SingleItemJson);
 
-            var card = await CreateService(mockHttp)
+            var card = await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604)
                 .SingleOrDefaultAsync();
 
@@ -309,7 +338,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("sort[surname]",           "ASC")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604)
                 .Take(25)
                 .Skip(0)
@@ -331,7 +360,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "MAIN")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Type == ContactType.Main)
                 .ToListAsync();
 
@@ -348,7 +377,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "ADDITIONAL")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Type == ContactType.Additional)
                 .ToListAsync();
 
@@ -373,7 +402,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "MAIN")   // regression: was "0"
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Type == ContactType.Main)
                 .ToListAsync();
 
@@ -393,7 +422,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "MAIN")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Type == type)
                 .ToListAsync();
 
@@ -412,7 +441,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "77001234567")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Value == "77001234567")
                 .ToListAsync();
 
@@ -429,7 +458,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "7700")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.Mobile.Value.Contains("7700"))
                 .ToListAsync();
 
@@ -451,7 +480,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[1][value]",    "MAIN")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateService(mockHttp)
+            await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604 && x.Mobile.Type == ContactType.Main)
                 .ToListAsync();
 
@@ -463,10 +492,81 @@ namespace Mobizon.Net.Tests.Services
         [Fact]
         public async Task Where_UnsupportedExpression_ThrowsNotSupportedException()
         {
-            var service = CreateService(new MockHttpMessageHandler());
+            var set = CreateSet(new MockHttpMessageHandler());
 
             await Assert.ThrowsAsync<NotSupportedException>(() =>
-                service.Where(x => x.GroupId != 33).ToListAsync());
+                set.Where(x => x.GroupId == 33 || x.Name == "John").ToListAsync());
+        }
+
+        // ── ToPageAsync ───────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task ToPageAsync_WithTakeAndSkip_SendsPaginationParams()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "1")
+                .WithFormData("pagination[pageSize]",    "25")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Take(25).Skip(25).ToPageAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ToPageAsync_MapsPaginationMetadata()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .Respond("application/json", PaginatedJson);
+
+            var page = await CreateSet(mockHttp).Take(10).ToPageAsync();
+
+            Assert.Equal(42, page.TotalCount);
+            Assert.Equal(10, page.PageSize);
+            Assert.Equal(0,  page.CurrentPage);
+            Assert.Single(page.Items);
+        }
+
+        // ── CountAsync ────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task CountAsync_SendsPageSizeOne()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "0")
+                .WithFormData("pagination[pageSize]",    "1")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.GroupId == 100604).CountAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task CountAsync_ReturnsTotalItemCount()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .Respond("application/json", PaginatedJson);
+
+            var count = await CreateSet(mockHttp).Where(x => x.GroupId == 100604).CountAsync();
+
+            Assert.Equal(42, count);
+        }
+
+        [Fact]
+        public async Task CountAsync_WhenEmpty_ReturnsZero()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .Respond("application/json", EmptyListJson);
+
+            var count = await CreateSet(mockHttp).Where(x => x.GroupId == 0).CountAsync();
+
+            Assert.Equal(0, count);
         }
     }
 }

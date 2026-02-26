@@ -140,7 +140,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactcard/list")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""userId"":""88296"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""title"":""Mr"",""name"":""John"",""surname"":""Doe"",""mobile"":{""value"":""77001234567"",""type"":""MAIN"",""countryA2"":""KZ"",""countryName"":""Казахстан"",""operatorId"":""304"",""operator"":""Altel"",""isMNP"":""0""},""email"":""john@example.com"",""birth_date"":""1990-01-15"",""gender"":""male"",""company_name"":""Acme"",""company_url"":""https://acme.com"",""info"":""VIP""},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""userId"":""88296"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""title"":""Mr"",""name"":""John"",""surname"":""Doe"",""mobile"":{""value"":""77001234567"",""type"":""MAIN"",""countryA2"":""KZ"",""countryName"":""Казахстан"",""operatorId"":""304"",""operator"":""Altel"",""isMNP"":""0""},""email"":{""value"":""john@example.com"",""type"":""ADDITIONAL""},""birth_date"":""1990-01-15"",""gender"":""male"",""company_name"":""Acme"",""company_url"":""https://acme.com"",""info"":""VIP""},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
@@ -150,12 +150,13 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal("John", f.Name);
             Assert.Equal("Doe", f.Surname);
             Assert.Equal("77001234567", f.Mobile!.Value);
-            Assert.Equal("MAIN", f.Mobile.Type);
+            Assert.Equal(ContactType.Main, f.Mobile.Type);
             Assert.Equal("KZ", f.Mobile.CountryA2);
             Assert.Equal("304", f.Mobile.OperatorId);
             Assert.Equal("Altel", f.Mobile.Operator);
-            Assert.Equal("0", f.Mobile.IsMNP);
-            Assert.Equal("john@example.com", f.Email);
+            Assert.Equal(false, f.Mobile.IsMNP);
+            Assert.Equal("john@example.com", f.Email?.Value);
+            Assert.Equal(ContactType.Additional, f.Email?.Type);
             Assert.Equal("1990-01-15", f.BirthDate);
             Assert.Equal("male", f.Gender);
             Assert.Equal("Acme", f.CompanyName);
@@ -332,6 +333,23 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.GetGroupsAsync("77885666");
 
             Assert.Empty(result.Data);
+        }
+
+        // ── RemoveAsync ──────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task RemoveAsync_SendsDeleteRequest()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, $"{BaseUrl}/service/contactcard/delete")
+                .WithFormData("id", "77885666")
+                .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
+
+            var result = await CreateService(mockHttp).RemoveAsync("77885666");
+
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            Assert.True(result.Data);
+            mockHttp.VerifyNoOutstandingExpectation();
         }
     }
 }

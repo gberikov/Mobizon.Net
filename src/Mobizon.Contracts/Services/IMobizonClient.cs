@@ -38,9 +38,9 @@ namespace Mobizon.Contracts.Services
         IContactGroupService ContactGroups { get; }
 
         /// <summary>
-        /// Gets the service for managing contact cards.
+        /// Gets the set for managing contact cards.
         /// </summary>
-        IContactCardService ContactCards { get; }
+        IContactCardSet ContactCards { get; }
 
         /// <summary>
         /// Gets the service for managing the number stop-list.
