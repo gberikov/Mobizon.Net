@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactGroup;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactGroups;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -43,45 +43,58 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<string>> CreateAsync(
+        public Task<MobizonResponse<int>> CreateAsync(
             string name,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<string>(
-                ModuleName, "create",
-                new { data = new { name } },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["data[name]"] = name
+            };
+
+            return _apiClient.SendAsync<int>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<bool>> UpdateAsync(
-            string id,
+            int id,
             string name,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<bool>(
-                ModuleName, "update",
-                new { id, data = new { name } },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"]          = id.ToString(),
+                ["data[name]"]  = name
+            };
+
+            return _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "update", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<DeleteContactGroupResult>> DeleteAsync(
-            string id,
+            int id,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<DeleteContactGroupResult>(
-                ModuleName, "delete",
-                new { id },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id.ToString()
+            };
+
+            return _apiClient.SendAsync<DeleteContactGroupResult>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<int>> GetCardsCountAsync(
-            string id,
+            int? id = null,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<int>(
-                ModuleName, "getcardscount",
-                new { id },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id.HasValue ? id.Value.ToString() : "-1"
+            };
+
+            return _apiClient.SendAsync<int>(
+                HttpMethod.Post, ModuleName, "getcardscount", parameters, cancellationToken);
         }
     }
 }

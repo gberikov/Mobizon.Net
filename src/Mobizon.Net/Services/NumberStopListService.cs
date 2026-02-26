@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.StopList;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.StopLists;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -43,37 +43,58 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<string>> AddNumberAsync(
+        public Task<MobizonResponse<int>> AddNumberAsync(
             string number,
             string? comment = null,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<string>(
-                ModuleName, "create",
-                new { id = "", number, comment = comment ?? string.Empty },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"]      = string.Empty,
+                ["number"]  = number,
+                ["comment"] = comment ?? string.Empty
+            };
+
+            return _apiClient.SendAsync<int>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<bool>> AddRangeAsync(
+        public Task<MobizonResponse<bool>> AddNumberRangeAsync(
             string numberFrom,
             string numberTo,
             string? comment = null,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<bool>(
-                ModuleName, "create",
-                new { id = "", numberFrom, numberTo, comment = comment ?? string.Empty },
-                cancellationToken);
+            // The API requires numberFrom <= numberTo. Swap the values if the caller
+            // provided them in reverse order so that the request passes validation.
+            if (ulong.TryParse(numberFrom, out var from) &&
+                ulong.TryParse(numberTo,   out var to) &&
+                from > to)
+                (numberFrom, numberTo) = (numberTo, numberFrom);
+
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"]         = string.Empty,
+                ["numberFrom"] = numberFrom,
+                ["numberTo"]   = numberTo,
+                ["comment"]    = comment ?? string.Empty
+            };
+
+            return _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<bool>> DeleteAsync(
-            string id,
+            int id,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<bool>(
-                ModuleName, "delete",
-                new { id },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id.ToString()
+            };
+
+            return _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
     }
 }

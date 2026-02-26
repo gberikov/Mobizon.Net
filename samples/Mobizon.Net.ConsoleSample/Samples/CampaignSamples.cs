@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Campaign;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Campaigns;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples

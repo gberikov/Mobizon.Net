@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Services;
 using Mobizon.Net;
 

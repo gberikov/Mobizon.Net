@@ -1,7 +1,8 @@
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactGroup;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactGroups;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -66,9 +67,9 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Single(result.Data.Items);
-            Assert.Equal("100604", result.Data.Items[0].Id);
+            Assert.Equal(100604, result.Data.Items[0].Id);
             Assert.Equal("Test Group", result.Data.Items[0].Name);
-            Assert.Equal(308, result.Data.Items[0].CardsCnt);
+            Assert.Equal(308, result.Data.Items[0].CardsCount);
             Assert.Equal(1, result.Data.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -86,23 +87,23 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.ListAsync();
 
             var item = result.Data.Items[0];
-            Assert.Equal("1", item.Id);
-            Assert.Equal("88296", item.UserId);
+            Assert.Equal(1, item.Id);
+            Assert.Equal(88296, item.UserId);
             Assert.Equal("Group A", item.Name);
-            Assert.Equal(12, item.CardsCnt);
-            Assert.Equal(1, item.IsHidden);
-            Assert.Equal("2026-01-01 09:00:00", item.CreateTs);
+            Assert.Equal(12, item.CardsCount);
+            Assert.True(item.IsHidden);
+            Assert.Equal(new DateTime(2026, 1, 1, 9, 0, 0), item.Created);
         }
 
         // ── CreateAsync ──────────────────────────────────────────────────────
 
         [Fact]
-        public async Task CreateAsync_SendsJsonBody_ReturnsId()
+        public async Task CreateAsync_SendsFormData_ReturnsId()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactgroup/create")
-                .WithContent(@"{""data"":{""name"":""New Group""}}")
+                .WithFormData("data[name]", "New Group")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""100820"",""message"":""""}");
 
@@ -110,24 +111,25 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.CreateAsync("New Group");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal("100820", result.Data);
+            Assert.Equal(100820, result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
         // ── UpdateAsync ──────────────────────────────────────────────────────
 
         [Fact]
-        public async Task UpdateAsync_SendsJsonBody_ReturnsTrue()
+        public async Task UpdateAsync_SendsFormData_ReturnsTrue()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactgroup/update")
-                .WithContent(@"{""id"":""100820"",""data"":{""name"":""Renamed Group""}}")
+                .WithFormData("id", "100820")
+                .WithFormData("data[name]", "Renamed Group")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.UpdateAsync("100820", "Renamed Group");
+            var result = await service.UpdateAsync(100820, "Renamed Group");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.True(result.Data);
@@ -137,21 +139,21 @@ namespace Mobizon.Net.Tests.Services
         // ── DeleteAsync ──────────────────────────────────────────────────────
 
         [Fact]
-        public async Task DeleteAsync_SendsJsonBody_ReturnsProcessedIds()
+        public async Task DeleteAsync_SendsFormData_ReturnsProcessedIds()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactgroup/delete")
-                .WithContent(@"{""id"":""100820""}")
+                .WithFormData("id", "100820")
                 .Respond("application/json",
                     @"{""code"":0,""data"":{""processed"":[""100820""],""notProcessed"":[]},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync("100820");
+            var result = await service.DeleteAsync(100820);
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Single(result.Data.Processed);
-            Assert.Equal("100820", result.Data.Processed[0]);
+            Assert.Equal(100820, result.Data.Processed[0]);
             Assert.Empty(result.Data.NotProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -166,27 +168,27 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""processed"":[],""notProcessed"":[""999""]},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync("999");
+            var result = await service.DeleteAsync(999);
 
             Assert.Empty(result.Data.Processed);
             Assert.Single(result.Data.NotProcessed);
-            Assert.Equal("999", result.Data.NotProcessed[0]);
+            Assert.Equal(999, result.Data.NotProcessed[0]);
         }
 
         // ── GetCardsCountAsync ───────────────────────────────────────────────
 
         [Fact]
-        public async Task GetCardsCountAsync_SendsJsonBody_ReturnsCount()
+        public async Task GetCardsCountAsync_SendsFormData_ReturnsCount()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactgroup/getcardscount")
-                .WithContent(@"{""id"":""100604""}")
+                .WithFormData("id", "100604")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""308"",""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.GetCardsCountAsync("100604");
+            var result = await service.GetCardsCountAsync(100604);
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Equal(308, result.Data);
@@ -199,12 +201,12 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactgroup/getcardscount")
-                .WithContent(@"{""id"":""-1""}")
+                .WithFormData("id", "-1")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""0"",""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.GetCardsCountAsync("-1");
+            var result = await service.GetCardsCountAsync();
 
             Assert.Equal(0, result.Data);
             mockHttp.VerifyNoOutstandingExpectation();

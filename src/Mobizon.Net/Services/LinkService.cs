@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Link;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Links;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 

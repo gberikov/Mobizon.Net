@@ -1,4 +1,4 @@
-using Mobizon.Contracts.Models;
+﻿using Mobizon.Contracts.Models.Common;
 
 namespace Mobizon.Contracts.Exceptions
 {

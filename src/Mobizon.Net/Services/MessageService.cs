@@ -1,9 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Message;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts.Models.Messages;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -94,50 +95,57 @@ namespace Mobizon.Net.Services
             {
                 parameters = new Dictionary<string, string>();
 
-                if (request.CampaignIds != null)
-                    parameters["criteria[campaignIds]"] = request.CampaignIds;
+                if (request.Criteria != null)
+                {
+                    var c = request.Criteria;
 
-                if (request.From != null)
-                    parameters["criteria[from]"] = request.From;
+                    if (c.CampaignIds != null)
+                        for (var i = 0; i < c.CampaignIds.Count; i++)
+                            parameters[$"criteria[campaignIds][{i}]"] = c.CampaignIds[i].ToString();
 
-                if (request.To != null)
-                    parameters["criteria[to]"] = request.To;
+                    if (c.From != null)
+                        parameters["criteria[from]"] = c.From;
 
-                if (request.Text != null)
-                    parameters["criteria[text]"] = request.Text;
+                    if (c.To != null)
+                        parameters["criteria[to]"] = c.To;
 
-                if (request.Status.HasValue)
-                    parameters["criteria[status]"] = request.Status.Value.ToString();
+                    if (c.Text != null)
+                        parameters["criteria[text]"] = c.Text;
 
-                if (request.Groups != null)
-                    parameters["criteria[groups]"] = request.Groups;
+                    if (c.Status.HasValue)
+                        parameters["criteria[status]"] = SmsStatusToApiCode(c.Status.Value);
 
-                if (request.CampaignStatus != null)
-                    parameters["criteria[campaignStatus]"] = request.CampaignStatus;
+                    if (c.Groups != null)
+                        for (var i = 0; i < c.Groups.Count; i++)
+                            parameters[$"criteria[groups][{i}]"] = c.Groups[i].ToString();
 
-                if (request.CampaignCreateTsFrom != null)
-                    parameters["criteria[campaignCreateTsFrom]"] = request.CampaignCreateTsFrom;
+                    if (c.CampaignStatus.HasValue)
+                        parameters["criteria[campaignStatus]"] = CampaignCommonStatusToApiCode(c.CampaignStatus.Value);
 
-                if (request.CampaignCreateTsTo != null)
-                    parameters["criteria[campaignCreateTsTo]"] = request.CampaignCreateTsTo;
+                    if (c.CampaignCreatedFrom.HasValue)
+                        parameters["criteria[campaignCreateTsFrom]"] = c.CampaignCreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.CampaignSentTsFrom != null)
-                    parameters["criteria[campaignSentTsFrom]"] = request.CampaignSentTsFrom;
+                    if (c.CampaignCreatedTo.HasValue)
+                        parameters["criteria[campaignCreateTsTo]"] = c.CampaignCreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.CampaignSentTsTo != null)
-                    parameters["criteria[campaignSentTsTo]"] = request.CampaignSentTsTo;
+                    if (c.CampaignSentFrom.HasValue)
+                        parameters["criteria[campaignSentTsFrom]"] = c.CampaignSentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.StartSendTsFrom != null)
-                    parameters["criteria[startSendTsFrom]"] = request.StartSendTsFrom;
+                    if (c.CampaignSentTo.HasValue)
+                        parameters["criteria[campaignSentTsTo]"] = c.CampaignSentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.StartSendTsTo != null)
-                    parameters["criteria[startSendTsTo]"] = request.StartSendTsTo;
+                    if (c.SentFrom.HasValue)
+                        parameters["criteria[startSendTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.StatusUpdateTsFrom != null)
-                    parameters["criteria[statusUpdateTsFrom]"] = request.StatusUpdateTsFrom;
+                    if (c.SentTo.HasValue)
+                        parameters["criteria[startSendTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
 
-                if (request.StatusUpdateTsTo != null)
-                    parameters["criteria[statusUpdateTsTo]"] = request.StatusUpdateTsTo;
+                    if (c.StatusUpdatedFrom.HasValue)
+                        parameters["criteria[statusUpdateTsFrom]"] = c.StatusUpdatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    if (c.StatusUpdatedTo.HasValue)
+                        parameters["criteria[statusUpdateTsTo]"] = c.StatusUpdatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                }
 
                 if (request.WithNumberInfo.HasValue)
                     parameters["withNumberInfo"] = request.WithNumberInfo.Value.ToString();
@@ -156,6 +164,37 @@ namespace Mobizon.Net.Services
 
             return _apiClient.SendAsync<MessageListResponse>(
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
+        }
+
+        private static string SmsStatusToApiCode(SmsStatus status)
+        {
+            switch (status)
+            {
+                case SmsStatus.New:         return "NEW";
+                case SmsStatus.Enqueued:    return "ENQUEUD";
+                case SmsStatus.Accepted:    return "ACCEPTD";
+                case SmsStatus.Delivered:   return "DELIVRD";
+                case SmsStatus.Undelivered: return "UNDELIV";
+                case SmsStatus.Rejected:    return "REJECTD";
+                case SmsStatus.Expired:     return "EXPIRD";
+                case SmsStatus.Deleted:     return "DELETED";
+                default: throw new System.ArgumentOutOfRangeException(nameof(status), status, null);
+            }
+        }
+
+        private static string CampaignCommonStatusToApiCode(CampaignCommonStatus status)
+        {
+            switch (status)
+            {
+                case CampaignCommonStatus.Moderation:       return "MODERATION";
+                case CampaignCommonStatus.Declined:         return "DECLINED";
+                case CampaignCommonStatus.ReadyForSend:     return "READY_FOR_SEND";
+                case CampaignCommonStatus.AutoReadyForSend: return "AUTO_READY_FOR_SEND";
+                case CampaignCommonStatus.Running:          return "RUNNING";
+                case CampaignCommonStatus.Sent:             return "SENT";
+                case CampaignCommonStatus.Done:             return "DONE";
+                default: throw new System.ArgumentOutOfRangeException(nameof(status), status, null);
+            }
         }
     }
 }

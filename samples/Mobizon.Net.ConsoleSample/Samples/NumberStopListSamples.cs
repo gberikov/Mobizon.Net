@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.StopList;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.StopLists;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -34,13 +34,13 @@ namespace Mobizon.Net.ConsoleSample.Samples
         }
 
         // POST /service/numberstoplist/create  (number range)
-        public static async Task AddRangeAsync(MobizonClient client)
+        public static async Task AddNumberRangeAsync(MobizonClient client)
         {
             Console.WriteLine("=== NumberStopList.AddRange ===");
             // Replace with the range you want to block
-            var result = await client.NumberStopList.AddRangeAsync(
+            var result = await client.NumberStopList.AddNumberRangeAsync(
+                "77470944002",
                 "77470944000",
-                "77470944099",
                 comment: "SDK range test");
             Console.WriteLine($"Range added: {result.Data}");
         }
@@ -50,7 +50,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== NumberStopList.Delete ===");
             // Replace with the record ID returned by AddNumber/AddRange
-            var result = await client.NumberStopList.DeleteAsync("83486");
+            var result = await client.NumberStopList.DeleteAsync(83822);
             Console.WriteLine($"Deleted: {result.Data}");
         }
     }

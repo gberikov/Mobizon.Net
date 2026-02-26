@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Net.Internal;
 using RichardSzalay.MockHttp;
 using Xunit;
@@ -106,7 +106,7 @@ namespace Mobizon.Net.Tests.Internal
                 client.SendAsync<object>(
                     HttpMethod.Post, "message", "sendsmsmessage", null));
 
-            Assert.Equal(MobizonResponseCode.AuthFailed, ex.Code);
+            Assert.Equal(MobizonResponseCode.NotFound, ex.Code);
             Assert.Equal(2, ex.RawCode);
             Assert.Equal("Invalid API key", ex.ApiMessage);
         }

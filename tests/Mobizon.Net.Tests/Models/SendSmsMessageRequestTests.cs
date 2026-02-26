@@ -1,4 +1,4 @@
-﻿using Mobizon.Contracts.Models.Message;
+﻿using Mobizon.Contracts.Models.Messages;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Models

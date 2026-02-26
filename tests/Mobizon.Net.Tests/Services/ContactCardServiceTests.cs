@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactCard;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactCards;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -76,9 +76,9 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(308, result.Data.FullListItemCount);
 
             var card = result.Data.Items[0];
-            Assert.Equal("77885834", card.Id);
-            Assert.Equal(0, card.IsDeleted);
-            Assert.Equal(1, card.IsAvailable);
+            Assert.Equal(77885834, card.Id);
+            Assert.False(card.IsDeleted);
+            Assert.True(card.IsAvailable);
             Assert.Equal("Gabin", card.Fields!.Name);
             Assert.Equal("77029932233", card.Fields.Mobile!.Value);
             Assert.Equal("KZ", card.Fields.Mobile.CountryA2);
@@ -166,12 +166,12 @@ namespace Mobizon.Net.Tests.Services
         // ── GetAsync ─────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task GetAsync_SendsJsonBody_ReturnsCard()
+        public async Task GetAsync_SendsFormData_ReturnsCard()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactcard/get")
-                .WithContent(@"{""id"":""77885666""}")
+                .WithFormData("id", "77885666")
                 .Respond("application/json",
                     @"{""code"":0,""data"":{""id"":""77885666"",""userId"":""88296"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""name"":""Yкiлi"",""mobile"":{""value"":""77006537475"",""countryA2"":""KZ"",""operator"":""Altel""}},""groups"":[]},""message"":""""}");
 
@@ -179,7 +179,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.GetAsync("77885666");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal("77885666", result.Data.Id);
+            Assert.Equal(77885666, result.Data.Id);
             Assert.Equal("Yкiлi", result.Data.Fields!.Name);
             Assert.Equal("77006537475", result.Data.Fields.Mobile!.Value);
             mockHttp.VerifyNoOutstandingExpectation();
@@ -259,12 +259,13 @@ namespace Mobizon.Net.Tests.Services
         // ── SetGroupsAsync ───────────────────────────────────────────────────
 
         [Fact]
-        public async Task SetGroupsAsync_SendsJsonBody_ReturnsTrue()
+        public async Task SetGroupsAsync_SendsFormData_ReturnsTrue()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactcard/setgroups")
-                .WithContent(@"{""id"":""78045032"",""groupIds"":[""100820""]}")
+                .WithFormData("id", "78045032")
+                .WithFormData("groupIds[0]", "100820")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
@@ -282,7 +283,10 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactcard/setgroups")
-                .WithContent(@"{""id"":""100"",""groupIds"":[""1"",""2"",""3""]}")
+                .WithFormData("id", "100")
+                .WithFormData("groupIds[0]", "1")
+                .WithFormData("groupIds[1]", "2")
+                .WithFormData("groupIds[2]", "3")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
@@ -295,12 +299,12 @@ namespace Mobizon.Net.Tests.Services
         // ── GetGroupsAsync ───────────────────────────────────────────────────
 
         [Fact]
-        public async Task GetGroupsAsync_SendsJsonBody_ReturnsGroups()
+        public async Task GetGroupsAsync_SendsFormData_ReturnsGroups()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/contactcard/getgroups")
-                .WithContent(@"{""id"":""77885666""}")
+                .WithFormData("id", "77885666")
                 .Respond("application/json",
                     @"{""code"":0,""data"":[{""id"":""100604"",""name"":""Freedom Broker""},{""id"":""100820"",""name"":""VIP""}],""message"":""""}");
 

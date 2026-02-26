@@ -1,9 +1,11 @@
-using System;
+﻿using System;
 using System.Net.Http;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
+
+using Mobizon.Net.ContactCards;
 
 namespace Mobizon.Net
 {
@@ -20,6 +22,7 @@ namespace Mobizon.Net
     {
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;
+        private readonly IContactCardService _contactCardService;
 
         /// <summary>
         /// Gets the service for sending and managing SMS messages.
@@ -52,9 +55,12 @@ namespace Mobizon.Net
         public IContactGroupService ContactGroups { get; }
 
         /// <summary>
-        /// Gets the service for managing contact cards.
+        /// Gets the EF Core-style access object for managing contact cards.
         /// </summary>
-        public IContactCardService ContactCards { get; }
+        public ContactCardSet ContactCards { get; }
+
+        /// <inheritdoc/>
+        IContactCardService IMobizonClient.ContactCards => _contactCardService;
 
         /// <summary>
         /// Gets the service for managing the number stop-list.
@@ -97,7 +103,8 @@ namespace Mobizon.Net
             User = new UserService(apiClient);
             TaskQueue = new TaskQueueService(apiClient);
             ContactGroups = new ContactGroupService(apiClient);
-            ContactCards = new ContactCardService(apiClient);
+            _contactCardService = new ContactCardService(apiClient);
+            ContactCards = new ContactCardSet(_contactCardService);
             NumberStopList = new NumberStopListService(apiClient);
         }
 

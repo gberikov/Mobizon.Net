@@ -1,7 +1,7 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.User;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Users;
 
 namespace Mobizon.Contracts.Services
 {

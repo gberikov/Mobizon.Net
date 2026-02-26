@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -9,8 +9,11 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Campaign;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts.Models.StopLists;
+
+using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Internal
 {
@@ -30,6 +33,7 @@ namespace Mobizon.Net.Internal
                 new CampaignCommonStatusConverter(),
                 new MessageTypeConverter(),
                 new StringToNumericEnumConverter<CampaignType>(),
+                new StringToNumericEnumConverter<StopListLevel>(),
                 new MobizonDateTimeConverter()
             }
         };
@@ -55,21 +59,23 @@ namespace Mobizon.Net.Internal
             string module,
             string apiMethod,
             IDictionary<string, string>? parameters,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            int[]? extraSuccessCodes = null)
         {
             var request = new HttpRequestMessage(method, BuildUrl(module, apiMethod));
 
             if (method == HttpMethod.Post && parameters != null && parameters.Count > 0)
                 request.Content = new FormUrlEncodedContent(parameters);
 
-            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
 
         public async Task<MobizonResponse<T>> SendJsonAsync<T>(
             string module,
             string apiMethod,
             object? body,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            int[]? extraSuccessCodes = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
 
@@ -79,7 +85,7 @@ namespace Mobizon.Net.Internal
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
-            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
 
         public async Task<MobizonResponse<T>> SendMultipartAsync<T>(
@@ -88,7 +94,8 @@ namespace Mobizon.Net.Internal
             IDictionary<string, string> fields,
             Stream? photo = null,
             string? photoFileName = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            int[]? extraSuccessCodes = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
 
@@ -106,7 +113,7 @@ namespace Mobizon.Net.Internal
 
             request.Content = multipart;
 
-            return await SendCoreAsync<T>(request, cancellationToken).ConfigureAwait(false);
+            return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
 
         private string BuildUrl(string module, string apiMethod) =>
@@ -115,7 +122,8 @@ namespace Mobizon.Net.Internal
 
         private async Task<MobizonResponse<T>> SendCoreAsync<T>(
             HttpRequestMessage request,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            int[]? extraSuccessCodes = null)
         {
             HttpResponseMessage response;
             try
@@ -154,7 +162,8 @@ namespace Mobizon.Net.Internal
             }
 
             if (result.Code != MobizonResponseCode.Success &&
-                result.Code != MobizonResponseCode.BackgroundTask)
+                result.Code != MobizonResponseCode.BackgroundTask &&
+                (extraSuccessCodes == null || Array.IndexOf(extraSuccessCodes, result.RawCode) < 0))
             {
                 throw new MobizonApiException(result.RawCode, result.Message);
             }

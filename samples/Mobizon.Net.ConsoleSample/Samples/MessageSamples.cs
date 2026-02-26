@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Message;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Messages;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -41,10 +41,10 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== Message.GetSmsStatus ===");
             // Replace with a real message ID
-            var singleResult = await client.Messages.GetSmsStatusAsync(799740734);
+            var singleResult = await client.Messages.GetSmsStatusAsync(800191838);
             foreach (var s in singleResult.Data)
                 Console.WriteLine($"Single:  Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
-            var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 799476047, 799463450 });
+            var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 800196668, 800196662 });
             foreach (var s in multiResult.Data)
                 Console.WriteLine($"Multi:   Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
         }
@@ -55,6 +55,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== Message.List ===");
             var result = await client.Messages.ListAsync(new MessageListRequest
             {
+                // Criteria = new MessageListCriteria { CampaignSentFrom = new DateTime(2025, 12,1), CampaignSentTo =  new DateTime(2025, 12,31) },
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
             });

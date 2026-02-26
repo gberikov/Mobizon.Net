@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactCard;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactCards;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -56,10 +56,13 @@ namespace Mobizon.Net.Services
             string id,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<ContactCardData>(
-                ModuleName, "get",
-                new { id },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id
+            };
+
+            return _apiClient.SendAsync<ContactCardData>(
+                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<string>> CreateAsync(
@@ -101,20 +104,29 @@ namespace Mobizon.Net.Services
             IReadOnlyList<string> groupIds,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<bool>(
-                ModuleName, "setgroups",
-                new { id, groupIds },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id
+            };
+
+            for (var i = 0; i < groupIds.Count; i++)
+                parameters[$"groupIds[{i}]"] = groupIds[i];
+
+            return _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "setgroups", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<ContactGroupRef>>> GetGroupsAsync(
             string id,
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendJsonAsync<IReadOnlyList<ContactGroupRef>>(
-                ModuleName, "getgroups",
-                new { id },
-                cancellationToken);
+            var parameters = new Dictionary<string, string>
+            {
+                ["id"] = id
+            };
+
+            return _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
+                HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken);
         }
 
         private static Dictionary<string, string> BuildCardFields(

@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Net;
 using Mobizon.Net.ConsoleSample.Samples;
 using Microsoft.Extensions.Configuration;
@@ -51,7 +51,7 @@ namespace Mobizon.Net.ConsoleSample
                 // await MessageSamples.QuickSendAsync(client, testRecipient, testMessage);
                 // await MessageSamples.SendSmsMessageAsync(client, testRecipient, testMessage);
                 // await MessageSamples.GetStatusAsync(client);
-                await MessageSamples.ListAsync(client);
+                // await MessageSamples.ListAsync(client);
 
                 // ── Campaign ──────────────────────────────────────────────────────
                 // await CampaignSamples.ListAsync(client);
@@ -71,7 +71,7 @@ namespace Mobizon.Net.ConsoleSample
                 // await ContactGroupSamples.GetCardsCountAsync(client);
 
                 // ── Contact Cards ─────────────────────────────────────────────────
-                // await ContactCardSamples.ListAsync(client);
+                await ContactCardSamples.ListAsync(client);
                 // await ContactCardSamples.ListByGroupAsync(client);
                 // await ContactCardSamples.GetAsync(client);
                 // await ContactCardSamples.CreateAndSetGroupAsync(client);
@@ -81,8 +81,11 @@ namespace Mobizon.Net.ConsoleSample
                 // ── Number Stop List ──────────────────────────────────────────────
                 // await NumberStopListSamples.ListAsync(client);
                 // await NumberStopListSamples.AddNumberAsync(client);
-                // await NumberStopListSamples.AddRangeAsync(client);
+                // await NumberStopListSamples.AddNumberRangeAsync(client);
                 // await NumberStopListSamples.DeleteAsync(client);
+
+                // ── Task Queue ────────────────────────────────────────────────────
+                // await TaskQueueSamples.GetStatusAsync(client, taskId: 0);
 
                 Console.WriteLine("Uncomment a block in Program.cs to run a sample.");
             }

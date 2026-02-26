@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Campaign;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Campaigns;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -319,7 +319,8 @@ namespace Mobizon.Net.Services
             }
 
             return _apiClient.SendAsync<AddRecipientsResult>(
-                HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken);
+                HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
+                extraSuccessCodes: new[] { (int)AddRecipientsResponseCode.PartiallyAdded, (int)AddRecipientsResponseCode.NoneAdded });
         }
 
         private static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> source, int offset, int count)

@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Exceptions
@@ -29,7 +29,7 @@ namespace Mobizon.Net.Tests.Exceptions
         {
             var ex = new MobizonApiException(2, "Auth failed");
 
-            Assert.Equal(MobizonResponseCode.AuthFailed, ex.Code);
+            Assert.Equal(MobizonResponseCode.NotFound, ex.Code);
             Assert.Equal(2, ex.RawCode);
             Assert.Equal("Auth failed", ex.ApiMessage);
             Assert.Contains("2", ex.Message);

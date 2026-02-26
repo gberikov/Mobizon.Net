@@ -1,10 +1,10 @@
-#nullable enable
+﻿#nullable enable
 
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Extensions.DependencyInjection;
 using Mobizon.Net.Extensions.Polly;

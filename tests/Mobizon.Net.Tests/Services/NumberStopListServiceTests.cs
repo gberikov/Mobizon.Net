@@ -1,6 +1,8 @@
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.StopLists;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -57,7 +59,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.ListAsync(new Mobizon.Contracts.Models.StopList.StopListListRequest
+            await service.ListAsync(new Mobizon.Contracts.Models.StopLists.StopListListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
                 Sort = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }
@@ -80,15 +82,15 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Equal(1, result.Data.TotalItemCount);
             var e = result.Data.Items[0];
-            Assert.Equal("83486", e.Id);
-            Assert.Equal("88296", e.UserId);
-            Assert.Equal("2", e.PartnerId);
+            Assert.Equal(83486, e.Id);
+            Assert.Equal(88296, e.UserId);
+            Assert.Equal(2, e.PartnerId);
             Assert.Equal("77007782006", e.Number);
-            Assert.Equal("1", e.IgnoreSingle);
-            Assert.Equal("0", e.Level);
-            Assert.Equal("88296", e.CreatedByUserId);
-            Assert.Equal("2026-02-24 16:19:33", e.CreateTs);
-            Assert.Equal("0", e.IsSystem);
+            Assert.True(e.IgnoreSingle);
+            Assert.Equal(StopListLevel.User, e.Level);
+            Assert.Equal(88296, e.CreatedByUserId);
+            Assert.Equal(new DateTime(2026, 2, 24, 16, 19, 33), e.Created);
+            Assert.False(e.IsSystem);
             Assert.Equal("KZ", e.CountryA2);
             Assert.Equal("Altel", e.OperatorName);
         }
@@ -96,12 +98,14 @@ namespace Mobizon.Net.Tests.Services
         // ── AddNumberAsync ───────────────────────────────────────────────────
 
         [Fact]
-        public async Task AddNumberAsync_SendsJsonBody_ReturnsId()
+        public async Task AddNumberAsync_SendsFormData_ReturnsId()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/create")
-                .WithContent(@"{""id"":"""",""number"":""77007782006"",""comment"":""Проверка""}")
+                .WithFormData("id", "")
+                .WithFormData("number", "77007782006")
+                .WithFormData("comment", "Проверка")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""83486"",""message"":""""}");
 
@@ -109,7 +113,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.AddNumberAsync("77007782006", "Проверка");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal("83486", result.Data);
+            Assert.Equal(83486, result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -119,31 +123,36 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/create")
-                .WithContent(@"{""id"":"""",""number"":""77001234567"",""comment"":""""}")
+                .WithFormData("id", "")
+                .WithFormData("number", "77001234567")
+                .WithFormData("comment", "")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""99001"",""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.AddNumberAsync("77001234567");
 
-            Assert.Equal("99001", result.Data);
+            Assert.Equal(99001, result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
-        // ── AddRangeAsync ────────────────────────────────────────────────────
+        // ── AddNumberRangeAsync ────────────────────────────────────────────────────
 
         [Fact]
-        public async Task AddRangeAsync_SendsJsonBody_ReturnsTrue()
+        public async Task AddNumberRangeAsync_SendsFormData_ReturnsTrue()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/create")
-                .WithContent(@"{""id"":"""",""numberFrom"":""77470944000"",""numberTo"":""77470944099"",""comment"":""Тест диапазона""}")
+                .WithFormData("id", "")
+                .WithFormData("numberFrom", "77470944000")
+                .WithFormData("numberTo", "77470944099")
+                .WithFormData("comment", "Тест диапазона")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.AddRangeAsync("77470944000", "77470944099", "Тест диапазона");
+            var result = await service.AddNumberRangeAsync("77470944000", "77470944099", "Тест диапазона");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.True(result.Data);
@@ -151,17 +160,20 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task AddRangeAsync_WithoutComment_SendsEmptyComment()
+        public async Task AddNumberRangeAsync_WithoutComment_SendsEmptyComment()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/create")
-                .WithContent(@"{""id"":"""",""numberFrom"":""77000000000"",""numberTo"":""77000000099"",""comment"":""""}")
+                .WithFormData("id", "")
+                .WithFormData("numberFrom", "77000000000")
+                .WithFormData("numberTo", "77000000099")
+                .WithFormData("comment", "")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.AddRangeAsync("77000000000", "77000000099");
+            var result = await service.AddNumberRangeAsync("77000000000", "77000000099");
 
             Assert.True(result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
@@ -170,17 +182,17 @@ namespace Mobizon.Net.Tests.Services
         // ── DeleteAsync ──────────────────────────────────────────────────────
 
         [Fact]
-        public async Task DeleteAsync_SendsJsonBody_ReturnsTrue()
+        public async Task DeleteAsync_SendsFormData_ReturnsTrue()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/delete")
-                .WithContent(@"{""id"":""83486""}")
+                .WithFormData("id", "83486")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync("83486");
+            var result = await service.DeleteAsync(83486);
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.True(result.Data);

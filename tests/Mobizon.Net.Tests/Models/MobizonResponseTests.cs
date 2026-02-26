@@ -1,5 +1,5 @@
-using System.Text.Json;
-using Mobizon.Contracts.Models;
+﻿using System.Text.Json;
+using Mobizon.Contracts.Models.Common;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Models
@@ -32,7 +32,7 @@ namespace Mobizon.Net.Tests.Models
 
             Assert.NotNull(response);
             Assert.Equal(2, response!.RawCode);
-            Assert.Equal(MobizonResponseCode.AuthFailed, response.Code);
+            Assert.Equal(MobizonResponseCode.NotFound, response.Code);
             Assert.Equal("Auth failed", response.Message);
         }
 

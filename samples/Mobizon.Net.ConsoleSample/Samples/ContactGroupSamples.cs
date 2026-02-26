@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactGroup;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactGroups;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -19,7 +19,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             });
             Console.WriteLine($"Total: {result.Data.TotalItemCount}");
             foreach (var g in result.Data.Items)
-                Console.WriteLine($"  Id={g.Id}  Name={g.Name}  Cards={g.CardsCnt}  Created={g.CreateTs}");
+                Console.WriteLine($"  Id={g.Id}  Name={g.Name}  Cards={g.CardsCount}  Created={g.Created}");
         }
 
         // POST /service/contactgroup/create  →  /update  →  /delete
@@ -27,8 +27,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== ContactGroup.Create + Update + Delete ===");
 
-            var createResult = await client.ContactGroups.CreateAsync("SDK Test Group");
-            var id = createResult.Data!;
+            var createResult = await client.ContactGroups.CreateAsync("SDK Test Group 2");
+            var id = createResult.Data;
             Console.WriteLine($"Created Id: {id}");
 
             var updateResult = await client.ContactGroups.UpdateAsync(id, "SDK Test Group (renamed)");
@@ -43,8 +43,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
         public static async Task GetCardsCountAsync(MobizonClient client)
         {
             Console.WriteLine("=== ContactGroup.GetCardsCount ===");
-            // Replace with a real group ID, or use "-1" for contacts without any group
-            var result = await client.ContactGroups.GetCardsCountAsync("-1");
+            // Pass a group ID, or omit to count contacts without any group
+            var result = await client.ContactGroups.GetCardsCountAsync(100604);
             Console.WriteLine($"Count (no group): {result.Data}");
         }
     }

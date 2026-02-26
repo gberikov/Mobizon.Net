@@ -1,7 +1,7 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.ContactGroup;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.ContactGroups;
 
 namespace Mobizon.Contracts.Services
 {
@@ -20,7 +20,7 @@ namespace Mobizon.Contracts.Services
         /// <summary>
         /// Creates a new contact group and returns its ID.
         /// </summary>
-        Task<MobizonResponse<string>> CreateAsync(
+        Task<MobizonResponse<int>> CreateAsync(
             string name,
             CancellationToken cancellationToken = default);
 
@@ -28,7 +28,7 @@ namespace Mobizon.Contracts.Services
         /// Renames an existing contact group.
         /// </summary>
         Task<MobizonResponse<bool>> UpdateAsync(
-            string id,
+            int id,
             string name,
             CancellationToken cancellationToken = default);
 
@@ -36,7 +36,7 @@ namespace Mobizon.Contracts.Services
         /// Deletes a contact group. Returns the lists of processed and not-processed IDs.
         /// </summary>
         Task<MobizonResponse<DeleteContactGroupResult>> DeleteAsync(
-            string id,
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Mobizon.Contracts.Services
         /// Pass <c>"-1"</c> to count contacts that have no group.
         /// </summary>
         Task<MobizonResponse<int>> GetCardsCountAsync(
-            string id,
+            int? id = null,
             CancellationToken cancellationToken = default);
     }
 }

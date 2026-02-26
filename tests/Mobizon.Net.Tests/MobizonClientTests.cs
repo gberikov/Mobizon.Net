@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 using System.Net.Http;
-using Mobizon.Contracts.Models;
+using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Services;
 using Mobizon.Net;
 using Xunit;

@@ -1,9 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.TaskQueue;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.TaskQueues;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -27,8 +27,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<TaskQueueStatus>(
-                HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken);
+            return _apiClient.SendAsync<TaskQueueStatus>(HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken);
         }
     }
 }

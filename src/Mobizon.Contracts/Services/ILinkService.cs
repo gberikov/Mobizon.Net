@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Link;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Links;
 
 namespace Mobizon.Contracts.Services
 {

@@ -1,8 +1,8 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.User;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Users;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
@@ -21,8 +21,7 @@ namespace Mobizon.Net.Services
         public Task<MobizonResponse<BalanceResult>> GetOwnBalanceAsync(
             CancellationToken cancellationToken = default)
         {
-            return _apiClient.SendAsync<BalanceResult>(
-                HttpMethod.Get, ModuleName, "getownbalance", null, cancellationToken);
+            return _apiClient.SendAsync<BalanceResult>(HttpMethod.Get, ModuleName, "getownbalance", null, cancellationToken);
         }
     }
 }

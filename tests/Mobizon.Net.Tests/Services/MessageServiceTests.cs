@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models;
-using Mobizon.Contracts.Models.Message;
+using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Messages;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -200,7 +200,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post,
                     "https://api.mobizon.kz/service/Message/List")
                 .WithFormData("criteria[from]", "Alpha")
-                .WithFormData("criteria[status]", "2")
+                .WithFormData("criteria[status]", "DELIVRD")
                 .WithFormData("pagination[currentPage]", "1")
                 .WithFormData("pagination[pageSize]", "10")
                 .WithFormData("sort[campaignId]", "DESC")
@@ -210,8 +210,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new MessageListRequest
             {
-                From = "Alpha",
-                Status = 2,
+                Criteria = new MessageListCriteria { From = "Alpha", Status = SmsStatus.Delivered },
                 Pagination = new PaginationRequest { CurrentPage = 1, PageSize = 10 },
                 Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
             });
