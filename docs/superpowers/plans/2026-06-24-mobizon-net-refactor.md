@@ -178,7 +178,7 @@ namespace Mobizon.Net.ApiCapture
         {
             var url = BuildUrl(_apiUrl, _apiVersion, _apiKey, module, method);
             using var req = new HttpRequestMessage(HttpMethod.Post, url);
-            if (form is { Count: > 0 }) req.Content = new FormUrlEncodedContent(form);
+            if (form != null && form.Count > 0) req.Content = new FormUrlEncodedContent(form);
             using var resp = await _http.SendAsync(req);
             return await resp.Content.ReadAsStringAsync();
         }

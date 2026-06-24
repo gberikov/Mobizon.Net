@@ -53,3 +53,6 @@ appsettings.Local.json
 
 ## Local reference files
 *.html
+
+## Subagent-driven-development scratch
+.superpowers/
