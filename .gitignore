@@ -56,3 +56,6 @@ appsettings.Local.json
 
 ## Subagent-driven-development scratch
 .superpowers/
+
+## API capture (raw, may contain PII)
+artifacts/api-captures/
