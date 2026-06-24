@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Mobizon.Net.Webhooks</PackageId>
+    <Description>Inbound webhook support for the Mobizon SMS gateway SDK: framework-agnostic signature verification and JSON parsing of Mobizon webhook events (SMS delivery reports and form events). Depends only on System.Text.Json.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mobizon.Contracts\Mobizon.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Mobizon.Net.Webhooks.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

@@ -14,6 +14,7 @@ account balance, and monitoring background tasks — all from a single `IMobizon
 ## Features
 
 - **5 API modules** — Messages, Campaigns, Links, User, and TaskQueue — with full method coverage
+- **Inbound webhooks** — verify signatures and parse delivery-report and form events, with optional ASP.NET Core helpers
 - **Strongly-typed requests and responses** via `MobizonResponse<T>` with typed exceptions
 - **ASP.NET Core DI integration** — register with a single `AddMobizon()` call
 - **Polly resilience** — retry, circuit breaker, and timeout policies out of the box
@@ -61,6 +62,16 @@ dotnet add package Mobizon.Net.Extensions.Polly
 
 Adds `AddMobizonResilience()` on `IHttpClientBuilder` with retry, circuit breaker, and timeout
 policies. Requires the DI package.
+
+### Webhooks (incoming events)
+
+```bash
+dotnet add package Mobizon.Net.Webhooks            # framework-agnostic verify + parse
+dotnet add package Mobizon.Net.Webhooks.AspNetCore # optional ASP.NET Core helpers
+```
+
+The core webhook package depends only on `System.Text.Json`; the ASP.NET Core package adds endpoint
+and DI helpers. See the [Webhooks](#webhooks) section below.
 
 ---
 
@@ -284,6 +295,71 @@ Console.WriteLine($"Task {taskStatus.Data.Id}: {taskStatus.Data.Progress}% compl
 ```
 
 `TaskQueueStatus` fields: `Id`, `Status`, `Progress` (0–100).
+
+---
+
+## Webhooks
+
+Mobizon can push events to your server in real time instead of you polling `GetSMSStatus`. Webhooks
+are created and configured in the Mobizon **control panel** (not via the API); this SDK provides the
+**receive** side: verifying the SHA1 signature and parsing the JSON body into a typed event.
+
+Supported event types: `sms-delivery-report`, `form-submission`, `form-contact-confirmation`,
+`form-contact-unsubscribe`. Unrecognised types are surfaced as `UnknownWebhookEvent` (forward-compatible).
+
+### Framework-agnostic core
+
+```csharp
+using Mobizon.Net.Webhooks;
+using Mobizon.Contracts.Models.Webhooks;
+
+var processor = new WebhookProcessor(); // default parser + verifier
+
+// body = raw request body; secret = the key you set when creating the webhook
+WebhookProcessResult result = processor.Process(body, secret);
+
+switch (result.Status)
+{
+    case WebhookProcessStatus.Ok when result.Event is SmsDeliveryReportEvent sms:
+        // sms.Data.MessageId, sms.Data.Status (SmsStatus), sms.Data.To
+        break;
+    case WebhookProcessStatus.SignatureMismatch: /* respond 403 */ break;
+    case WebhookProcessStatus.ParseError:        /* respond 400 */ break;
+}
+```
+
+Per-webhook secrets (multiple webhooks on one endpoint):
+
+```csharp
+var result = processor.Process(body, evt => LookupSecret(evt.WebhookId));
+```
+
+### ASP.NET Core
+
+```csharp
+using Mobizon.Net.Webhooks.AspNetCore;
+
+builder.Services.AddMobizonWebhooks(o =>
+    o.SecretKeyResolver = (sp, evt) => builder.Configuration["Mobizon:WebhookSecret"]!);
+
+app.MapMobizonWebhook("/webhooks/mobizon", async (evt, ct) =>
+{
+    switch (evt)
+    {
+        case SmsDeliveryReportEvent sms:  /* enqueue sms.Data */ break;
+        case FormSubmissionEvent form:    /* handle form.Data */ break;
+        case UnknownWebhookEvent unknown: /* log unknown.EventTypeRaw */ break;
+    }
+});
+// 200 = handled, 403 = bad signature, 400 = malformed — returned automatically.
+```
+
+**Signature**: `SHA1(eventId|attempt|eventCreateTs|secretKey)`, compared in constant time and failing
+closed. The original `eventCreateTs` string is preserved verbatim for verification.
+
+**Acknowledge fast**: Mobizon treats a webhook as failed if no `2xx` arrives within 5 seconds and
+retries up to 10 times. Verify → persist/enqueue → return `200`, then process asynchronously.
+Deduplicate on `EventId` (stable across retries).
 
 ---
 

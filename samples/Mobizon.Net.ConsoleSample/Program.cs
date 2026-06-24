@@ -87,6 +87,10 @@ namespace Mobizon.Net.ConsoleSample
                 // ── Task Queue ────────────────────────────────────────────────────
                 // await TaskQueueSamples.GetStatusAsync(client, taskId: 0);
 
+                // ── Webhooks (incoming; no API call) ──────────────────────────────
+                // var sampleBody = "{\"eventId\":1,\"eventType\":\"sms-delivery-report\",\"eventCreateTs\":\"2026-01-15 11:42:28\",\"webhookId\":1,\"attempt\":1,\"data\":{\"campaignId\":1,\"messageId\":2,\"segNum\":1,\"status\":\"DELIVRD\",\"to\":\"77001234567\"},\"sign\":\"...\"}";
+                // WebhookSamples.ProcessDeliveryReport(sampleBody, "your-webhook-secret");
+
                 Console.WriteLine("Uncomment a block in Program.cs to run a sample.");
             }
             catch (MobizonApiException ex)
