@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Campaigns;
@@ -80,12 +79,12 @@ namespace Mobizon.Contracts.Services
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="CampaignData"/> items.
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<CampaignData>>> ListAsync(
+        Task<MobizonResponse<MobizonListResult<CampaignData>>> ListAsync(
             CampaignListRequest? request = null, CancellationToken cancellationToken = default);
 
         /// <summary>

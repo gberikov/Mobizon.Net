@@ -17,7 +17,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
-            foreach (var c in result.Data)
+            foreach (var c in result.Data.Items)
                 Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Status={c.CommonStatus}");
         }
 

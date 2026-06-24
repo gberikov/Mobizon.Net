@@ -96,7 +96,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "GetInfo", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<CampaignData>>> ListAsync(
+        public Task<MobizonResponse<MobizonListResult<CampaignData>>> ListAsync(
             CampaignListRequest? request = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string>? parameters = null;
@@ -160,7 +160,7 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<IReadOnlyList<CampaignData>>(
+            return _apiClient.SendAsync<MobizonListResult<CampaignData>>(
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
         }
 
