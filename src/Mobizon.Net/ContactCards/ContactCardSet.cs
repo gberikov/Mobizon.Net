@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Mobizon.Contracts.Models.ContactCards;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
+using Mobizon.Net.Services;
 
 namespace Mobizon.Net.ContactCards
 {
@@ -13,11 +14,11 @@ namespace Mobizon.Net.ContactCards
     /// Provides EF Core-style CRUD and query operations for contact cards.
     /// Accessible via <c>client.ContactCards</c>.
     /// </summary>
-    public sealed class ContactCardSet
+    public sealed class ContactCardSet : IContactCardSet
     {
-        private readonly IContactCardService _service;
+        private readonly ContactCardService _service;
 
-        internal ContactCardSet(IContactCardService service)
+        internal ContactCardSet(ContactCardService service)
         {
             _service = service;
         }
@@ -25,24 +26,24 @@ namespace Mobizon.Net.ContactCards
         // ── Query entry points ────────────────────────────────────────────────
 
         /// <summary>Begins a filtered query.</summary>
-        public ContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate)
+        public IContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate)
             => new ContactCardQuery(_service).Where(predicate);
 
         /// <summary>Begins a query and sets the maximum number of items to return.</summary>
-        public ContactCardQuery Take(int count)
+        public IContactCardQuery Take(int count)
             => new ContactCardQuery(_service).Take(count);
 
         /// <summary>Begins a query and skips the first <paramref name="count"/> items.</summary>
-        public ContactCardQuery Skip(int count)
+        public IContactCardQuery Skip(int count)
             => new ContactCardQuery(_service).Skip(count);
 
         /// <summary>Begins a query sorted by the specified field ascending.</summary>
-        public ContactCardQuery OrderBy<TKey>(
+        public IContactCardQuery OrderBy<TKey>(
             Expression<Func<ContactCardFilterSpec, TKey>> keySelector)
             => new ContactCardQuery(_service).OrderBy(keySelector);
 
         /// <summary>Begins a query sorted by the specified field descending.</summary>
-        public ContactCardQuery OrderByDescending<TKey>(
+        public IContactCardQuery OrderByDescending<TKey>(
             Expression<Func<ContactCardFilterSpec, TKey>> keySelector)
             => new ContactCardQuery(_service).OrderByDescending(keySelector);
 
@@ -91,6 +92,10 @@ namespace Mobizon.Net.ContactCards
             return _service.UpdateAsync(
                 ContactCardMapper.ToUpdateRequest(entity), cancellationToken);
         }
+
+        /// <summary>Deletes the contact card with the specified ID.</summary>
+        public Task RemoveAsync(int id, CancellationToken cancellationToken = default)
+            => _service.RemoveAsync(id.ToString(), cancellationToken);
 
         // ── Groups ────────────────────────────────────────────────────────────
 

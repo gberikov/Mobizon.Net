@@ -25,6 +25,8 @@ namespace Mobizon.Net.Tests
             Assert.NotNull(client.Links);
             Assert.NotNull(client.User);
             Assert.NotNull(client.TaskQueue);
+            Assert.NotNull(client.ContactCards);
+            Assert.IsAssignableFrom<IContactCardSet>(client.ContactCards);
         }
 
         [Fact]

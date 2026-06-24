@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.ContactCards;
-using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class ContactCardService : IContactCardService
+    internal class ContactCardService
     {
         private const string ModuleName = "contactcard";
         private readonly MobizonApiClient _apiClient;
@@ -71,8 +71,8 @@ namespace Mobizon.Net.Services
         {
             var fields = BuildCardFields(request.Title, request.Name, request.Surname,
                 request.MobileValue, request.MobileType, request.Email,
-                request.Viber, request.Whatsapp, request.Landline,
-                request.Skype, request.Telegram, request.BirthDate,
+                request.Viber, request.WhatsApp, request.Landline,
+                request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
             return _apiClient.SendMultipartAsync<string>(
@@ -87,8 +87,8 @@ namespace Mobizon.Net.Services
         {
             var fields = BuildCardFields(request.Title, request.Name, request.Surname,
                 request.MobileValue, request.MobileType, request.Email,
-                request.Viber, request.Whatsapp, request.Landline,
-                request.Skype, request.Telegram, request.BirthDate,
+                request.Viber, request.WhatsApp, request.Landline,
+                request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
             fields["id"] = request.Id;
@@ -129,33 +129,60 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken);
         }
 
+        public Task<MobizonResponse<bool>> RemoveAsync(
+            string id,
+            CancellationToken cancellationToken = default)
+        {
+            var parameters = new Dictionary<string, string> { ["id"] = id };
+            return _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
+        }
+
         private static Dictionary<string, string> BuildCardFields(
             string? title, string? name, string? surname,
-            string? mobileValue, string? mobileType,
+            string? mobileValue, ContactType? mobileType,
             string? email, string? viber, string? whatsapp, string? landline,
-            string? skype, string? telegram,
-            string? birthDate, string? gender, string? companyName, string? companyUrl,
+            string? skype, string? telegram, AddressFieldInfo? address,
+            DateTime? birthDate, string? gender, string? companyName, string? companyUrl,
             string? info)
         {
-            return new Dictionary<string, string>
+            var fields = new Dictionary<string, string>
             {
                 ["data[title]"]           = title       ?? string.Empty,
                 ["data[name]"]            = name        ?? string.Empty,
                 ["data[surname]"]         = surname     ?? string.Empty,
                 ["data[mobile][value]"]   = mobileValue ?? string.Empty,
-                ["data[mobile][type]"]    = mobileType  ?? string.Empty,
+                ["data[mobile][type]"]    = mobileType?.ToString().ToUpperInvariant() ?? string.Empty,
                 ["data[email]"]           = email       ?? string.Empty,
                 ["data[viber]"]           = viber       ?? string.Empty,
                 ["data[whatsapp]"]        = whatsapp    ?? string.Empty,
                 ["data[landline]"]        = landline    ?? string.Empty,
                 ["data[skype]"]           = skype       ?? string.Empty,
                 ["data[telegram]"]        = telegram    ?? string.Empty,
-                ["data[birth_date]"]      = birthDate   ?? string.Empty,
+                ["data[birth_date]"]      = birthDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty,
                 ["data[gender]"]          = gender      ?? string.Empty,
                 ["data[company_name]"]    = companyName ?? string.Empty,
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,
                 ["data[info]"]            = info        ?? string.Empty,
             };
+
+            // Address is only sent when provided, so callers that don't touch it
+            // (e.g. update) don't accidentally clear an existing address.
+            if (address != null)
+            {
+                fields["data[address][countryA2]"]  = address.CountryA2  ?? string.Empty;
+                fields["data[address][country]"]    = address.Country    ?? string.Empty;
+                fields["data[address][regionId]"]   = address.RegionId   ?? string.Empty;
+                fields["data[address][region]"]     = address.Region     ?? string.Empty;
+                fields["data[address][cityId]"]     = address.CityId     ?? string.Empty;
+                fields["data[address][city]"]       = address.City       ?? string.Empty;
+                fields["data[address][postalcode]"] = address.PostalCode ?? string.Empty;
+                fields["data[address][street]"]     = address.Street     ?? string.Empty;
+                fields["data[address][building]"]   = address.Building   ?? string.Empty;
+                fields["data[address][other]"]      = address.Other      ?? string.Empty;
+            }
+
+            return fields;
         }
     }
 }

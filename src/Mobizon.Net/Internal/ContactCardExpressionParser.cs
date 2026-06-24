@@ -55,12 +55,17 @@ namespace Mobizon.Net.Internal
                             return Build(bin.Left, "empty", null);
                         // equal:  x.GroupId == 33  or  x.Mobile.Type == PhoneType.Main
                         return Build(bin.Left, "equal", value);
+
+                    case ExpressionType.NotEqual:
+                        var neValue = Evaluate(bin.Right);
+                        // not_equal:  x.GroupId != 33
+                        return Build(bin.Left, "not_equal", neValue);
                 }
             }
 
             throw new NotSupportedException(
                 $"Unsupported expression '{expr.NodeType}': {expr}. " +
-                "Supported: == (equal/empty), >=, <=, .Contains(), &&.");
+                "Supported: == (equal/empty), != (not_equal), >=, <=, .Contains(), &&.");
         }
 
         private static ContactCardCriteria Build(Expression memberExpr, string op, object? value)

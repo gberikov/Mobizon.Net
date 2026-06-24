@@ -1,4 +1,6 @@
-﻿using Mobizon.Contracts.Models.ContactCards;
+using System;
+using System.Globalization;
+using Mobizon.Contracts.Models.ContactCards;
 
 namespace Mobizon.Net.Internal
 {
@@ -14,15 +16,15 @@ namespace Mobizon.Net.Internal
             Title       = d.Fields?.Title,
             Name        = d.Fields?.Name,
             Surname     = d.Fields?.Surname,
-            Mobile      = d.Fields?.Mobile?.Value,
-            MobileType  = d.Fields?.Mobile?.Type,
+            Mobile      = d.Fields?.Mobile,
             Email       = d.Fields?.Email,
             Viber       = d.Fields?.Viber,
-            Whatsapp    = d.Fields?.Whatsapp,
+            WhatsApp    = d.Fields?.WhatsApp,
             Landline    = d.Fields?.Landline,
             Skype       = d.Fields?.Skype,
             Telegram    = d.Fields?.Telegram,
-            BirthDate   = d.Fields?.BirthDate,
+            Address     = d.Fields?.Address,
+            BirthDate   = ParseDate(d.Fields?.BirthDate),
             Gender      = d.Fields?.Gender,
             CompanyName = d.Fields?.CompanyName,
             CompanyUrl  = d.Fields?.CompanyUrl,
@@ -35,14 +37,15 @@ namespace Mobizon.Net.Internal
                 Title       = e.Title,
                 Name        = e.Name,
                 Surname     = e.Surname,
-                MobileValue = e.Mobile,
-                MobileType  = e.MobileType,
-                Email       = e.Email,
-                Viber       = e.Viber,
-                Whatsapp    = e.Whatsapp,
-                Landline    = e.Landline,
-                Skype       = e.Skype,
-                Telegram    = e.Telegram,
+                MobileValue = e.Mobile?.Value,
+                MobileType  = e.Mobile?.Type,
+                Email       = e.Email?.Value,
+                Viber       = e.Viber?.Value,
+                WhatsApp    = e.WhatsApp?.Value,
+                Landline    = e.Landline?.Value,
+                Skype       = e.Skype?.Value,
+                Telegram    = e.Telegram?.Value,
+                Address     = e.Address,
                 BirthDate   = e.BirthDate,
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
@@ -57,19 +60,25 @@ namespace Mobizon.Net.Internal
                 Title       = e.Title,
                 Name        = e.Name,
                 Surname     = e.Surname,
-                MobileValue = e.Mobile,
-                MobileType  = e.MobileType,
-                Email       = e.Email,
-                Viber       = e.Viber,
-                Whatsapp    = e.Whatsapp,
-                Landline    = e.Landline,
-                Skype       = e.Skype,
-                Telegram    = e.Telegram,
+                MobileValue = e.Mobile?.Value,
+                MobileType  = e.Mobile?.Type,
+                Email       = e.Email?.Value,
+                Viber       = e.Viber?.Value,
+                WhatsApp    = e.WhatsApp?.Value,
+                Landline    = e.Landline?.Value,
+                Skype       = e.Skype?.Value,
+                Telegram    = e.Telegram?.Value,
+                Address     = e.Address,
                 BirthDate   = e.BirthDate,
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
                 Info        = e.Info
             };
+
+        private static DateTime? ParseDate(string? s) =>
+            string.IsNullOrWhiteSpace(s) ? (DateTime?)null
+            : DateTime.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt)
+                ? dt : (DateTime?)null;
     }
 }
