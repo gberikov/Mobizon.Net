@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Links;
@@ -33,7 +32,7 @@ namespace Mobizon.Net.Tests.Services
                     "https://api.mobizon.kz/service/link/create")
                 .WithFormData("data[fullLink]", "https://example.com")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""clicks"":0},""message"":""""}");
+                    @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""clickCnt"":""0""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.CreateAsync(new CreateLinkRequest
@@ -99,14 +98,14 @@ namespace Mobizon.Net.Tests.Services
                     "https://api.mobizon.kz/service/link/get")
                 .WithFormData("code", "abc123")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""clicks"":5},""message"":""""}");
+                    @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""clickCnt"":""5""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.GetAsync("abc123");
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Equal("abc123", result.Data.Code);
-            Assert.Equal(5, result.Data.Clicks);
+            Assert.Equal(5, result.Data.ClickCnt);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -187,13 +186,12 @@ namespace Mobizon.Net.Tests.Services
         public async Task ListAsync_WithPaginationAndSort_SendsFormData()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/list")
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/list")
                 .WithFormData("pagination[currentPage]", "1")
                 .WithFormData("pagination[pageSize]", "10")
                 .WithFormData("sort[id]", "DESC")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[{""id"":1,""code"":""abc"",""fullLink"":""https://example.com"",""status"":1,""clicks"":0}],""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""code"":""abc"",""fullLink"":""https://example.com"",""status"":""1"",""clickCnt"":""0""}],""totalItemCount"":""1""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new LinkListRequest
@@ -203,7 +201,8 @@ namespace Mobizon.Net.Tests.Services
             });
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data);
+            Assert.Single(result.Data.Items);
+            Assert.Equal(1, result.Data.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -211,17 +210,31 @@ namespace Mobizon.Net.Tests.Services
         public async Task ListAsync_WithoutRequest_SendsNoFormData()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/list")
-                .Respond("application/json",
-                    @"{""code"":0,""data"":[],""message"":""""}");
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/list")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data);
+            Assert.Empty(result.Data.Items);
             mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_Parses_Real_Fixture_Shape()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/link/list")
+                .Respond("application/json", Fixtures.Load("link.list.json"));
+
+            var service = CreateService(mockHttp);
+            var result = await service.ListAsync(new LinkListRequest());
+
+            Assert.Equal(2, result.Data.TotalItemCount);
+            Assert.Equal(2, result.Data.Items.Count);
+            Assert.Equal("tyz2", result.Data.Items[0].Code);
+            Assert.Equal(1, result.Data.Items[1].ClickCnt); // second link has clickCnt "1"
         }
 
         [Fact]

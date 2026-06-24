@@ -1,44 +1,23 @@
-﻿namespace Mobizon.Contracts.Models.Links
+using System.Text.Json.Serialization;
+
+namespace Mobizon.Contracts.Models.Links
 {
-    /// <summary>
-    /// Represents a Mobizon short link and its associated metadata.
-    /// </summary>
+    /// <summary>Represents a Mobizon short link.</summary>
     public class LinkData
     {
-        /// <summary>
-        /// Gets or sets the unique numeric ID of the link.
-        /// </summary>
         public int Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique short code used in the shortened URL.
-        /// </summary>
         public string Code { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the full destination URL that the short link redirects to.
-        /// </summary>
+        [JsonPropertyName("shortLink")] public string? ShortLink { get; set; }
         public string FullLink { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the current status code of the link.
-        /// </summary>
         public int Status { get; set; }
-
-        /// <summary>
-        /// Gets or sets the expiration date of the link as returned by the API,
-        /// or <see langword="null"/> if the link does not expire.
-        /// </summary>
+        [JsonPropertyName("moderatorStatus")] public int ModeratorStatus { get; set; }
+        [JsonPropertyName("clickCnt")] public int ClickCnt { get; set; }
+        [JsonPropertyName("redirectCnt")] public int RedirectCnt { get; set; }
         public string? ExpirationDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets an optional comment or label associated with the link.
-        /// </summary>
+        [JsonPropertyName("realExpirationDate")] public string? RealExpirationDate { get; set; }
         public string? Comment { get; set; }
-
-        /// <summary>
-        /// Gets or sets the total number of times this short link has been clicked.
-        /// </summary>
-        public int Clicks { get; set; }
+        [JsonPropertyName("moderatorComment")] public string? ModeratorComment { get; set; }
+        [JsonPropertyName("createTs")] public string? CreateTs { get; set; }
+        [JsonPropertyName("updateTs")] public string? UpdateTs { get; set; }
     }
 }

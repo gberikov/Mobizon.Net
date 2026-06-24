@@ -85,12 +85,12 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">Optional pagination and sort criteria. Pass <see langword="null"/> to use API defaults.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="LinkData"/> items.
+        /// A <see cref="MobizonResponse{T}"/> containing a paged envelope of <see cref="LinkData"/> items.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<LinkData>>> ListAsync(
+        Task<MobizonResponse<MobizonListResult<LinkData>>> ListAsync(
             LinkListRequest? request = null, CancellationToken cancellationToken = default);
 
         /// <summary>

@@ -17,8 +17,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
-            foreach (var l in result.Data)
-                Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.Clicks}");
+            foreach (var l in result.Data.Items)
+                Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.ClickCnt}");
         }
 
         // POST /service/link/Create  →  /service/link/Get  →  /service/link/Update  →  /service/link/Delete
@@ -35,7 +35,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine($"Created: code={code}  url={createResult.Data.FullLink}");
 
             var getResult = await client.Links.GetAsync(code);
-            Console.WriteLine($"Get    : clicks={getResult.Data.Clicks}");
+            Console.WriteLine($"Get    : clicks={getResult.Data.ClickCnt}");
 
             await client.Links.UpdateAsync(new UpdateLinkRequest
             {

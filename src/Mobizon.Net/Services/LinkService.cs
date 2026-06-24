@@ -99,7 +99,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<LinkData>>> ListAsync(
+        public Task<MobizonResponse<MobizonListResult<LinkData>>> ListAsync(
             LinkListRequest? request = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string>? parameters = null;
@@ -120,7 +120,7 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<IReadOnlyList<LinkData>>(
+            return _apiClient.SendAsync<MobizonListResult<LinkData>>(
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
