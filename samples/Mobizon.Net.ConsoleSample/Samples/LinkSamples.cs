@@ -31,15 +31,16 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 FullLink = "https://example.com",
                 Comment  = "SDK test link"
             });
+            var id   = createResult.Data.Id;
             var code = createResult.Data.Code!;
-            Console.WriteLine($"Created: code={code}  url={createResult.Data.FullLink}");
+            Console.WriteLine($"Created: id={id}  code={code}  url={createResult.Data.FullLink}");
 
-            var getResult = await client.Links.GetAsync(code);
+            var getResult = await client.Links.GetByCodeAsync(code);
             Console.WriteLine($"Get    : clicks={getResult.Data.ClickCnt}");
 
             await client.Links.UpdateAsync(new UpdateLinkRequest
             {
-                Code    = code,
+                Id      = id,
                 Comment = "Updated by SDK"
             });
             Console.WriteLine("Updated comment.");

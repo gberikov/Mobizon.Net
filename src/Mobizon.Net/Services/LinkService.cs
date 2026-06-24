@@ -53,17 +53,17 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<LinkData>> GetAsync(
-            string code, CancellationToken cancellationToken = default)
-        {
-            var parameters = new Dictionary<string, string>
-            {
-                ["code"] = code
-            };
+        public Task<MobizonResponse<LinkData>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken);
 
-            return _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken);
-        }
+        public Task<MobizonResponse<LinkData>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["code"] = code }, cancellationToken);
+
+        public Task<MobizonResponse<LinkData>> GetByShortLinkAsync(string shortLink, CancellationToken cancellationToken = default)
+            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken);
 
         public Task<MobizonResponse<IReadOnlyList<LinkData>>> GetLinksAsync(
             int campaignId, CancellationToken cancellationToken = default)
@@ -124,28 +124,13 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<object>> UpdateAsync(
-            UpdateLinkRequest request, CancellationToken cancellationToken = default)
+        public Task<MobizonResponse<object>> UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string>
-            {
-                ["code"] = request.Code
-            };
-
-            if (request.FullLink != null)
-                parameters["data[fullLink]"] = request.FullLink;
-
-            if (request.Status.HasValue)
-                parameters["data[status]"] = request.Status.Value.ToString();
-
-            if (request.ExpirationDate != null)
-                parameters["data[expirationDate]"] = request.ExpirationDate;
-
-            if (request.Comment != null)
-                parameters["data[comment]"] = request.Comment;
-
-            return _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "update", parameters, cancellationToken);
+            var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
+            if (request.Status.HasValue) parameters["data[status]"] = request.Status.Value.ToString();
+            if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
+            if (request.Comment != null) parameters["data[comment]"] = request.Comment;
+            return _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken);
         }
     }
 }

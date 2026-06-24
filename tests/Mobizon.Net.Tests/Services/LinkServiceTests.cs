@@ -91,21 +91,38 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task GetAsync_SendsCodeParameter()
+        public async Task GetByCodeAsync_SendsCode()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/get")
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
                 .WithFormData("code", "abc123")
-                .Respond("application/json",
-                    @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""clickCnt"":""5""},""message"":""""}");
-
-            var service = CreateService(mockHttp);
-            var result = await service.GetAsync("abc123");
-
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal("abc123", result.Data.Code);
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""abc123"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""5""},""message"":""""}");
+            var result = await CreateService(mockHttp).GetByCodeAsync("abc123");
             Assert.Equal(5, result.Data.ClickCnt);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_SendsId()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
+                .WithFormData("id", "42")
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""42"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
+            var result = await CreateService(mockHttp).GetByIdAsync(42);
+            Assert.Equal(42, result.Data.Id);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetByShortLinkAsync_SendsShortLink()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
+                .WithFormData("shortLink", "https://mbzn.co/x")
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
+            var result = await CreateService(mockHttp).GetByShortLinkAsync("https://mbzn.co/x");
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -238,47 +255,16 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateAsync_SendsCorrectParameters()
+        public async Task UpdateAsync_SendsIdAndFields_NoFullLink()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/update")
-                .WithFormData("code", "abc123")
-                .WithFormData("data[fullLink]", "https://updated.com")
-                .WithFormData("data[status]", "2")
-                .WithFormData("data[comment]", "Updated comment")
-                .Respond("application/json",
-                    @"{""code"":0,""data"":{},""message"":""""}");
-
-            var service = CreateService(mockHttp);
-            var result = await service.UpdateAsync(new UpdateLinkRequest
-            {
-                Code = "abc123",
-                FullLink = "https://updated.com",
-                Status = 2,
-                Comment = "Updated comment"
-            });
-
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/update")
+                .WithFormData("id", "42")
+                .WithFormData("data[status]", "0")
+                .WithFormData("data[comment]", "c")
+                .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
+            var result = await CreateService(mockHttp).UpdateAsync(new UpdateLinkRequest { Id = 42, Status = 0, Comment = "c" });
             Assert.Equal(MobizonResponseCode.Success, result.Code);
-            mockHttp.VerifyNoOutstandingExpectation();
-        }
-
-        [Fact]
-        public async Task UpdateAsync_WithOnlyCode_SendsMinimalParams()
-        {
-            var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/update")
-                .WithFormData("code", "xyz789")
-                .Respond("application/json",
-                    @"{""code"":0,""data"":{},""message"":""""}");
-
-            var service = CreateService(mockHttp);
-            await service.UpdateAsync(new UpdateLinkRequest
-            {
-                Code = "xyz789"
-            });
-
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

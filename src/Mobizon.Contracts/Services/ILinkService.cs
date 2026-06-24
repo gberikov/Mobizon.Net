@@ -38,6 +38,20 @@ namespace Mobizon.Contracts.Services
             int[] ids, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Retrieves a short link by its numeric ID.
+        /// </summary>
+        /// <param name="id">The numeric ID that identifies the link.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A <see cref="MobizonResponse{T}"/> containing the matching <see cref="LinkData"/>.
+        /// </returns>
+        /// <exception cref="Exceptions.MobizonApiException">
+        /// Thrown when the API returns a non-success response code.
+        /// </exception>
+        Task<MobizonResponse<LinkData>> GetByIdAsync(
+            int id, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Retrieves a short link by its unique short code.
         /// </summary>
         /// <param name="code">The short code that identifies the link.</param>
@@ -48,8 +62,22 @@ namespace Mobizon.Contracts.Services
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<LinkData>> GetAsync(
+        Task<MobizonResponse<LinkData>> GetByCodeAsync(
             string code, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Retrieves a short link by its full short URL.
+        /// </summary>
+        /// <param name="shortLink">The full short URL (e.g. <c>https://mbzn.co/x</c>) that identifies the link.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A <see cref="MobizonResponse{T}"/> containing the matching <see cref="LinkData"/>.
+        /// </returns>
+        /// <exception cref="Exceptions.MobizonApiException">
+        /// Thrown when the API returns a non-success response code.
+        /// </exception>
+        Task<MobizonResponse<LinkData>> GetByShortLinkAsync(
+            string shortLink, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves all short links associated with a specific campaign.
@@ -96,7 +124,7 @@ namespace Mobizon.Contracts.Services
         /// <summary>
         /// Updates the properties of an existing short link.
         /// </summary>
-        /// <param name="request">The updated link data, identified by short code.</param>
+        /// <param name="request">The updated link data, identified by numeric <see cref="UpdateLinkRequest.Id"/>.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A <see cref="MobizonResponse{T}"/> confirming the update.</returns>
         /// <exception cref="Exceptions.MobizonApiException">

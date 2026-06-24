@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts.Models.Links
 {
     /// <summary>
     /// Represents the parameters required to update an existing Mobizon short link.
@@ -6,15 +6,9 @@
     public class UpdateLinkRequest
     {
         /// <summary>
-        /// Gets or sets the short code that uniquely identifies the link to update.
+        /// Gets or sets the numeric ID that uniquely identifies the link to update.
         /// </summary>
-        public string Code { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the new full destination URL for the link.
-        /// When <see langword="null"/>, the existing URL is preserved.
-        /// </summary>
-        public string? FullLink { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the new status for the link.
