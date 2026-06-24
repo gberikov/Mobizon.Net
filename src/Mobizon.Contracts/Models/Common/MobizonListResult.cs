@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Mobizon.Contracts.Models.Common
 {
@@ -15,11 +14,5 @@ namespace Mobizon.Contracts.Models.Common
 
         /// <summary>Total number of items matching the query (API may return this as a string).</summary>
         public int TotalItemCount { get; set; }
-
-        /// <summary>
-        /// Total number of items in the unfiltered list (returned by some endpoints, e.g. <c>contactcard/list</c>).
-        /// </summary>
-        [JsonPropertyName("fullListItemCount")]
-        public int FullListItemCount { get; set; }
     }
 }

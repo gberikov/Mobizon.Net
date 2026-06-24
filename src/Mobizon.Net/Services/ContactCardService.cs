@@ -19,7 +19,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<MobizonListResult<ContactCardData>>> ListAsync(
+        public Task<MobizonResponse<ContactCardListResult>> ListAsync(
             ContactCardListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -48,7 +48,7 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
             }
 
-            return _apiClient.SendAsync<MobizonListResult<ContactCardData>>(
+            return _apiClient.SendAsync<ContactCardListResult>(
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
