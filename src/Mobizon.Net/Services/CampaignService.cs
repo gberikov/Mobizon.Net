@@ -20,7 +20,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<CreateCampaignResult>> CreateAsync(
+        public Task<MobizonResponse<int>> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -53,7 +53,7 @@ namespace Mobizon.Net.Services
             if (request.TrackShortLinkRecipients.HasValue)
                 parameters["data[trackShortLinkRecipients]"] = request.TrackShortLinkRecipients.Value ? "1" : "0";
 
-            return _apiClient.SendAsync<CreateCampaignResult>(
+            return _apiClient.SendAsync<int>(
                 HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken);
         }
 
@@ -164,7 +164,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<CampaignSendResult>> SendAsync(
+        public Task<MobizonResponse<int>> SendAsync(
             int id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -172,7 +172,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<CampaignSendResult>(
+            return _apiClient.SendAsync<int>(
                 HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken);
         }
 

@@ -56,11 +56,16 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Text = "Hello from Mobizon.Net SDK!",
                 Type = CampaignType.Bulk,
             });
-            var id = createResult.Data.CampaignId;
+            var id = createResult.Data;   // int — the new campaign ID
             Console.WriteLine($"Created Id: {id}");
 
-            // var sendResult = await client.Campaigns.SendAsync(id);
-            // Console.WriteLine($"Sent: {sendResult.Data.Status}");
+            // SendAsync returns the task id when Code == BackgroundTask (100),
+            // or 0 when scheduled synchronously (Code == Success).
+            var sendResult = await client.Campaigns.SendAsync(id);
+            if (sendResult.Code == MobizonResponseCode.BackgroundTask)
+                Console.WriteLine($"Queued as background task id: {sendResult.Data}");
+            else
+                Console.WriteLine($"Sent (code={sendResult.Code})");
 
             await client.Campaigns.DeleteAsync(id);
             Console.WriteLine("Deleted.");

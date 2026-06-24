@@ -16,12 +16,12 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The campaign configuration, including type, sender name, and message text.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CreateCampaignResult"/> with the new campaign ID.
+        /// A <see cref="MobizonResponse{T}"/> whose <c>Data</c> is the integer ID of the newly created campaign.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<CreateCampaignResult>> CreateAsync(
+        Task<MobizonResponse<int>> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -93,13 +93,14 @@ namespace Mobizon.Contracts.Services
         /// <param name="id">The ID of the campaign to send.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CampaignSendResult"/> with the
-        /// resulting send status.
+        /// A <see cref="MobizonResponse{T}"/> whose <c>Data</c> is an integer scalar.
+        /// When <see cref="MobizonResponseCode.BackgroundTask"/> (<c>Code == 100</c>) the value is the
+        /// background task ID that can be tracked via <c>TaskQueue/GetStatus</c>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<CampaignSendResult>> SendAsync(
+        Task<MobizonResponse<int>> SendAsync(
             int id, CancellationToken cancellationToken = default);
 
         /// <summary>
