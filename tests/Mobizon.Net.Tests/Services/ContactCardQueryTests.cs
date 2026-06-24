@@ -70,6 +70,23 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
+        // ── Where: not_equal ─────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Where_GroupIdNotEqual_SendsNotEqualCriteria()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "groupId")
+                .WithFormData("criteria[0][operator]", "not_equal")
+                .WithFormData("criteria[0][value]",    "100604")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.GroupId != 100604).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
         // ── Where: contain ───────────────────────────────────────────────────
 
         [Fact]

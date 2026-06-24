@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 namespace Mobizon.Contracts.Models.ContactCards
 {
@@ -35,32 +36,32 @@ namespace Mobizon.Contracts.Models.ContactCards
         /// <summary>Gets or sets the last name.</summary>
         public string? Surname { get; set; }
 
-        /// <summary>Gets or sets the mobile phone number in international format.</summary>
-        public string? Mobile { get; set; }
+        /// <summary>Gets or sets the mobile phone details (number, type, operator info).</summary>
+        public MobileFieldInfo? Mobile { get; set; }
 
-        /// <summary>Gets or sets the mobile phone type (e.g. HOME, JOB, MAIN).</summary>
-        public string? MobileType { get; set; }
+        /// <summary>Gets or sets the email address details (value and type).</summary>
+        public ContactFieldInfo? Email { get; set; }
 
-        /// <summary>Gets or sets the email address.</summary>
-        public string? Email { get; set; }
+        /// <summary>Gets or sets the Viber number details (value and type).</summary>
+        public ContactFieldInfo? Viber { get; set; }
 
-        /// <summary>Gets or sets the Viber number.</summary>
-        public string? Viber { get; set; }
+        /// <summary>Gets or sets the WhatsApp number details (value and type).</summary>
+        public ContactFieldInfo? WhatsApp { get; set; }
 
-        /// <summary>Gets or sets the WhatsApp number.</summary>
-        public string? Whatsapp { get; set; }
+        /// <summary>Gets or sets the landline phone number details (value and type).</summary>
+        public ContactFieldInfo? Landline { get; set; }
 
-        /// <summary>Gets or sets the landline phone number.</summary>
-        public string? Landline { get; set; }
+        /// <summary>Gets or sets the Skype handle details (value and type).</summary>
+        public ContactFieldInfo? Skype { get; set; }
 
-        /// <summary>Gets or sets the Skype handle.</summary>
-        public string? Skype { get; set; }
+        /// <summary>Gets or sets the Telegram handle details (value and type).</summary>
+        public ContactFieldInfo? Telegram { get; set; }
 
-        /// <summary>Gets or sets the Telegram handle.</summary>
-        public string? Telegram { get; set; }
+        /// <summary>Gets or sets the address.</summary>
+        public AddressFieldInfo? Address { get; set; }
 
-        /// <summary>Gets or sets the date of birth. Format: <c>YYYY-MM-DD</c>.</summary>
-        public string? BirthDate { get; set; }
+        /// <summary>Gets or sets the date of birth.</summary>
+        public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
         public string? Gender { get; set; }

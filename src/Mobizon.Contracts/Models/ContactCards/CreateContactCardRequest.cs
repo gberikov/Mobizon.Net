@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Mobizon.Contracts.Models.ContactCards
 {
@@ -20,7 +21,7 @@ namespace Mobizon.Contracts.Models.ContactCards
         public string? MobileValue { get; set; }
 
         /// <summary>Gets or sets the mobile phone type (e.g. HOME, JOB, MAIN).</summary>
-        public string? MobileType { get; set; }
+        public ContactType? MobileType { get; set; }
 
         /// <summary>Gets or sets the email address.</summary>
         public string? Email { get; set; }
@@ -29,7 +30,7 @@ namespace Mobizon.Contracts.Models.ContactCards
         public string? Viber { get; set; }
 
         /// <summary>Gets or sets the WhatsApp number.</summary>
-        public string? Whatsapp { get; set; }
+        public string? WhatsApp { get; set; }
 
         /// <summary>Gets or sets the landline phone number.</summary>
         public string? Landline { get; set; }
@@ -40,8 +41,11 @@ namespace Mobizon.Contracts.Models.ContactCards
         /// <summary>Gets or sets the Telegram handle.</summary>
         public string? Telegram { get; set; }
 
-        /// <summary>Gets or sets the date of birth. Format: <c>YYYY-MM-DD</c>.</summary>
-        public string? BirthDate { get; set; }
+        /// <summary>Gets or sets the postal address. When <see langword="null"/>, no address is sent.</summary>
+        public AddressFieldInfo? Address { get; set; }
+
+        /// <summary>Gets or sets the date of birth.</summary>
+        public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
         public string? Gender { get; set; }

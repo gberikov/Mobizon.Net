@@ -20,25 +20,25 @@ namespace Mobizon.Contracts.Models.ContactCards
         public MobileFieldInfo? Mobile { get; set; }
 
         /// <summary>Gets or sets the email address.</summary>
-        public string? Email { get; set; }
+        public ContactFieldInfo? Email { get; set; }
 
         /// <summary>Gets or sets the Viber number.</summary>
-        public string? Viber { get; set; }
+        public ContactFieldInfo? Viber { get; set; }
 
         /// <summary>Gets or sets the WhatsApp number.</summary>
-        public string? Whatsapp { get; set; }
+        public ContactFieldInfo? WhatsApp { get; set; }
 
         /// <summary>Gets or sets the landline phone number.</summary>
-        public string? Landline { get; set; }
+        public ContactFieldInfo? Landline { get; set; }
 
         /// <summary>Gets or sets the Skype handle.</summary>
-        public string? Skype { get; set; }
+        public ContactFieldInfo? Skype { get; set; }
 
         /// <summary>Gets or sets the Telegram handle.</summary>
-        public string? Telegram { get; set; }
+        public ContactFieldInfo? Telegram { get; set; }
 
         /// <summary>Gets or sets the address.</summary>
-        public string? Address { get; set; }
+        public AddressFieldInfo? Address { get; set; }
 
         /// <summary>Gets or sets the date of birth. Format: <c>YYYY-MM-DD</c>.</summary>
         [JsonPropertyName("birth_date")]

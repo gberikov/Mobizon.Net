@@ -11,7 +11,7 @@
         public string Field { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the filter operator: <c>"equal"</c> or <c>"empty"</c>.
+        /// Gets or sets the filter operator: <c>"equal"</c>, <c>"not_equal"</c>, <c>"contain"</c>, <c>"empty"</c>, <c>"from"</c>, <c>"to"</c>.
         /// </summary>
         public string Operator { get; set; } = "equal";
 

@@ -72,7 +72,7 @@ namespace Mobizon.Net.Services
             var fields = BuildCardFields(request.Title, request.Name, request.Surname,
                 request.MobileValue, request.MobileType, request.Email,
                 request.Viber, request.WhatsApp, request.Landline,
-                request.Skype, request.Telegram, request.BirthDate,
+                request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
             return _apiClient.SendMultipartAsync<string>(
@@ -88,7 +88,7 @@ namespace Mobizon.Net.Services
             var fields = BuildCardFields(request.Title, request.Name, request.Surname,
                 request.MobileValue, request.MobileType, request.Email,
                 request.Viber, request.WhatsApp, request.Landline,
-                request.Skype, request.Telegram, request.BirthDate,
+                request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
             fields["id"] = request.Id;
@@ -142,11 +142,11 @@ namespace Mobizon.Net.Services
             string? title, string? name, string? surname,
             string? mobileValue, ContactType? mobileType,
             string? email, string? viber, string? whatsapp, string? landline,
-            string? skype, string? telegram,
+            string? skype, string? telegram, AddressFieldInfo? address,
             DateTime? birthDate, string? gender, string? companyName, string? companyUrl,
             string? info)
         {
-            return new Dictionary<string, string>
+            var fields = new Dictionary<string, string>
             {
                 ["data[title]"]           = title       ?? string.Empty,
                 ["data[name]"]            = name        ?? string.Empty,
@@ -165,6 +165,24 @@ namespace Mobizon.Net.Services
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,
                 ["data[info]"]            = info        ?? string.Empty,
             };
+
+            // Address is only sent when provided, so callers that don't touch it
+            // (e.g. update) don't accidentally clear an existing address.
+            if (address != null)
+            {
+                fields["data[address][countryA2]"]  = address.CountryA2  ?? string.Empty;
+                fields["data[address][country]"]    = address.Country    ?? string.Empty;
+                fields["data[address][regionId]"]   = address.RegionId   ?? string.Empty;
+                fields["data[address][region]"]     = address.Region     ?? string.Empty;
+                fields["data[address][cityId]"]     = address.CityId     ?? string.Empty;
+                fields["data[address][city]"]       = address.City       ?? string.Empty;
+                fields["data[address][postalcode]"] = address.PostalCode ?? string.Empty;
+                fields["data[address][street]"]     = address.Street     ?? string.Empty;
+                fields["data[address][building]"]   = address.Building   ?? string.Empty;
+                fields["data[address][other]"]      = address.Other      ?? string.Empty;
+            }
+
+            return fields;
         }
     }
 }
