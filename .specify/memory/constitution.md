@@ -1,14 +1,20 @@
 <!--
 ## Sync Impact Report
-- **Version change**: 1.1.0 → 1.1.1
-- **Bump rationale**: PATCH — clarified parallelism strategy to
-  exempt reference implementation (Message service) from parallel
-  requirement. No principle changes.
-- **Modified principles**: None (all 7 principles unchanged)
+- **Version change**: 1.1.1 → 1.2.0
+- **Bump rationale**: MINOR — new principle (VIII. Inbound Webhook
+  Handling) added and webhook handling removed from Explicit
+  Non-Goals to enable feature 002-webhooks. New opt-in packages
+  registered. No backward-incompatible changes to existing principles.
+- **Modified principles**: None of I–VII changed; added VIII.
 - **Modified sections**:
-  - AI Agent Workflow → Parallelism Strategy: clarified that Message
-    service is implemented first as sequential reference, remaining 4
-    services parallelized.
+  - Core Principles → added "VIII. Inbound Webhook Handling".
+  - Architecture Constraints → Package Structure: added
+    `Mobizon.Net.Webhooks` and `Mobizon.Net.Webhooks.AspNetCore`.
+  - Architecture Constraints → Solution Layout: added the two
+    webhook projects and a webhook test project.
+  - Architecture Constraints → Explicit Non-Goals: removed
+    "Webhook/callback handling"; clarified XML and outbound webhook
+    management remain out of scope.
 - **Removed sections**: None
 - **Templates requiring updates**:
   - `.specify/templates/plan-template.md` — ✅ no update needed
@@ -108,6 +114,34 @@ for retry, circuit breaker, and timeout policies.
 `IHttpClientFactory` for proper `HttpClient` lifetime
 management, DNS rotation, and policy injection.
 
+### VIII. Inbound Webhook Handling
+
+The SDK MUST support receiving, authenticating, and parsing inbound
+Mobizon webhooks (SMS delivery reports and form events). This
+capability MUST be delivered as separate opt-in packages so the core
+SDK stays dependency-free:
+
+1. A framework-agnostic core (`Mobizon.Net.Webhooks`) depending only
+   on `System.Text.Json` and BCL cryptography (`System.Security.
+   Cryptography`). It exposes primitives that verify a signature and
+   parse a raw request body into a typed event.
+2. An ASP.NET Core integration package (`Mobizon.Net.Webhooks.
+   AspNetCore`) that binds the incoming request, verifies, and yields
+   the typed event to a handler.
+
+Signature verification MUST recompute the SHA1 signature over
+`eventId|attempt|eventCreateTs|secretKey`, compare it in constant
+time, and fail closed. Webhook event DTOs and enums MUST reside in
+`Mobizon.Contracts` (Principle II). Webhook events are their own typed
+models and are NOT wrapped in `MobizonResponse<T>` (Principle IV
+applies to outbound API calls only). Only JSON inbound parsing is in
+scope; XML and outbound webhook subscription management (configured in
+the Mobizon control panel) are OUT OF SCOPE.
+
+**Rationale**: Real-time delivery statuses eliminate `GetSMSStatus`
+polling. Isolating webhook code in opt-in packages preserves the
+dependency-free core mandated by Principle I.
+
 ## Architecture Constraints
 
 ### Target Framework
@@ -122,7 +156,15 @@ Mobizon.Contracts                             — DTOs, Enums, Interfaces
 Mobizon.Net                                   — Core SDK implementation
 Mobizon.Net.Extensions.DependencyInjection    — IServiceCollection DI
 Mobizon.Net.Extensions.Polly                  — Resilience policies
+Mobizon.Net.Webhooks                          — Webhook verify/parse (core)
+Mobizon.Net.Webhooks.AspNetCore               — ASP.NET Core webhook integration
 ```
+
+The `Mobizon.Net.Webhooks` core targets `netstandard2.0` and depends
+only on `System.Text.Json` + BCL cryptography. The
+`Mobizon.Net.Webhooks.AspNetCore` package targets the current
+ASP.NET Core LTS framework reference and depends on
+`Mobizon.Net.Webhooks`.
 
 ### Solution Layout
 
@@ -132,9 +174,12 @@ Mobizon.Net.sln
 │   ├── Mobizon.Contracts/
 │   ├── Mobizon.Net/
 │   ├── Mobizon.Net.Extensions.DependencyInjection/
-│   └── Mobizon.Net.Extensions.Polly/
+│   ├── Mobizon.Net.Extensions.Polly/
+│   ├── Mobizon.Net.Webhooks/
+│   └── Mobizon.Net.Webhooks.AspNetCore/
 ├── tests/
 │   ├── Mobizon.Net.Tests/
+│   ├── Mobizon.Net.Webhooks.Tests/
 │   └── Mobizon.Net.IntegrationTests/
 ├── samples/
 │   └── Mobizon.Net.ConsoleSample/
@@ -143,10 +188,12 @@ Mobizon.Net.sln
 ### Explicit Non-Goals
 
 The following are OUT OF SCOPE and MUST NOT be implemented:
-- XML response format support (JSON only)
+- XML format support, for both API responses and webhook payloads (JSON only)
 - Synchronous method wrappers
 - Response caching
-- Webhook/callback handling
+- Outbound webhook subscription management (webhooks are created and
+  configured in the Mobizon control panel, not via API). Inbound
+  webhook receiving/verifying/parsing IS in scope — see Principle VIII.
 - OpenAPI code generation (no schema exists)
 
 ## Quality & CI Standards
@@ -250,4 +297,4 @@ Violations MUST be justified in the PR description
 and tracked in the Complexity Tracking section of
 the implementation plan.
 
-**Version**: 1.1.1 | **Ratified**: 2026-02-24 | **Last Amended**: 2026-02-24
+**Version**: 1.2.0 | **Ratified**: 2026-02-24 | **Last Amended**: 2026-06-24

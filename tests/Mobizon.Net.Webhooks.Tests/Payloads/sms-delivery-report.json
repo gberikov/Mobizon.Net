@@ -1,0 +1,16 @@
+{
+  "eventId": 26,
+  "eventType": "sms-delivery-report",
+  "eventCreateTs": "2026-01-15 11:42:28",
+  "webhookId": 1,
+  "attempt": 1,
+  "data": {
+    "campaignId": 245455096,
+    "messageId": 169275418,
+    "segNum": 3,
+    "statusUpdateTs": "2026-01-15 11:42:08",
+    "status": "DELIVRD",
+    "to": "380737893456"
+  },
+  "sign": "5cdebbb611d765bad163d765e8637830b6fd4060"
+}

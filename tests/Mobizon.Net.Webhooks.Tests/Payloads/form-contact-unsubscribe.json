@@ -1,0 +1,23 @@
+{
+  "eventId": 45,
+  "eventType": "form-contact-unsubscribe",
+  "eventCreateTs": "2026-01-15 17:33:47",
+  "webhookId": 1,
+  "attempt": 1,
+  "data": {
+    "formId": 846,
+    "unsubscribeTs": "2026-01-15 17:33:46",
+    "items": [
+      {
+        "submissionId": 3675,
+        "submissionDataId": 12289,
+        "fieldId": 3745,
+        "fieldType": "EMAIL",
+        "fieldName": "E-mail",
+        "value": "test@mobizon.com",
+        "confirmationTs": ""
+      }
+    ]
+  },
+  "sign": "ab4f77e19e9bdebd2499c9347a4e8aac654dd39f"
+}
