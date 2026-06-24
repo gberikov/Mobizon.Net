@@ -1,6 +1,7 @@
 ﻿using Mobizon.Contracts.Models.Common;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Mobizon.Contracts.Models.Campaigns
 {
@@ -93,6 +94,12 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// (populated when a contact reference was used).
         /// </summary>
         public int? Contact { get; set; }
+
+        /// <summary>
+        /// Gets or sets the recipient type returned by the API (e.g. <c>"number"</c>, <c>"contact"</c>).
+        /// </summary>
+        [JsonPropertyName("type")]
+        public string? Type { get; set; }
     }
 }
 

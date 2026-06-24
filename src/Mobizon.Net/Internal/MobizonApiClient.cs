@@ -35,7 +35,8 @@ namespace Mobizon.Net.Internal
                 new StringToNumericEnumConverter<CampaignType>(),
                 new StringToNumericEnumConverter<StopListLevel>(),
                 new MobizonDateTimeConverter(),
-                new ContactTypeConverter()
+                new ContactTypeConverter(),
+                new AddRecipientsResultConverter()
             }
         };
 
