@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\src\Mobizon.Net\Mobizon.Net.csproj" />
     <ProjectReference Include="..\..\src\Mobizon.Net.Extensions.DependencyInjection\Mobizon.Net.Extensions.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\Mobizon.Net.Extensions.Polly\Mobizon.Net.Extensions.Polly.csproj" />
+    <ProjectReference Include="..\..\tools\Mobizon.Net.ApiCapture\Mobizon.Net.ApiCapture.csproj" />
   </ItemGroup>
 
   <ItemGroup>
