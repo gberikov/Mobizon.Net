@@ -63,5 +63,23 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(2, result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task GetInfoAsync_Parses_Counters_And_Currency()
+        {
+            const string json = @"{""code"":0,""data"":{""id"":""123"",""counters"":{""campaignId"":""123"",""totalSegNum"":""1"",""totalCost"":""16.2000"",""userCurrency"":""KZT""}},""message"":""""}";
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/GetInfo")
+                .Respond("application/json", json);
+
+            var result = await CreateService(mockHttp).GetInfoAsync(123);
+
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            Assert.NotNull(result.Data.Counters);
+            Assert.Equal(1, result.Data.Counters!.TotalSegNum);
+            Assert.Equal(16.2000m, result.Data.Counters.TotalCost);
+            Assert.Equal("KZT", result.Data.Counters.UserCurrency);
+            Assert.Equal(123, result.Data.Counters.CampaignId);
+        }
     }
 }

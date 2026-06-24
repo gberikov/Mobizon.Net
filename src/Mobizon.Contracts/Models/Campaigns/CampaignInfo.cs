@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Mobizon.Contracts.Models.Campaigns
 {
@@ -110,5 +111,15 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets the number of rejected recipients (not included in the campaign).
         /// </summary>
         public int RecipientsRejected { get; set; }
+
+        // ── Campaign reference ──────────────────────────────────────────────
+
+        /// <summary>Gets or sets the ID of the campaign these counters belong to.</summary>
+        [JsonPropertyName("campaignId")]
+        public int CampaignId { get; set; }
+
+        /// <summary>Gets or sets the ISO-4217 currency code used for billing (e.g. <c>KZT</c>).</summary>
+        [JsonPropertyName("userCurrency")]
+        public string? UserCurrency { get; set; }
     }
 }
