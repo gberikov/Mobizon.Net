@@ -56,6 +56,7 @@ infra/DX, and adds a test foundation that prevents contract regressions.
 | C6 | `BracketNotationSerializer` | **Adopt** it across services (remove hand-rolled bracket building) |
 | C7 | Capture harness location | **`tools/Mobizon.Net.ApiCapture`** (gitignored output) |
 | C8 | `alphaname` module | **In scope** (user has a registered Sender ID) |
+| C9 | Capture sends | **Real SMS/campaign sends allowed** against a small configured test group — opt-in flag, recipient-capped (≤5), balance logged |
 
 ## 5. Verified findings → fix matrix
 
@@ -121,17 +122,25 @@ exact numeric type confirmed from the Phase 0 capture).
 `GetByIdAsync(int)`, `GetByCodeAsync(string)`, `GetByShortLinkAsync(string)`.
 `Link/Update` keyed by `Id`.
 
-**Capture harness (C7).** `tools/Mobizon.Net.ApiCapture` console (`IsPackable=false`,
-not in the solution's package output). Reads the local `appsettings.Development.json`,
-calls **read-safe/cheap** endpoints, writes raw JSON to `artifacts/api-captures/` (gitignored).
-Safety tiers:
+**Capture harness (C7, C9).** `tools/Mobizon.Net.ApiCapture` console (`IsPackable=false`,
+excluded from the solution's package output). Reads the local `appsettings.Development.json`,
+writes raw JSON to `artifacts/api-captures/` (gitignored). Tiers, each separately gated:
 - Tier 1 (always): read-only — `user/getOwnBalance`, every `*/list`, `link/get`,
   `campaign/get`+`getInfo`, `taskqueue/getStatus`, `alphaname/list`, `message/getSMSStatus`.
 - Tier 2 (default on, free): `link` create→get→getStats→update→delete cycle.
-- Tier 3 (**off by default**, flag-gated): `campaign/create`+`delete` (never `send`).
-- **Never** sends SMS or a campaign.
-Captured JSON is sanitized (phones, names, balance) before becoming committed fixtures in
-`tests/.../Payloads/`.
+- Tier 3 (**opt-in flag `--send`, real cost**): real sends to a small configured test group —
+  `message/sendSmsMessage` then poll `message/getSMSStatus` for the live delivery report; and the
+  full campaign lifecycle `campaign/create` → `addRecipients` → `send` → poll
+  `taskqueue/getStatus` → `campaign/getInfo` / `getStatusByList` → `campaign/delete`. This captures
+  the real `SendSmsResult`, `AddRecipientsResult` (incl. partial/none codes 98/99),
+  `CampaignSendResult`, background-task, and DLR shapes — exactly the endpoints with contract bugs.
+- Tier 4 (optional, manual): if a webhook is configured in the panel, the Tier 3 sends produce
+  real `sms-delivery-report` webhook calls; capture those bodies (via an existing endpoint or a
+  tunnel) to validate webhook models + signature against production.
+Real sends require the explicit `--send` flag plus `Mobizon:TestRecipient` / `Mobizon:TestGroupId`
+in `appsettings.Development.json`, and a hard recipient cap (≤5) to bound cost; the harness logs
+`getOwnBalance` before and after. Captured JSON is sanitized (phones, names, balance) before
+fixtures are committed to `tests/.../Payloads/`.
 
 **DI lifetime.** Move to typed-client registration so `IHttpClientFactory` owns handler
 lifetime/rotation; the SDK stops mutating a caller-owned `HttpClient.Timeout`.
@@ -144,8 +153,10 @@ string building. Its existing tests stay; new round-trip tests are added.
 
 **Phase 0 — Capture & baseline (no SDK changes).**
 Build `tools/Mobizon.Net.ApiCapture`; user runs it with their key; record real JSON for all
-endpoints; resolve open shapes (`CampaignData` vs `CampaignInfo` for List, `link/getStats`
-`type` values + item shape, `alphaname` fields); sanitize → commit fixtures. Prerequisite:
+endpoints. With `--send`, Tier 3 sends to the small test group capture the live
+send / delivery-report / campaign-lifecycle shapes. Resolve open shapes (`CampaignData` vs
+`CampaignInfo` for List, `link/getStats` `type` values + item shape, `alphaname` fields);
+sanitize → commit fixtures. Prerequisite:
 resolve the local `dotnet build` MSB3491 (`obj/...AssemblyInfoInputs.cache` access-denied)
 file-lock issue.
 
@@ -176,7 +187,9 @@ guard; `ContactCardQuery.Where`/`Skip` semantics.
 
 - **Real shapes differ from docs** → Phase 0 capture is authoritative (C3).
 - **PII in captures** → sanitize before committing fixtures; raw captures gitignored.
-- **Cost** → capture is read-only + free link CRUD; SMS/campaign-send never invoked.
+- **Cost** → Tiers 1–2 are read-only/free; Tier 3 sends real SMS, gated behind `--send`,
+  capped at ≤5 recipients on a small test group, with balance logged before/after, so cost is
+  small, deliberate, and visible.
 - **Local build lock (MSB3491)** → resolved as Phase 0 prerequisite.
 - **Breaking changes** → acceptable pre-1.0 (C1); summarized in CHANGELOG.
 
@@ -185,3 +198,5 @@ guard; `ContactCardQuery.Where`/`Skip` semantics.
 - `Campaign/List` item model: `CampaignData` vs `CampaignInfo`.
 - `Link/GetStats`: exact `type` parameter values and per-item field shape.
 - `alphaname/list`: item fields (e.g. `alphanameId`, `name`, `globalStatus`, `partnerStatus`, `description`).
+- Real `sendSmsMessage` / `addRecipients` (codes 98/99) / `campaign send` + background-task / DLR
+  shapes — captured live via Tier 3 (`--send`) against the test group.
