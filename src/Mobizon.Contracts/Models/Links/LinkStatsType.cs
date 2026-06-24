@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts.Models.Links
 {
     /// <summary>
     /// Specifies the aggregation period for short-link click statistics.
@@ -9,6 +9,12 @@
         Daily,
 
         /// <summary>Aggregate click statistics by month.</summary>
-        Monthly
+        Monthly,
+
+        /// <summary>Aggregate click statistics by hour.</summary>
+        Hourly,
+
+        /// <summary>Aggregate click statistics by minute.</summary>
+        Minute
     }
 }

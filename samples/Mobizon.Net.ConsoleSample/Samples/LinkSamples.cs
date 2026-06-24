@@ -59,7 +59,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Ids  = new[] { 1 },
                 Type = LinkStatsType.Daily
             });
-            foreach (var s in result.Data)
+            Console.WriteLine($"  Totals={result.Data.Totals}");
+            foreach (var s in result.Data.Items)
                 Console.WriteLine($"  LinkId={s.LinkId}  Date={s.Date}  Clicks={s.Clicks}");
         }
     }

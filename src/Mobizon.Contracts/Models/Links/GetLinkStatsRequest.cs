@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts.Models.Links
 {
     /// <summary>
     /// Represents the parameters required to retrieve click statistics for one or more short links.
@@ -7,11 +7,12 @@
     {
         /// <summary>
         /// Gets or sets the IDs of the links for which to retrieve statistics.
+        /// The API accepts a maximum of 5 IDs per request.
         /// </summary>
         public int[] Ids { get; set; } = System.Array.Empty<int>();
 
         /// <summary>
-        /// Gets or sets the aggregation period for the statistics (daily or monthly).
+        /// Gets or sets the aggregation period for the statistics (daily, monthly, hourly, or minute).
         /// </summary>
         public LinkStatsType Type { get; set; }
 

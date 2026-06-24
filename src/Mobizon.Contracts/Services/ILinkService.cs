@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -99,12 +99,13 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The request specifying link IDs, aggregation type, and optional date range.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="LinkStatsResult"/> entries.
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="LinkStatsResult"/> with per-period
+        /// <see cref="LinkStatsResult.Items"/> and an aggregate <see cref="LinkStatsResult.Totals"/> click count.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<LinkStatsResult>>> GetStatsAsync(
+        Task<MobizonResponse<LinkStatsResult>> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>

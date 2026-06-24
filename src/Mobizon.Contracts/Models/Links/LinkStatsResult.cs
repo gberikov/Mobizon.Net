@@ -1,23 +1,12 @@
-﻿namespace Mobizon.Contracts.Models.Links
+using System;
+using System.Collections.Generic;
+
+namespace Mobizon.Contracts.Models.Links
 {
-    /// <summary>
-    /// Represents click statistics for a single short link over a specific time period.
-    /// </summary>
+    /// <summary>Click statistics for short links: per-period points plus total clicks.</summary>
     public class LinkStatsResult
     {
-        /// <summary>
-        /// Gets or sets the ID of the link these statistics belong to.
-        /// </summary>
-        public int LinkId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the date or month of the statistics entry as a string in the format returned by the API.
-        /// </summary>
-        public string Date { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the number of clicks recorded for the link in this time period.
-        /// </summary>
-        public int Clicks { get; set; }
+        public IReadOnlyList<LinkStatPoint> Items { get; set; } = Array.Empty<LinkStatPoint>();
+        public int Totals { get; set; }
     }
 }

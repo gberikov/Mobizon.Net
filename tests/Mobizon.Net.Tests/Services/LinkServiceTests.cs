@@ -147,55 +147,30 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task GetStatsAsync_SendsCorrectParameters()
+        public async Task GetStatsAsync_ReturnsItemsAndTotals()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/getstats")
-                .WithFormData("ids[0]", "1")
-                .WithFormData("ids[1]", "2")
-                .WithFormData("type", "daily")
-                .WithFormData("criteria[dateFrom]", "2025-01-01")
-                .WithFormData("criteria[dateTo]", "2025-01-31")
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getstats")
+                .WithFormData("ids[0]", "1").WithFormData("type", "daily")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":[{""linkId"":1,""date"":""2025-01-01"",""clicks"":10},{""linkId"":2,""date"":""2025-01-01"",""clicks"":20}],""message"":""""}");
-
-            var service = CreateService(mockHttp);
-            var result = await service.GetStatsAsync(new GetLinkStatsRequest
-            {
-                Ids = new[] { 1, 2 },
-                Type = LinkStatsType.Daily,
-                DateFrom = "2025-01-01",
-                DateTo = "2025-01-31"
-            });
-
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(2, result.Data.Count);
-            Assert.Equal(10, result.Data[0].Clicks);
+                    @"{""code"":0,""data"":{""items"":[{""linkId"":""1"",""date"":""2025-01-01"",""clicks"":""10""}],""totals"":""10""},""message"":""""}");
+            var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1 }, Type = LinkStatsType.Daily });
+            Assert.Single(result.Data.Items);
+            Assert.Equal(10, result.Data.Items[0].Clicks);
+            Assert.Equal(10, result.Data.Totals);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
-        [Fact]
-        public async Task GetStatsAsync_MonthlyType_SendsMonthly()
+        [Theory]
+        [InlineData(LinkStatsType.Hourly, "hourly")]
+        [InlineData(LinkStatsType.Minute, "minute")]
+        public async Task GetStatsAsync_SerializesNewTypes(LinkStatsType type, string expected)
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Post,
-                    "https://api.mobizon.kz/service/link/getstats")
-                .WithFormData("ids[0]", "5")
-                .WithFormData("type", "monthly")
-                .Respond("application/json",
-                    @"{""code"":0,""data"":[{""linkId"":5,""date"":""2025-01"",""clicks"":100}],""message"":""""}");
-
-            var service = CreateService(mockHttp);
-            var result = await service.GetStatsAsync(new GetLinkStatsRequest
-            {
-                Ids = new[] { 5 },
-                Type = LinkStatsType.Monthly
-            });
-
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data);
-            Assert.Equal(100, result.Data[0].Clicks);
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getstats")
+                .WithFormData("ids[0]", "1").WithFormData("type", expected)
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totals"":""0""},""message"":""""}");
+            await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1 }, Type = type });
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

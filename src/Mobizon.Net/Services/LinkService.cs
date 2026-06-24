@@ -77,7 +77,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<LinkStatsResult>>> GetStatsAsync(
+        public Task<MobizonResponse<LinkStatsResult>> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
@@ -95,7 +95,7 @@ namespace Mobizon.Net.Services
             if (request.DateTo != null)
                 parameters["criteria[dateTo]"] = request.DateTo;
 
-            return _apiClient.SendAsync<IReadOnlyList<LinkStatsResult>>(
+            return _apiClient.SendAsync<LinkStatsResult>(
                 HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken);
         }
 
