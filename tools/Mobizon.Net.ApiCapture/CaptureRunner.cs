@@ -54,7 +54,7 @@ namespace Mobizon.Net.ApiCapture
                 await Capture("link", "getStats", new Dictionary<string, string>
                 {
                     ["ids[0]"] = firstLinkId,
-                    ["type"] = "day"
+                    ["type"] = "daily"
                 });
             }
             else
@@ -93,7 +93,7 @@ namespace Mobizon.Net.ApiCapture
                 var statsJson = await _api.CallAsync("link", "getStats", new Dictionary<string, string>
                 {
                     ["ids[0]"] = newLinkId,
-                    ["type"] = "day"
+                    ["type"] = "daily"
                 });
                 WriteCapture("link.getStats.new.json", statsJson);
 
@@ -262,6 +262,16 @@ namespace Mobizon.Net.ApiCapture
                 {
                     if (data.TryGetProperty(field, out var val))
                         return val.ToString();
+
+                    // List endpoints wrap rows in data.items[]
+                    if (data.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var item in items.EnumerateArray())
+                        {
+                            if (item.TryGetProperty(field, out var itemVal))
+                                return itemVal.ToString();
+                        }
+                    }
                 }
 
                 return null;

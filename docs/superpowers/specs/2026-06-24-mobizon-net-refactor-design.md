@@ -106,6 +106,25 @@ Structure / naming:
 | `MobizonResponse.Data` | `default!` hides null (`MobizonResponse.cs:28`) | document invariant + guard in `MobizonApiClient` |
 | `ContactCardQuery.Where` | second `Where` overwrites (`ContactCardQuery.cs:35`) | combine predicates or document single-Where; document `Skip` page semantics |
 
+## 5b. Additional findings from Phase 0 capture (2026-06-24)
+
+Confirmed against sanitized fixtures (`tests/Mobizon.Net.Tests/Payloads/`) — see
+`docs/superpowers/notes/2026-06-24-api-shapes.md`. These are **new correctness bugs** the
+doc/code review did not catch; they are added to Phase 1.
+
+| Area | Real `data` | Current SDK | Fix |
+|------|-------------|-------------|-----|
+| `campaign/create` | bare string id `"123456"` | `CreateCampaignResult` object → cannot bind | return `MobizonResponse<int>` (string→int converter) |
+| `campaign/send` | bare int `2` (sync) / task id (`code==100`) | `CampaignSendResult` object → cannot bind | return `MobizonResponse<int>`; caller branches on `Code==BackgroundTask` |
+| `campaign/addRecipients` | sync: bare array `[{recipient,code,messageId,type,number}]`; async: scalar task id | `AddRecipientsResult` `{TaskId,Entries}` → binds neither | custom `JsonConverter` (array→`Entries`, scalar→`TaskId`); add `Type` to `AddRecipientEntry` |
+| `link/delete` | `{processed:[],notProcessed:[]}` | untyped `object` | optional `LinkDeleteResult` |
+| `Link/GetStats` `type` | valid: `monthly\|daily\|hourly\|minute`; `ids` max 5 | `LinkStatsType` has only Daily/Monthly | add `Hourly`,`Minute`; document `ids`≤5 |
+| list envelopes | `totalItemCount` is a **string** | `int` | rely on `StringToIntConverter` for `MobizonListResult.TotalItemCount` |
+
+Confirmed **already correct** (do not "fix"): `SendSmsResult`, `SmsStatusResult`,
+`CampaignInfo`/`CampaignCounters` (audit only: add `Counters.UserCurrency`/`CampaignId`,
+verify `extra{}`), `BalanceResult`.
+
 ## 6. Architecture decisions
 
 **Generic list envelope (C4).**
@@ -193,10 +212,13 @@ guard; `ContactCardQuery.Where`/`Skip` semantics.
 - **Local build lock (MSB3491)** → resolved as Phase 0 prerequisite.
 - **Breaking changes** → acceptable pre-1.0 (C1); summarized in CHANGELOG.
 
-## 10. Open items (resolved during Phase 0)
+## 10. Open items — status after Phase 0 capture
 
-- `Campaign/List` item model: `CampaignData` vs `CampaignInfo`.
-- `Link/GetStats`: exact `type` parameter values and per-item field shape.
-- `alphaname/list`: item fields (e.g. `alphanameId`, `name`, `globalStatus`, `partnerStatus`, `description`).
-- Real `sendSmsMessage` / `addRecipients` (codes 98/99) / `campaign send` + background-task / DLR
-  shapes — captured live via Tier 3 (`--send`) against the test group.
+Resolved (see `docs/superpowers/notes/2026-06-24-api-shapes.md`):
+- `Campaign/List` items → `CampaignData`; envelope `{items,totalItemCount}` confirmed.
+- `alphaname/list` fields resolved (`alphaname.name`, `alphanameId`, statuses, `details.description`).
+- `sendSmsMessage`/`getSMSStatus`/`addRecipients`/`campaign create`+`send` shapes captured (and yielded the §5b bugs).
+
+Still open (close during Phase 1):
+- `Link/GetStats` success per-item shape — capture failed (tool sent invalid `type=day`; now fixed to `daily`). Re-run read-only capture to grab it; envelope `{items,totals}` known from docs.
+- `taskqueue/getStatus` success shape — no background task arose from the 1-recipient sync send; rely on docs `{progress,status}` or re-capture with a larger `--send`.
