@@ -108,12 +108,12 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">Optional filter, pagination, and sort criteria. Pass <see langword="null"/> to use API defaults.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MessageListResponse"/> with items and total count.
+        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MobizonListResult{T}"/> of <see cref="MessageInfo"/> with items and total count.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<MessageListResponse>> ListAsync(
+        Task<MobizonResponse<MobizonListResult<MessageInfo>>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default);
     }

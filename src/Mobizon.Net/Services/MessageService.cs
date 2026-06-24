@@ -85,7 +85,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<MessageListResponse>> ListAsync(
+        public Task<MobizonResponse<MobizonListResult<MessageInfo>>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -162,7 +162,7 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<MessageListResponse>(
+            return _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
         }
 
