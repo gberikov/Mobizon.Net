@@ -10,6 +10,19 @@ namespace Mobizon.Net.ApiCapture
     {
         internal static async Task Main(string[] args)
         {
+            // Offline --sanitize mode: no API key required
+            foreach (var arg in args)
+            {
+                if (arg.Equals("--sanitize", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sanitizeInDir  = Path.Combine(Directory.GetCurrentDirectory(), "artifacts", "api-captures");
+                    var sanitizeOutDir = Path.Combine(Directory.GetCurrentDirectory(), "tests", "Mobizon.Net.Tests", "Payloads");
+                    var n = SanitizeRunner.Run(sanitizeInDir, sanitizeOutDir);
+                    Console.WriteLine($"[sanitize] wrote {n} file(s) to {sanitizeOutDir}");
+                    return;
+                }
+            }
+
             var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
                               ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
                               ?? "Development";
