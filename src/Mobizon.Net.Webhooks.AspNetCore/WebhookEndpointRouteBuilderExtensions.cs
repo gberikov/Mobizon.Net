@@ -47,6 +47,15 @@ namespace Mobizon.Net.Webhooks.AspNetCore
         /// <summary>
         /// Core request handling: read body, verify + parse, map to an <see cref="IResult"/>, and invoke
         /// the handler only on success. Extracted for unit testing without a full server.
+        /// <para>
+        /// Responses:
+        /// <list type="bullet">
+        ///   <item><description>200 OK — signature verified, event parsed, handler invoked (enqueue heavy work to stay within Mobizon's 5-second window).</description></item>
+        ///   <item><description>413 Payload Too Large (JSON <c>{"error":"payload_too_large"}</c>) — <c>Content-Length</c> exceeds <see cref="MobizonWebhookOptions.MaxRequestBodyBytes"/>.</description></item>
+        ///   <item><description>403 Forbidden (JSON <c>{"error":"signature_mismatch"}</c>) — HMAC verification failed.</description></item>
+        ///   <item><description>400 Bad Request (JSON <c>{"error":"parse_error"}</c>) — body could not be parsed.</description></item>
+        /// </list>
+        /// </para>
         /// </summary>
         internal static async Task<IResult> HandleRequestAsync(
             HttpContext context,
@@ -55,6 +64,9 @@ namespace Mobizon.Net.Webhooks.AspNetCore
             var processor = context.RequestServices.GetRequiredService<IWebhookProcessor>();
             var options = context.RequestServices.GetRequiredService<MobizonWebhookOptions>();
             var services = context.RequestServices;
+
+            if (context.Request.ContentLength is long len && len > options.MaxRequestBodyBytes)
+                return Results.Json(new { error = "payload_too_large" }, statusCode: StatusCodes.Status413PayloadTooLarge);
 
             string body;
             using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true))
@@ -70,9 +82,9 @@ namespace Mobizon.Net.Webhooks.AspNetCore
                     await handler(result.Event!, context.RequestAborted).ConfigureAwait(false);
                     return Results.Ok();
                 case WebhookProcessStatus.SignatureMismatch:
-                    return Results.StatusCode(StatusCodes.Status403Forbidden);
+                    return Results.Json(new { error = "signature_mismatch" }, statusCode: StatusCodes.Status403Forbidden);
                 default:
-                    return Results.BadRequest();
+                    return Results.Json(new { error = "parse_error" }, statusCode: StatusCodes.Status400BadRequest);
             }
         }
     }

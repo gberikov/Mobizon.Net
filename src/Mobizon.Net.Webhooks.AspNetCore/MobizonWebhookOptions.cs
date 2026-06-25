@@ -15,5 +15,11 @@ namespace Mobizon.Net.Webhooks.AspNetCore
         /// argument and return the configured value. Required.
         /// </summary>
         public Func<IServiceProvider, MobizonWebhookEvent, string>? SecretKeyResolver { get; set; }
+
+        /// <summary>
+        /// Maximum accepted request body size in bytes. Requests larger than this are rejected with 413.
+        /// Default 262144 (256 KiB).
+        /// </summary>
+        public int MaxRequestBodyBytes { get; set; } = 262144;
     }
 }

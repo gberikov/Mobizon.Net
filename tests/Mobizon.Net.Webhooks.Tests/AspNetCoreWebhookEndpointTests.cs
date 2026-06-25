@@ -86,5 +86,30 @@ namespace Mobizon.Net.Webhooks.Tests
             Assert.Equal(200, status);
             Assert.Equal(1, seenWebhookId);
         }
+
+        [Fact]
+        public async Task OversizedBody_Returns413()
+        {
+            var (context, _) = BuildContext(Payloads.Load(Payloads.SmsDeliveryReport), (_, __) => Payloads.Secret);
+            // Set ContentLength to 1 byte over the default cap (262144)
+            context.Request.ContentLength = 262145;
+
+            var status = await InvokeAsync(context, (evt, ct) => Task.CompletedTask);
+
+            Assert.Equal(413, status);
+        }
+
+        [Fact]
+        public async Task SignatureMismatch_Returns403_WithJsonBody()
+        {
+            var (context, responseBody) = BuildContext(Payloads.Load(Payloads.SmsDeliveryReport), (_, __) => "wrong-secret");
+
+            var status = await InvokeAsync(context, (evt, ct) => Task.CompletedTask);
+
+            Assert.Equal(403, status);
+            var json = Encoding.UTF8.GetString(responseBody.ToArray());
+            Assert.Contains("signature_mismatch", json);
+            Assert.Equal("application/json", context.Response.ContentType?.Split(';')[0]);
+        }
     }
 }
