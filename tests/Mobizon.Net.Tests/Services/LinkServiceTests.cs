@@ -84,7 +84,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync(new[] { 10, 20 });
+            var result = await service.DeleteAsync(new[] { 10L, 20L });
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
@@ -154,7 +154,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("ids[0]", "1").WithFormData("type", "daily")
                 .Respond("application/json",
                     @"{""code"":0,""data"":{""items"":[{""linkId"":""1"",""date"":""2025-01-01"",""clicks"":""10""}],""totals"":""10""},""message"":""""}");
-            var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1 }, Type = LinkStatsType.Daily });
+            var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1L }, Type = LinkStatsType.Daily });
             Assert.Single(result.Data.Items);
             Assert.Equal(10, result.Data.Items[0].Clicks);
             Assert.Equal(10, result.Data.Totals);
@@ -170,7 +170,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getstats")
                 .WithFormData("ids[0]", "1").WithFormData("type", expected)
                 .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totals"":""0""},""message"":""""}");
-            await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1 }, Type = type });
+            await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1L }, Type = type });
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -259,6 +259,17 @@ namespace Mobizon.Net.Tests.Services
             var result = await CreateService(mockHttp).UpdateAsync(new UpdateLinkRequest { Id = 42, Status = 0, Comment = "c" });
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_Parses_LargeId()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
+                .WithFormData("id", "70000000005")
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""70000000005"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
+            var result = await CreateService(mockHttp).GetByIdAsync(70000000005L);
+            Assert.Equal(70000000005L, result.Data.Id);
         }
     }
 }

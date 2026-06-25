@@ -9,7 +9,7 @@ namespace Mobizon.Contracts.Models.Links
         /// Gets or sets the IDs of the links for which to retrieve statistics.
         /// The API accepts a maximum of 5 IDs per request.
         /// </summary>
-        public int[] Ids { get; set; } = System.Array.Empty<int>();
+        public long[] Ids { get; set; } = System.Array.Empty<long>();
 
         /// <summary>
         /// Gets or sets the aggregation period for the statistics (daily, monthly, hourly, or minute).

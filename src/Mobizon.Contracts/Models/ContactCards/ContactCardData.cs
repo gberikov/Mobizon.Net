@@ -8,10 +8,10 @@ namespace Mobizon.Contracts.Models.ContactCards
     public class ContactCardData
     {
         /// <summary>Gets or sets the unique ID of the contact card.</summary>
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>Gets or sets the owner user ID.</summary>
-        public int? UserId { get; set; }
+        public long? UserId { get; set; }
 
         /// <summary>Gets or sets whether the card has been deleted.</summary>
         public bool IsDeleted { get; set; }

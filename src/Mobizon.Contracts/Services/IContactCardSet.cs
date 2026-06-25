@@ -43,7 +43,7 @@ namespace Mobizon.Contracts.Services
         /// Returns the full data of a single contact card by ID,
         /// or <see langword="null"/> if not found.
         /// </summary>
-        Task<ContactCard?> FindAsync(int id, CancellationToken cancellationToken = default);
+        Task<ContactCard?> FindAsync(long id, CancellationToken cancellationToken = default);
 
         // ── CRUD ──────────────────────────────────────────────────────────────
 
@@ -54,14 +54,14 @@ namespace Mobizon.Contracts.Services
         Task UpdateAsync(ContactCard entity, CancellationToken cancellationToken = default);
 
         /// <summary>Deletes the contact card with the specified ID.</summary>
-        Task RemoveAsync(int id, CancellationToken cancellationToken = default);
+        Task RemoveAsync(long id, CancellationToken cancellationToken = default);
 
         // ── Groups ────────────────────────────────────────────────────────────
 
         /// <summary>Replaces the group membership of a contact card.</summary>
-        Task SetGroupsAsync(int id, IReadOnlyList<string> groupIds, CancellationToken cancellationToken = default);
+        Task SetGroupsAsync(long id, IReadOnlyList<string> groupIds, CancellationToken cancellationToken = default);
 
         /// <summary>Returns the groups the specified contact card belongs to.</summary>
-        Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(int id, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(long id, CancellationToken cancellationToken = default);
     }
 }

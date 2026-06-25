@@ -11,10 +11,10 @@ namespace Mobizon.Contracts.Models.ContactCards
         // ── Fields set from API responses ────────────────────────────────────
 
         /// <summary>Gets or sets the unique ID. Populated by <c>AddAsync</c> after creation.</summary>
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>Gets or sets the owner user ID. Set by the API on read.</summary>
-        public int? UserId { get; set; }
+        public long? UserId { get; set; }
 
         /// <summary>Gets or sets whether the card has been deleted.</summary>
         public bool IsDeleted { get; set; }

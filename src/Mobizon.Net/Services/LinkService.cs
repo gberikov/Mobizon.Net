@@ -41,7 +41,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<object>> DeleteAsync(
-            int[] ids, CancellationToken cancellationToken = default)
+            long[] ids, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
@@ -53,7 +53,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<LinkData>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task<MobizonResponse<LinkData>> GetByIdAsync(long id, CancellationToken cancellationToken = default)
             => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
                 new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken);
 
@@ -66,7 +66,7 @@ namespace Mobizon.Net.Services
                 new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken);
 
         public Task<MobizonResponse<IReadOnlyList<LinkData>>> GetLinksAsync(
-            int campaignId, CancellationToken cancellationToken = default)
+            long campaignId, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {

@@ -56,7 +56,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             // Replace with a real link ID
             var result = await client.Links.GetStatsAsync(new GetLinkStatsRequest
             {
-                Ids  = new[] { 1 },
+                Ids  = new[] { 1L },
                 Type = LinkStatsType.Daily
             });
             Console.WriteLine($"  Totals={result.Data.Totals}");

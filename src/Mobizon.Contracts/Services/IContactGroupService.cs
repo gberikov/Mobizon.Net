@@ -20,7 +20,7 @@ namespace Mobizon.Contracts.Services
         /// <summary>
         /// Creates a new contact group and returns its ID.
         /// </summary>
-        Task<MobizonResponse<int>> CreateAsync(
+        Task<MobizonResponse<long>> CreateAsync(
             string name,
             CancellationToken cancellationToken = default);
 
@@ -28,7 +28,7 @@ namespace Mobizon.Contracts.Services
         /// Renames an existing contact group.
         /// </summary>
         Task<MobizonResponse<bool>> UpdateAsync(
-            int id,
+            long id,
             string name,
             CancellationToken cancellationToken = default);
 
@@ -36,15 +36,15 @@ namespace Mobizon.Contracts.Services
         /// Deletes a contact group. Returns the lists of processed and not-processed IDs.
         /// </summary>
         Task<MobizonResponse<DeleteContactGroupResult>> DeleteAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns the number of contact cards in the specified group.
         /// Pass <c>"-1"</c> to count contacts that have no group.
         /// </summary>
-        Task<MobizonResponse<int>> GetCardsCountAsync(
-            int? id = null,
+        Task<MobizonResponse<long>> GetCardsCountAsync(
+            long? id = null,
             CancellationToken cancellationToken = default);
     }
 }

@@ -10,13 +10,13 @@ namespace Mobizon.Contracts.Models.StopLists
     public class StopListEntry
     {
         /// <summary>Gets or sets the unique ID of this stop-list record.</summary>
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>Gets or sets the owner user ID.</summary>
-        public int? UserId { get; set; }
+        public long? UserId { get; set; }
 
         /// <summary>Gets or sets the partner ID.</summary>
-        public int? PartnerId { get; set; }
+        public long? PartnerId { get; set; }
 
         /// <summary>Gets or sets the blocked phone number in international format.</summary>
         public string? Number { get; set; }
@@ -31,7 +31,7 @@ namespace Mobizon.Contracts.Models.StopLists
         public StopListLevel? Level { get; set; }
 
         /// <summary>Gets or sets the ID of the user who created this record.</summary>
-        public int? CreatedByUserId { get; set; }
+        public long? CreatedByUserId { get; set; }
 
         /// <summary>Gets or sets the first name of the user who created this record.</summary>
         public string? CreatedByUserName { get; set; }

@@ -9,10 +9,10 @@ namespace Mobizon.Contracts.Models.ContactGroups
     public class ContactGroupData
     {
         /// <summary>Gets or sets the unique ID of the group.</summary>
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>Gets or sets the owner user ID.</summary>
-        public int? UserId { get; set; }
+        public long? UserId { get; set; }
 
         /// <summary>Gets or sets the display name of the group.</summary>
         public string? Name { get; set; }

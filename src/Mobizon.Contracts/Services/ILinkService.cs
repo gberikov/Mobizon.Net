@@ -35,7 +35,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<object>> DeleteAsync(
-            int[] ids, CancellationToken cancellationToken = default);
+            long[] ids, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves a short link by its numeric ID.
@@ -49,7 +49,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<LinkData>> GetByIdAsync(
-            int id, CancellationToken cancellationToken = default);
+            long id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves a short link by its unique short code.
@@ -91,7 +91,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<IReadOnlyList<LinkData>>> GetLinksAsync(
-            int campaignId, CancellationToken cancellationToken = default);
+            long campaignId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves click statistics for one or more short links over a date range.

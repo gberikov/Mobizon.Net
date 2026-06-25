@@ -8,9 +8,9 @@ namespace Mobizon.Contracts.Models.ContactGroups
     public class DeleteContactGroupResult
     {
         /// <summary>Gets or sets the IDs of groups that were successfully deleted.</summary>
-        public IReadOnlyList<int> Processed { get; set; } = new List<int>();
+        public IReadOnlyList<long> Processed { get; set; } = new List<long>();
 
         /// <summary>Gets or sets the IDs of groups that could not be deleted.</summary>
-        public IReadOnlyList<int> NotProcessed { get; set; } = new List<int>();
+        public IReadOnlyList<long> NotProcessed { get; set; } = new List<long>();
     }
 }

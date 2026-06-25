@@ -5,7 +5,7 @@ namespace Mobizon.Contracts.Models.Links
     /// <summary>Represents a Mobizon short link.</summary>
     public class LinkData
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Code { get; set; } = string.Empty;
         [JsonPropertyName("shortLink")] public string? ShortLink { get; set; }
         public string FullLink { get; set; } = string.Empty;

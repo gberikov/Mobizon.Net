@@ -23,7 +23,7 @@ namespace Mobizon.Contracts.Services
         /// <param name="number">Phone number in international format (e.g. <c>77007782006</c>).</param>
         /// <param name="comment">Optional comment describing why the number is blocked.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        Task<MobizonResponse<int>> AddNumberAsync(
+        Task<MobizonResponse<long>> AddNumberAsync(
             string number,
             string? comment = null,
             CancellationToken cancellationToken = default);
@@ -45,7 +45,7 @@ namespace Mobizon.Contracts.Services
         /// Removes a stop-list entry by its record ID.
         /// </summary>
         Task<MobizonResponse<bool>> DeleteAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default);
     }
 }

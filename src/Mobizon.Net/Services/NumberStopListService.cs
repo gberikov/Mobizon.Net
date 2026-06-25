@@ -43,7 +43,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<int>> AddNumberAsync(
+        public Task<MobizonResponse<long>> AddNumberAsync(
             string number,
             string? comment = null,
             CancellationToken cancellationToken = default)
@@ -55,7 +55,7 @@ namespace Mobizon.Net.Services
                 ["comment"] = comment ?? string.Empty
             };
 
-            return _apiClient.SendAsync<int>(
+            return _apiClient.SendAsync<long>(
                 HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
@@ -85,7 +85,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<bool>> DeleteAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>

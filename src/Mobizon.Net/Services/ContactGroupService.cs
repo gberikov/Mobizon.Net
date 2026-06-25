@@ -43,7 +43,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<int>> CreateAsync(
+        public Task<MobizonResponse<long>> CreateAsync(
             string name,
             CancellationToken cancellationToken = default)
         {
@@ -52,12 +52,12 @@ namespace Mobizon.Net.Services
                 ["data[name]"] = name
             };
 
-            return _apiClient.SendAsync<int>(
+            return _apiClient.SendAsync<long>(
                 HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<bool>> UpdateAsync(
-            int id,
+            long id,
             string name,
             CancellationToken cancellationToken = default)
         {
@@ -72,7 +72,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<DeleteContactGroupResult>> DeleteAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -84,8 +84,8 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<int>> GetCardsCountAsync(
-            int? id = null,
+        public Task<MobizonResponse<long>> GetCardsCountAsync(
+            long? id = null,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -93,7 +93,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.HasValue ? id.Value.ToString() : "-1"
             };
 
-            return _apiClient.SendAsync<int>(
+            return _apiClient.SendAsync<long>(
                 HttpMethod.Post, ModuleName, "getcardscount", parameters, cancellationToken);
         }
     }

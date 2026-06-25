@@ -8,7 +8,7 @@ namespace Mobizon.Contracts.Models.Links
         /// <summary>
         /// Gets or sets the numeric ID that uniquely identifies the link to update.
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the new status for the link.

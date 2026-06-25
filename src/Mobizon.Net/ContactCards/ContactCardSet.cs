@@ -54,7 +54,7 @@ namespace Mobizon.Net.ContactCards
         /// or <see langword="null"/> if not found.
         /// </summary>
         public async Task<ContactCard?> FindAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default)
         {
             var response = await _service.GetAsync(id.ToString(), cancellationToken);
@@ -75,7 +75,7 @@ namespace Mobizon.Net.ContactCards
             var response = await _service.CreateAsync(
                 ContactCardMapper.ToCreateRequest(entity), cancellationToken);
 
-            entity.Id = int.TryParse(response.Data, out var id) ? id : (int?)null;
+            entity.Id = long.TryParse(response.Data, out var id) ? id : (long?)null;
         }
 
         /// <summary>Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.</summary>
@@ -94,7 +94,7 @@ namespace Mobizon.Net.ContactCards
         }
 
         /// <summary>Deletes the contact card with the specified ID.</summary>
-        public Task RemoveAsync(int id, CancellationToken cancellationToken = default)
+        public Task RemoveAsync(long id, CancellationToken cancellationToken = default)
             => _service.RemoveAsync(id.ToString(), cancellationToken);
 
         // ── Groups ────────────────────────────────────────────────────────────
@@ -103,14 +103,14 @@ namespace Mobizon.Net.ContactCards
         /// Replaces the group membership of a contact card.
         /// </summary>
         public Task SetGroupsAsync(
-            int id,
+            long id,
             IReadOnlyList<string> groupIds,
             CancellationToken cancellationToken = default)
             => _service.SetGroupsAsync(id.ToString(), groupIds, cancellationToken);
 
         /// <summary>Returns the groups the specified contact card belongs to.</summary>
         public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default)
         {
             var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken);

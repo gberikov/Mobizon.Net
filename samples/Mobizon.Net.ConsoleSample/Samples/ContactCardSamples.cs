@@ -111,7 +111,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== ContactCard.GetGroups + SetGroups ===");
             // Replace with a real card ID
-            const int cardId = 77885666;
+            const long cardId = 77885666L;
 
             var groups = await client.ContactCards.GetGroupsAsync(cardId);
             Console.WriteLine($"Groups ({groups.Count}):");
@@ -128,7 +128,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== ContactCard.Remove ===");
             // Replace with a real card ID to delete
-            const int cardId = 77885666;
+            const long cardId = 77885666L;
 
             await client.ContactCards.RemoveAsync(cardId);
             Console.WriteLine($"Deleted card {cardId}.");
