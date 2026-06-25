@@ -46,5 +46,10 @@ namespace Mobizon.Contracts.Services
         /// Gets the service for managing the number stop-list.
         /// </summary>
         INumberStopListService NumberStopList { get; }
+
+        /// <summary>
+        /// Gets the service for listing registered sender IDs (alphanames).
+        /// </summary>
+        IAlphanameService Alphanames { get; }
     }
 }

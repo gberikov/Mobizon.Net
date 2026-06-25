@@ -64,6 +64,11 @@ namespace Mobizon.Net
         public INumberStopListService NumberStopList { get; }
 
         /// <summary>
+        /// Gets the service for listing registered sender IDs (alphanames).
+        /// </summary>
+        public IAlphanameService Alphanames { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="MobizonClient"/> using a privately managed <see cref="HttpClient"/>.
         /// </summary>
         /// <param name="options">The configuration options including API key, URL, version, and timeout.</param>
@@ -101,6 +106,7 @@ namespace Mobizon.Net
             ContactGroups = new ContactGroupService(apiClient);
             ContactCards = new ContactCardSet(new ContactCardService(apiClient));
             NumberStopList = new NumberStopListService(apiClient);
+            Alphanames = new AlphanameService(apiClient);
         }
 
         /// <summary>
