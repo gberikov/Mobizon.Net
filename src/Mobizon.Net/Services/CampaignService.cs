@@ -340,7 +340,7 @@ namespace Mobizon.Net.Services
 
             return _apiClient.SendAsync<AddRecipientsResult>(
                 HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
-                extraSuccessCodes: new[] { (int)AddRecipientsResponseCode.PartiallyAdded, (int)AddRecipientsResponseCode.NoneAdded });
+                extraSuccessCodes: new[] { (int)AddRecipientsOutcome.PartiallyAdded, (int)AddRecipientsOutcome.NoneAdded });
         }
 
         private static void AppendParams(IDictionary<string, string> parameters, AddRecipientsParameters? prm)
