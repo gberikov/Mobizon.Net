@@ -189,8 +189,8 @@ long campaignId = await client.Campaigns.CreateAsync(
         Text = "Flash sale — 50% off today!"
     });
 
-// 2. Add recipients
-await client.Campaigns.AddRecipientsAsync(
+// 2. Add recipients — Outcome reports AllAdded / PartiallyAdded / NoneAdded
+var addResult = await client.Campaigns.AddRecipientsAsync(
     new AddRecipientsRequest
     {
         CampaignId = campaignId,
@@ -200,6 +200,9 @@ await client.Campaigns.AddRecipientsAsync(
             new RecipientEntry { Recipient = "77002222222" }
         }
     });
+
+if (addResult.Outcome != AddRecipientsOutcome.AllAdded)
+    Console.WriteLine($"Some recipients were rejected: {addResult.Outcome}");
 
 // 3. Send — returns CampaignSendResult; IsQueued is true when the API accepted
 //    the send as a background task (former code 100).
