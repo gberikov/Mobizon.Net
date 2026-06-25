@@ -7,6 +7,7 @@ using Mobizon.Contracts.Models.Campaigns;
 using Mobizon.Contracts.Models.Messages;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
+using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
@@ -115,14 +116,14 @@ namespace Mobizon.Net.Services
                         parameters["criteria[text]"] = c.Text;
 
                     if (c.Status.HasValue)
-                        parameters["criteria[status]"] = SmsStatusToApiCode(c.Status.Value);
+                        parameters["criteria[status]"] = ApiStatusCodes.ToApiCode(c.Status.Value);
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)
                             parameters[$"criteria[groups][{i}]"] = c.Groups[i].ToString();
 
                     if (c.CampaignStatus.HasValue)
-                        parameters["criteria[campaignStatus]"] = CampaignCommonStatusToApiCode(c.CampaignStatus.Value);
+                        parameters["criteria[campaignStatus]"] = ApiStatusCodes.ToApiCode(c.CampaignStatus.Value);
 
                     if (c.CampaignCreatedFrom.HasValue)
                         parameters["criteria[campaignCreateTsFrom]"] = c.CampaignCreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
@@ -166,37 +167,6 @@ namespace Mobizon.Net.Services
 
             return _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
-        }
-
-        private static string SmsStatusToApiCode(SmsStatus status)
-        {
-            switch (status)
-            {
-                case SmsStatus.New:         return "NEW";
-                case SmsStatus.Enqueued:    return "ENQUEUD";
-                case SmsStatus.Accepted:    return "ACCEPTD";
-                case SmsStatus.Delivered:   return "DELIVRD";
-                case SmsStatus.Undelivered: return "UNDELIV";
-                case SmsStatus.Rejected:    return "REJECTD";
-                case SmsStatus.Expired:     return "EXPIRD";
-                case SmsStatus.Deleted:     return "DELETED";
-                default: throw new System.ArgumentOutOfRangeException(nameof(status), status, null);
-            }
-        }
-
-        private static string CampaignCommonStatusToApiCode(CampaignCommonStatus status)
-        {
-            switch (status)
-            {
-                case CampaignCommonStatus.Moderation:       return "MODERATION";
-                case CampaignCommonStatus.Declined:         return "DECLINED";
-                case CampaignCommonStatus.ReadyForSend:     return "READY_FOR_SEND";
-                case CampaignCommonStatus.AutoReadyForSend: return "AUTO_READY_FOR_SEND";
-                case CampaignCommonStatus.Running:          return "RUNNING";
-                case CampaignCommonStatus.Sent:             return "SENT";
-                case CampaignCommonStatus.Done:             return "DONE";
-                default: throw new System.ArgumentOutOfRangeException(nameof(status), status, null);
-            }
         }
     }
 }
