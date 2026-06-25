@@ -62,5 +62,19 @@ namespace Mobizon.Net.Tests
             // External HttpClient should still be usable (no ObjectDisposedException)
             _ = httpClient.Timeout;
         }
+
+        [Fact]
+        public void Ctor_WithInjectedHttpClient_DoesNotMutateItsTimeout()
+        {
+            using var http = new HttpClient();
+            var original = http.Timeout; // default 100s
+            using var client = new MobizonClient(http, new MobizonClientOptions
+            {
+                ApiKey = "k",
+                ApiUrl = "https://api.mobizon.kz",
+                Timeout = TimeSpan.FromSeconds(5)
+            });
+            Assert.Equal(original, http.Timeout); // injected client untouched
+        }
     }
 }

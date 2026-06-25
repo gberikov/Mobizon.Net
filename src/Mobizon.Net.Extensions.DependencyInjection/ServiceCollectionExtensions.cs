@@ -15,7 +15,7 @@ namespace Mobizon.Net.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Registers <see cref="IMobizonClient"/> as a singleton and configures it using a delegate.
+        /// Registers <see cref="IMobizonClient"/> as a transient service backed by <see cref="IHttpClientFactory"/>, and configures it using a delegate.
         /// </summary>
         /// <param name="services">The service collection to add the Mobizon client to.</param>
         /// <param name="configure">A delegate that configures the <see cref="MobizonClientOptions"/>.</param>
@@ -42,7 +42,7 @@ namespace Mobizon.Net.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Registers <see cref="IMobizonClient"/> as a singleton and binds its configuration from an
+        /// Registers <see cref="IMobizonClient"/> as a transient service backed by <see cref="IHttpClientFactory"/>, and binds its configuration from an
         /// <see cref="IConfiguration"/> section.
         /// </summary>
         /// <param name="services">The service collection to add the Mobizon client to.</param>
@@ -71,7 +71,7 @@ namespace Mobizon.Net.Extensions.DependencyInjection
 
         private static IHttpClientBuilder AddMobizonCore(IServiceCollection services)
         {
-            services.AddSingleton<IMobizonClient>(sp =>
+            services.AddTransient<IMobizonClient>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<MobizonClientOptions>>().Value;
                 options.Validate();

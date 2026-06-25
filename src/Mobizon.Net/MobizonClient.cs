@@ -93,7 +93,7 @@ namespace Mobizon.Net
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _ownsHttpClient = ownsHttpClient;
 
-            if (options.Timeout > TimeSpan.Zero)
+            if (ownsHttpClient && options.Timeout > TimeSpan.Zero)
                 _httpClient.Timeout = options.Timeout;
 
             var apiClient = new MobizonApiClient(httpClient, options);
