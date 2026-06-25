@@ -17,8 +17,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
                 Sort       = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }
             });
-            Console.WriteLine($"Total: {result.Data.TotalItemCount}");
-            foreach (var e in result.Data.Items)
+            Console.WriteLine($"Total: {result.TotalItemCount}");
+            foreach (var e in result.Items)
                 Console.WriteLine($"  Id={e.Id}  Number={e.Number}  Country={e.CountryA2}  Operator={e.OperatorName}  Comment={e.Comment}");
         }
 
@@ -27,10 +27,10 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== NumberStopList.AddNumber ===");
             // Replace with the number you want to block
-            var result = await client.NumberStopList.AddNumberAsync(
+            var id = await client.NumberStopList.AddNumberAsync(
                 "77007782006",
                 comment: "SDK test block");
-            Console.WriteLine($"Created record Id: {result.Data}");
+            Console.WriteLine($"Created record Id: {id}");
         }
 
         // POST /service/numberstoplist/create  (number range)
@@ -38,11 +38,11 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== NumberStopList.AddRange ===");
             // Replace with the range you want to block
-            var result = await client.NumberStopList.AddNumberRangeAsync(
+            await client.NumberStopList.AddNumberRangeAsync(
                 "77470944002",
                 "77470944000",
                 comment: "SDK range test");
-            Console.WriteLine($"Range added: {result.Data}");
+            Console.WriteLine("Range added.");
         }
 
         // POST /service/numberstoplist/delete
@@ -50,8 +50,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== NumberStopList.Delete ===");
             // Replace with the record ID returned by AddNumber/AddRange
-            var result = await client.NumberStopList.DeleteAsync(83822);
-            Console.WriteLine($"Deleted: {result.Data}");
+            await client.NumberStopList.DeleteAsync(83822);
+            Console.WriteLine("Deleted.");
         }
     }
 }

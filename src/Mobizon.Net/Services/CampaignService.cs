@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -20,7 +20,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<long>> CreateAsync(
+        public async Task<long> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
@@ -58,11 +58,11 @@ namespace Mobizon.Net.Services
             if (request.ShortenLinks.HasValue)
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
-            return _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<long>(
+                HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<object>> DeleteAsync(
+        public async Task DeleteAsync(
             long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -70,11 +70,11 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "Delete", parameters, cancellationToken);
+            await _apiClient.SendAsync<object>(
+                HttpMethod.Post, ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<CampaignData>> GetAsync(
+        public async Task<CampaignData> GetAsync(
             long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -82,11 +82,11 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<CampaignData>(
-                HttpMethod.Post, ModuleName, "Get", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<CampaignData>(
+                HttpMethod.Post, ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<CampaignInfo>> GetInfoAsync(
+        public async Task<CampaignInfo> GetInfoAsync(
             long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -97,11 +97,11 @@ namespace Mobizon.Net.Services
             if (getFilledTplCampaignText.HasValue)
                 parameters["getFilledTplCampaignText"] = getFilledTplCampaignText.Value.ToString();
 
-            return _apiClient.SendAsync<CampaignInfo>(
-                HttpMethod.Post, ModuleName, "GetInfo", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<CampaignInfo>(
+                HttpMethod.Post, ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<MobizonListResult<CampaignData>>> ListAsync(
+        public async Task<MobizonListResult<CampaignData>> ListAsync(
             CampaignListRequest? request = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string>? parameters = null;
@@ -165,25 +165,28 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<MobizonListResult<CampaignData>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<MobizonListResult<CampaignData>>(
+                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<long>> SendAsync(
+        public async Task<CampaignSendResult> SendAsync(
             long id, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string>
-            {
-                ["id"] = id.ToString()
-            };
+            var parameters = new Dictionary<string, string> { ["id"] = id.ToString() };
 
-            return _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken);
+            var response = await _apiClient.SendAsync<long>(
+                HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
+
+            return new CampaignSendResult
+            {
+                IsQueued = response.Code == MobizonResponseCode.BackgroundTask,
+                Id = response.Data
+            };
         }
 
         private const int AddRecipientsMaxBatchSize = 500;
 
-        public async Task<MobizonResponse<AddRecipientsResult>> AddRecipientsAsync(
+        public async Task<AddRecipientsResult> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default)
         {
             var sources = (request.Recipients != null ? 1 : 0)
@@ -199,15 +202,15 @@ namespace Mobizon.Net.Services
             {
                 var fields = new Dictionary<string, string> { ["id"] = request.CampaignId.ToString() };
                 AppendParams(fields, request.Parameters);
-                return await _apiClient.SendMultipartAsync<AddRecipientsResult>(
+                return Finalize(await _apiClient.SendMultipartAsync<AddRecipientsResult>(
                     ModuleName, "AddRecipients", fields, request.RecipientsFile,
                     request.RecipientsFileName ?? "recipients.csv",
-                    cancellationToken, fileFieldName: "recipientsFile").ConfigureAwait(false);
+                    cancellationToken, fileFieldName: "recipientsFile").ConfigureAwait(false));
             }
 
             // Groups are asynchronous — no limit applies, send as-is.
             if (request.RecipientGroups != null)
-                return await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false);
+                return Finalize(await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false));
 
             // Split synchronous recipients (phone numbers / contact cards) into batches of 500.
             var recipients = request.Recipients;
@@ -216,7 +219,7 @@ namespace Mobizon.Net.Services
 
             // Fast path: fits within a single batch.
             if (totalCount <= AddRecipientsMaxBatchSize)
-                return await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false);
+                return Finalize(await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false));
 
             // Multi-batch path: aggregate all per-recipient entries into the first response.
             MobizonResponse<AddRecipientsResult>? aggregated = null;
@@ -292,7 +295,16 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return aggregated!;
+            return Finalize(aggregated!);
+        }
+
+        private static AddRecipientsResult Finalize(MobizonResponse<AddRecipientsResult> response)
+        {
+            var result = response.Data ?? new AddRecipientsResult();
+            result.Outcome = response.RawCode == 98 ? AddRecipientsOutcome.PartiallyAdded
+                           : response.RawCode == 99 ? AddRecipientsOutcome.NoneAdded
+                           : AddRecipientsOutcome.AllAdded; // 0 or 100 (async accepted)
+            return result;
         }
 
         private Task<MobizonResponse<AddRecipientsResult>> SendAddRecipientsAsync(
@@ -364,4 +376,3 @@ namespace Mobizon.Net.Services
         }
     }
 }
-

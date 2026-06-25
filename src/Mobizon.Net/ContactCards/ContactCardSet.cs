@@ -58,7 +58,7 @@ namespace Mobizon.Net.ContactCards
             CancellationToken cancellationToken = default)
         {
             var response = await _service.GetAsync(id.ToString(), cancellationToken);
-            return response.Data != null ? ContactCardMapper.ToEntity(response.Data) : null;
+            return response != null ? ContactCardMapper.ToEntity(response) : null;
         }
 
         // ── CRUD ──────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ namespace Mobizon.Net.ContactCards
             var response = await _service.CreateAsync(
                 ContactCardMapper.ToCreateRequest(entity), cancellationToken);
 
-            entity.Id = long.TryParse(response.Data, out var id) ? id : (long?)null;
+            entity.Id = long.TryParse(response, out var id) ? id : (long?)null;
         }
 
         /// <summary>Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.</summary>
@@ -114,7 +114,7 @@ namespace Mobizon.Net.ContactCards
             CancellationToken cancellationToken = default)
         {
             var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken);
-            return response.Data ?? Array.Empty<ContactGroupRef>();
+            return response ?? Array.Empty<ContactGroupRef>();
         }
     }
 }

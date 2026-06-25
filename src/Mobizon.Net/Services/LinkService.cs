@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<LinkData>> CreateAsync(
+        public async Task<LinkData> CreateAsync(
             CreateLinkRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -36,11 +36,11 @@ namespace Mobizon.Net.Services
             if (request.Comment != null)
                 parameters["data[comment]"] = request.Comment;
 
-            return _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<LinkData>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<object>> DeleteAsync(
+        public async Task DeleteAsync(
             long[] ids, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
@@ -49,23 +49,23 @@ namespace Mobizon.Net.Services
                 parameters[$"ids[{i}]"] = ids[i].ToString();
             }
 
-            return _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
+            await _apiClient.SendAsync<object>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<LinkData>> GetByIdAsync(long id, CancellationToken cancellationToken = default)
-            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
-                new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken);
+        public async Task<LinkData> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken).ConfigureAwait(false)).Data;
 
-        public Task<MobizonResponse<LinkData>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
-            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
-                new Dictionary<string, string> { ["code"] = code }, cancellationToken);
+        public async Task<LinkData> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["code"] = code }, cancellationToken).ConfigureAwait(false)).Data;
 
-        public Task<MobizonResponse<LinkData>> GetByShortLinkAsync(string shortLink, CancellationToken cancellationToken = default)
-            => _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
-                new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken);
+        public async Task<LinkData> GetByShortLinkAsync(string shortLink, CancellationToken cancellationToken = default)
+            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+                new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken).ConfigureAwait(false)).Data;
 
-        public Task<MobizonResponse<IReadOnlyList<LinkData>>> GetLinksAsync(
+        public async Task<IReadOnlyList<LinkData>> GetLinksAsync(
             long campaignId, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -73,11 +73,11 @@ namespace Mobizon.Net.Services
                 ["campaignId"] = campaignId.ToString()
             };
 
-            return _apiClient.SendAsync<IReadOnlyList<LinkData>>(
-                HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
+                HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public async Task<MobizonResponse<LinkStatsResult>> GetStatsAsync(
+        public async Task<LinkStatsResult> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
@@ -109,10 +109,10 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return response;
+            return response.Data!;
         }
 
-        public Task<MobizonResponse<MobizonListResult<LinkData>>> ListAsync(
+        public async Task<MobizonListResult<LinkData>> ListAsync(
             LinkListRequest? request = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string>? parameters = null;
@@ -147,18 +147,18 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<MobizonListResult<LinkData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<MobizonListResult<LinkData>>(
+                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<object>> UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
+        public async Task UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = request.Status.Value.ToString();
             if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
-            return _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken);
+            await _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

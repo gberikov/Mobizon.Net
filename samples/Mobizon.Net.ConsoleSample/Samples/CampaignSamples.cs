@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Campaigns;
@@ -17,7 +17,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
-            foreach (var c in result.Data.Items)
+            foreach (var c in result.Items)
                 Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Status={c.CommonStatus}");
         }
 
@@ -27,10 +27,10 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== Campaign.Get ===");
             // Replace with a real campaign ID
             var result = await client.Campaigns.GetAsync(1);
-            Console.WriteLine($"Id    : {result.Data.Id}");
-            Console.WriteLine($"Name  : {result.Data.Name}");
-            Console.WriteLine($"Status: {result.Data.CommonStatus}");
-            Console.WriteLine($"Text  : {result.Data.Text}");
+            Console.WriteLine($"Id    : {result.Id}");
+            Console.WriteLine($"Name  : {result.Name}");
+            Console.WriteLine($"Status: {result.CommonStatus}");
+            Console.WriteLine($"Text  : {result.Text}");
         }
 
         // POST /service/Campaign/GetInfo
@@ -39,10 +39,10 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== Campaign.GetInfo ===");
             // Replace with a real campaign ID
             var result = await client.Campaigns.GetInfoAsync(1);
-            Console.WriteLine($"Id      : {result.Data.Id}");
-            Console.WriteLine($"Sent    : {result.Data.Counters?.TotalDelivrdMsgNum}");
-            Console.WriteLine($"Failed  : {result.Data.Counters?.TotalUndelivMsgNum}");
-            Console.WriteLine($"Total   : {result.Data.Counters?.TotalMsgNum}");
+            Console.WriteLine($"Id      : {result.Id}");
+            Console.WriteLine($"Sent    : {result.Counters?.TotalDelivrdMsgNum}");
+            Console.WriteLine($"Failed  : {result.Counters?.TotalUndelivMsgNum}");
+            Console.WriteLine($"Total   : {result.Counters?.TotalMsgNum}");
         }
 
         // POST /service/Campaign/Create  →  /service/Campaign/Send  →  /service/Campaign/Delete
@@ -50,22 +50,21 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== Campaign.Create + Send + Delete ===");
 
-            var createResult = await client.Campaigns.CreateAsync(new CreateCampaignRequest
+            var id = await client.Campaigns.CreateAsync(new CreateCampaignRequest
             {
                 Name = "SDK Test Campaign",
                 Text = "Hello from Mobizon.Net SDK!",
                 Type = CampaignType.Bulk,
             });
-            var id = createResult.Data;   // int — the new campaign ID
             Console.WriteLine($"Created Id: {id}");
 
-            // SendAsync returns the task id when Code == BackgroundTask (100),
-            // or 0 when scheduled synchronously (Code == Success).
+            // SendAsync returns a CampaignSendResult; IsQueued is true when the API
+            // queued the send as a background task (code 100).
             var sendResult = await client.Campaigns.SendAsync(id);
-            if (sendResult.Code == MobizonResponseCode.BackgroundTask)
-                Console.WriteLine($"Queued as background task id: {sendResult.Data}");
+            if (sendResult.IsQueued)
+                Console.WriteLine($"Queued as background task id: {sendResult.Id}");
             else
-                Console.WriteLine($"Sent (code={sendResult.Code})");
+                Console.WriteLine($"Sent (id={sendResult.Id})");
 
             await client.Campaigns.DeleteAsync(id);
             Console.WriteLine("Deleted.");
@@ -85,8 +84,9 @@ namespace Mobizon.Net.ConsoleSample.Samples
                     new RecipientEntry { Recipient = "77029932233" },
                 }
             });
-            if (result.Data.Entries != null)
-                foreach (var e in result.Data.Entries)
+            Console.WriteLine($"Outcome: {result.Outcome}");
+            if (result.Entries != null)
+                foreach (var e in result.Entries)
                     Console.WriteLine($"  {e.Recipient}  Code={e.Code}  MessageId={e.MessageId}");
         }
     }

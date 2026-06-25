@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.StopLists;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
@@ -19,7 +18,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<StopListListResponse>> ListAsync(
+        public async Task<StopListListResponse> ListAsync(
             StopListListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -39,11 +38,11 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
             }
 
-            return _apiClient.SendAsync<StopListListResponse>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<StopListListResponse>(
+                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<long>> AddNumberAsync(
+        public async Task<long> AddNumberAsync(
             string number,
             string? comment = null,
             CancellationToken cancellationToken = default)
@@ -55,11 +54,11 @@ namespace Mobizon.Net.Services
                 ["comment"] = comment ?? string.Empty
             };
 
-            return _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<long>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<bool>> AddNumberRangeAsync(
+        public async Task AddNumberRangeAsync(
             string numberFrom,
             string numberTo,
             string? comment = null,
@@ -80,11 +79,11 @@ namespace Mobizon.Net.Services
                 ["comment"]    = comment ?? string.Empty
             };
 
-            return _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken);
+            await _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<bool>> DeleteAsync(
+        public async Task DeleteAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
@@ -93,8 +92,8 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
+            await _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

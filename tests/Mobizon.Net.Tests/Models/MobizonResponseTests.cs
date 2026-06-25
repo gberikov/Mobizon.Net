@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Mobizon.Contracts.Models.Common;
+using Mobizon.Net.Internal;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Models

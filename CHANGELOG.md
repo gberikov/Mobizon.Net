@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking
 
-- List endpoints now return `MobizonResponse<MobizonListResult<T>>` (Campaign, Link, Message, ContactCard list operations)
-- `Campaign.CreateAsync` and `SendAsync` now return `MobizonResponse<long>` instead of `MobizonResponse<CreateCampaignResult>` and `MobizonResponse<CampaignSendResult>`
+- All service methods now return their domain type directly — `MobizonResponse<T>` is internal and no longer part of the public API surface. Call sites must remove `.Data` indirection and replace `.Code`-based success checks with `try`/`catch (MobizonApiException)`.
+- `Campaign.SendAsync` returns `CampaignSendResult { bool IsQueued; long Id; }` instead of a wrapped `long`; branch on `IsQueued` instead of comparing the former code 100.
+- `Campaign.AddRecipientsAsync` returns `AddRecipientsResult` with an `Outcome` property (`AllAdded` / `PartiallyAdded` / `NoneAdded`) plus `Entries` and `TaskId`; the former codes 98/99/100 no longer appear on a response wrapper.
+- No-payload methods (`DeleteAsync`, `UpdateAsync`, `AddNumberRangeAsync`, etc.) return `Task` and succeed silently; errors throw `MobizonApiException`.
+- List endpoints (`Campaign`, `Link`, `Message`, `ContactCard`) return `MobizonListResult<T>` directly
+- `Campaign.CreateAsync` returns `long` (the new campaign ID) directly
 - `Link.GetAsync(code)` replaced by `Link.GetByIdAsync`, `Link.GetByCodeAsync`, and `Link.GetByShortLinkAsync`
 - `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code`)
 - `LinkData.Clicks` property renamed to `ClickCnt`

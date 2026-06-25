@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -40,9 +40,8 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data.Items);
-            Assert.Equal(0, result.Data.TotalItemCount);
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -65,12 +64,11 @@ namespace Mobizon.Net.Tests.Services
                 Sort = new SortRequest { Field = "name", Direction = SortDirection.ASC }
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data.Items);
-            Assert.Equal(100604, result.Data.Items[0].Id);
-            Assert.Equal("Test Group", result.Data.Items[0].Name);
-            Assert.Equal(308, result.Data.Items[0].CardsCount);
-            Assert.Equal(1, result.Data.TotalItemCount);
+            Assert.Single(result.Items);
+            Assert.Equal(100604, result.Items[0].Id);
+            Assert.Equal("Test Group", result.Items[0].Name);
+            Assert.Equal(308, result.Items[0].CardsCount);
+            Assert.Equal(1, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -86,7 +84,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            var item = result.Data.Items[0];
+            var item = result.Items[0];
             Assert.Equal(1, item.Id);
             Assert.Equal(88296, item.UserId);
             Assert.Equal("Group A", item.Name);
@@ -110,8 +108,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.CreateAsync("New Group");
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(100820, result.Data);
+            Assert.Equal(100820, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -129,10 +126,8 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.UpdateAsync(100820, "Renamed Group");
+            await service.UpdateAsync(100820, "Renamed Group");
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.True(result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -151,10 +146,9 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.DeleteAsync(100820);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data.Processed);
-            Assert.Equal(100820, result.Data.Processed[0]);
-            Assert.Empty(result.Data.NotProcessed);
+            Assert.Single(result.Processed);
+            Assert.Equal(100820, result.Processed[0]);
+            Assert.Empty(result.NotProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -170,9 +164,9 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.DeleteAsync(999);
 
-            Assert.Empty(result.Data.Processed);
-            Assert.Single(result.Data.NotProcessed);
-            Assert.Equal(999, result.Data.NotProcessed[0]);
+            Assert.Empty(result.Processed);
+            Assert.Single(result.NotProcessed);
+            Assert.Equal(999, result.NotProcessed[0]);
         }
 
         // ── GetCardsCountAsync ───────────────────────────────────────────────
@@ -190,8 +184,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.GetCardsCountAsync(100604);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(308, result.Data);
+            Assert.Equal(308, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -208,7 +201,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.GetCardsCountAsync();
 
-            Assert.Equal(0, result.Data);
+            Assert.Equal(0, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

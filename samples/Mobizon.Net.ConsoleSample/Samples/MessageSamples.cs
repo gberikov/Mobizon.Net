@@ -13,9 +13,9 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== Message.QuickSend ===");
             var result = await client.Messages.QuickSendAsync(recipient, text);
-            Console.WriteLine($"MessageId : {result.Data.MessageId}");
-            Console.WriteLine($"CampaignId: {result.Data.CampaignId}");
-            Console.WriteLine($"Status    : {result.Data.Status}");
+            Console.WriteLine($"MessageId : {result.MessageId}");
+            Console.WriteLine($"CampaignId: {result.CampaignId}");
+            Console.WriteLine($"Status    : {result.Status}");
         }
 
         // POST /service/Message/SendSmsMessage  (with optional params)
@@ -33,7 +33,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                     DeferredTo = DateTime.Now.AddHours(2),
                 }
             });
-            Console.WriteLine($"MessageId : {result.Data.MessageId}");
+            Console.WriteLine($"MessageId : {result.MessageId}");
         }
 
         // POST /service/Message/GetSMSStatus
@@ -42,10 +42,10 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== Message.GetSmsStatus ===");
             // Replace with a real message ID
             var singleResult = await client.Messages.GetSmsStatusAsync(800191838);
-            foreach (var s in singleResult.Data)
+            foreach (var s in singleResult)
                 Console.WriteLine($"Single:  Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
             var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 800196668L, 800196662L });
-            foreach (var s in multiResult.Data)
+            foreach (var s in multiResult)
                 Console.WriteLine($"Multi:   Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
         }
 
@@ -59,8 +59,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
             });
-            Console.WriteLine($"Total: {result.Data.TotalItemCount}");
-            foreach (var m in result.Data.Items)
+            Console.WriteLine($"Total: {result.TotalItemCount}");
+            foreach (var m in result.Items)
                 Console.WriteLine($"  Id={m.Id}  To={m.To}  Status={m.Status}  Text={m.Text}");
         }
     }

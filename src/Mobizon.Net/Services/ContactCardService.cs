@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -19,7 +19,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<ContactCardListResult>> ListAsync(
+        public async Task<ContactCardListResult> ListAsync(
             ContactCardListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -48,11 +48,11 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
             }
 
-            return _apiClient.SendAsync<ContactCardListResult>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<ContactCardListResult>(
+                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<ContactCardData>> GetAsync(
+        public async Task<ContactCardData> GetAsync(
             string id,
             CancellationToken cancellationToken = default)
         {
@@ -61,11 +61,11 @@ namespace Mobizon.Net.Services
                 ["id"] = id
             };
 
-            return _apiClient.SendAsync<ContactCardData>(
-                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<ContactCardData>(
+                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<string>> CreateAsync(
+        public async Task<string> CreateAsync(
             CreateContactCardRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -75,13 +75,13 @@ namespace Mobizon.Net.Services
                 request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
-            return _apiClient.SendMultipartAsync<string>(
+            return (await _apiClient.SendMultipartAsync<string>(
                 ModuleName, "create", fields,
                 request.Photo, request.PhotoFileName,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<bool>> UpdateAsync(
+        public async Task UpdateAsync(
             UpdateContactCardRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -93,13 +93,13 @@ namespace Mobizon.Net.Services
 
             fields["id"] = request.Id;
 
-            return _apiClient.SendMultipartAsync<bool>(
+            await _apiClient.SendMultipartAsync<bool>(
                 ModuleName, "update", fields,
                 request.Photo, request.PhotoFileName,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<bool>> SetGroupsAsync(
+        public async Task SetGroupsAsync(
             string id,
             IReadOnlyList<string> groupIds,
             CancellationToken cancellationToken = default)
@@ -112,11 +112,11 @@ namespace Mobizon.Net.Services
             for (var i = 0; i < groupIds.Count; i++)
                 parameters[$"groupIds[{i}]"] = groupIds[i];
 
-            return _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "setgroups", parameters, cancellationToken);
+            await _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<ContactGroupRef>>> GetGroupsAsync(
+        public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
             string id,
             CancellationToken cancellationToken = default)
         {
@@ -125,17 +125,17 @@ namespace Mobizon.Net.Services
                 ["id"] = id
             };
 
-            return _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
-                HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
+                HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<bool>> RemoveAsync(
+        public async Task RemoveAsync(
             string id,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string> { ["id"] = id };
-            return _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken);
+            await _apiClient.SendAsync<bool>(
+                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         private static Dictionary<string, string> BuildCardFields(

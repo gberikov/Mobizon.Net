@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,17 +21,17 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<SendSmsResult>> QuickSendAsync(
+        public async Task<SendSmsResult> QuickSendAsync(
             string recipient,
             string text,
             CancellationToken cancellationToken = default)
         {
-            return SendSmsMessageAsync(
+            return await SendSmsMessageAsync(
                 new SendSmsMessageRequest { Recipient = recipient, Text = text },
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<SendSmsResult>> SendSmsMessageAsync(
+        public async Task<SendSmsResult> SendSmsMessageAsync(
             SendSmsMessageRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -63,18 +63,18 @@ namespace Mobizon.Net.Services
                     parameters["params[validity]"] = ((int)p.Validity.Value.TotalMinutes).ToString();
             }
 
-            return _apiClient.SendAsync<SendSmsResult>(
-                HttpMethod.Post, ModuleName, "SendSmsMessage", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<SendSmsResult>(
+                HttpMethod.Post, ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+        public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
-            return GetSmsStatusAsync(new[] { id }, cancellationToken);
+            return await GetSmsStatusAsync(new[] { id }, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+        public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long[] ids,
             CancellationToken cancellationToken = default)
         {
@@ -84,11 +84,11 @@ namespace Mobizon.Net.Services
                 parameters[$"ids[{i}]"] = ids[i].ToString();
             }
 
-            return _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
-                HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
+                HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public Task<MobizonResponse<MobizonListResult<MessageInfo>>> ListAsync(
+        public async Task<MobizonListResult<MessageInfo>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -165,8 +165,8 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
+                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }
 }

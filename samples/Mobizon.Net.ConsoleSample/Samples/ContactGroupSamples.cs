@@ -17,8 +17,8 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
                 Sort       = new SortRequest { Field = "name", Direction = SortDirection.ASC }
             });
-            Console.WriteLine($"Total: {result.Data.TotalItemCount}");
-            foreach (var g in result.Data.Items)
+            Console.WriteLine($"Total: {result.TotalItemCount}");
+            foreach (var g in result.Items)
                 Console.WriteLine($"  Id={g.Id}  Name={g.Name}  Cards={g.CardsCount}  Created={g.Created}");
         }
 
@@ -27,16 +27,15 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== ContactGroup.Create + Update + Delete ===");
 
-            var createResult = await client.ContactGroups.CreateAsync("SDK Test Group 2");
-            var id = createResult.Data;
+            var id = await client.ContactGroups.CreateAsync("SDK Test Group 2");
             Console.WriteLine($"Created Id: {id}");
 
-            var updateResult = await client.ContactGroups.UpdateAsync(id, "SDK Test Group (renamed)");
-            Console.WriteLine($"Updated   : {updateResult.Data}");
+            await client.ContactGroups.UpdateAsync(id, "SDK Test Group (renamed)");
+            Console.WriteLine("Updated.");
 
             var deleteResult = await client.ContactGroups.DeleteAsync(id);
-            Console.WriteLine($"Processed : [{string.Join(", ", deleteResult.Data.Processed)}]");
-            Console.WriteLine($"Not proc  : [{string.Join(", ", deleteResult.Data.NotProcessed)}]");
+            Console.WriteLine($"Processed : [{string.Join(", ", deleteResult.Processed)}]");
+            Console.WriteLine($"Not proc  : [{string.Join(", ", deleteResult.NotProcessed)}]");
         }
 
         // POST /service/contactgroup/getcardscount
@@ -45,7 +44,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine("=== ContactGroup.GetCardsCount ===");
             // Pass a group ID, or omit to count contacts without any group
             var result = await client.ContactGroups.GetCardsCountAsync(100604);
-            Console.WriteLine($"Count (no group): {result.Data}");
+            Console.WriteLine($"Count (no group): {result}");
         }
     }
 }
