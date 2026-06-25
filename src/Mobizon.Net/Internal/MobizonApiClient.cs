@@ -25,6 +25,7 @@ namespace Mobizon.Net.Internal
             Converters =
             {
                 new StringToIntConverter(),
+                new StringToLongConverter(),
                 new StringToFloatConverter(),
                 new StringToDecimalConverter(),
                 new StringToBoolConverter(),
