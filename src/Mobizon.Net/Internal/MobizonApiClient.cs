@@ -41,7 +41,8 @@ namespace Mobizon.Net.Internal
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.ContactFieldInfo>(),
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.MobileFieldInfo>(),
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.AddressFieldInfo>(),
-                new AddRecipientsResultConverter()
+                new AddRecipientsResultConverter(),
+                new LinkStatsResultConverter()
             }
         };
 

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Link.GetAsync(code)` replaced by `Link.GetByIdAsync`, `Link.GetByCodeAsync`, and `Link.GetByShortLinkAsync`
 - `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code`)
 - `LinkData.Clicks` property renamed to `ClickCnt`
-- `Link.GetStatsAsync` now returns `LinkStatsResult { Items, Totals }` with individual stat points typed as `LinkStatPoint`
+- `Link.GetStatsAsync` now returns `LinkStatsResult { Links }` — one `LinkStatSeries` per requested link (with `LinkId`, `TotalClicks`, `TotalRedirects`, and per-period `LinkStatPoint { Param, Clicks, Redirects }`); the SDK transposes the API's period-major `clicks{i}`/`redirects{i}` grid and resolves each series back to its link ID
 - `MessageInfo.SegUserBuy` now typed as `decimal` instead of `int`
 - `ContactCardListResponse` renamed to `ContactCardListResult`
 - All ID types widened from `int` to `long` (campaign IDs, message IDs, link IDs, task IDs, etc.)
@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `campaign/addRecipients` endpoint deserialization for both array and scalar (task ID) request formats
+- `link/getStats` deserialization — the real API returns a period-major grid with a `totals` **object** (not the scalar the old model assumed), which threw "Failed to deserialize Mobizon API response"; now parsed by a dedicated converter
 - `LinkData.clickCnt` property mapping from API responses
 - Injected `HttpClient.Timeout` no longer mutated by SDK operations
 - README documentation corrections

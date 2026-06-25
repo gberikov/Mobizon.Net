@@ -51,6 +51,9 @@ artifacts/
 appsettings.Development.json
 appsettings.Local.json
 
+## Local API playground (throwaway harness with a real key — never committed)
+samples/Mobizon.Net.Playground/
+
 ## Local reference files
 *.html
 

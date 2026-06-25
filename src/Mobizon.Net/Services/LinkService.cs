@@ -77,7 +77,7 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<LinkStatsResult>> GetStatsAsync(
+        public async Task<MobizonResponse<LinkStatsResult>> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
@@ -95,8 +95,21 @@ namespace Mobizon.Net.Services
             if (request.DateTo != null)
                 parameters["criteria[dateTo]"] = request.DateTo;
 
-            return _apiClient.SendAsync<LinkStatsResult>(
-                HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken);
+            var response = await _apiClient.SendAsync<LinkStatsResult>(
+                HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
+
+            // The payload identifies links only by their position in the requested `ids` array;
+            // resolve each series back to its actual link ID here.
+            if (response.Data?.Links != null)
+            {
+                foreach (var series in response.Data.Links)
+                {
+                    if (series.Index >= 0 && series.Index < request.Ids.Length)
+                        series.LinkId = request.Ids[series.Index];
+                }
+            }
+
+            return response;
         }
 
         public Task<MobizonResponse<MobizonListResult<LinkData>>> ListAsync(
