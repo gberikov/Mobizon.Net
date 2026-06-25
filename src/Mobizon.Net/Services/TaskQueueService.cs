@@ -20,7 +20,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<TaskQueueStatus>> GetStatusAsync(
-            int id, CancellationToken cancellationToken = default)
+            long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {

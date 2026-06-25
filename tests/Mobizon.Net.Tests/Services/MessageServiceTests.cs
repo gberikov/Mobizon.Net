@@ -179,11 +179,11 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":[{""id"":""100"",""status"":""DELIVRD"",""segNum"":""1"",""startSendTs"":""2024-01-01 12:00:00"",""statusUpdateTs"":""2024-01-01 12:05:00""},{""id"":""200"",""status"":""NEW"",""segNum"":""1"",""startSendTs"":"" "",""statusUpdateTs"":"" ""}],""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.GetSmsStatusAsync(new[] { 100, 200 });
+            var result = await service.GetSmsStatusAsync(new[] { 100L, 200L });
 
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Equal(2, result.Data.Count);
-            Assert.Equal(100, result.Data[0].Id);
+            Assert.Equal(100L, result.Data[0].Id);
             Assert.Equal(SmsStatus.Delivered, result.Data[0].Status);
             Assert.Equal(new DateTime(2024, 1, 1, 12, 5, 0), result.Data[0].StatusUpdated);
             Assert.Equal(new DateTime(2024, 1, 1, 12, 0, 0), result.Data[0].SendStarted);
@@ -245,6 +245,18 @@ namespace Mobizon.Net.Tests.Services
         {
             var service = CreateService(new MockHttpMessageHandler());
             await Assert.ThrowsAsync<System.ArgumentNullException>(() => service.SendSmsMessageAsync(null!));
+        }
+
+        [Fact]
+        public async Task SendSmsMessageAsync_Parses_LargeIds()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""campaignId"":""70000000001"",""messageId"":""70000000002"",""status"":0},""message"":""""}");
+            var result = await CreateService(mockHttp).SendSmsMessageAsync(new SendSmsMessageRequest { Recipient = "7700", Text = "x" });
+            Assert.Equal(70000000001L, result.Data.CampaignId);
+            Assert.Equal(70000000002L, result.Data.MessageId);
         }
     }
 }

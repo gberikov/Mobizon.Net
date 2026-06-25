@@ -68,14 +68,14 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default)
         {
             return GetSmsStatusAsync(new[] { id }, cancellationToken);
         }
 
         public Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
-            int[] ids,
+            long[] ids,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();

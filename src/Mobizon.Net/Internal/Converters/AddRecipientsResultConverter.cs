@@ -29,11 +29,11 @@ namespace Mobizon.Net.Internal.Converters
             {
                 result.Entries = JsonSerializer.Deserialize<List<AddRecipientEntry>>(ref reader, options);
             }
-            else if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var taskId))
+            else if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt64(out var taskId))
             {
                 result.TaskId = taskId;
             }
-            else if (reader.TokenType == JsonTokenType.String && int.TryParse(reader.GetString(), out var taskIdFromString))
+            else if (reader.TokenType == JsonTokenType.String && long.TryParse(reader.GetString(), out var taskIdFromString))
             {
                 result.TaskId = taskIdFromString;
             }

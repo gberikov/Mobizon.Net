@@ -44,7 +44,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var singleResult = await client.Messages.GetSmsStatusAsync(800191838);
             foreach (var s in singleResult.Data)
                 Console.WriteLine($"Single:  Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
-            var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 800196668, 800196662 });
+            var multiResult = await client.Messages.GetSmsStatusAsync(new[] { 800196668L, 800196662L });
             foreach (var s in multiResult.Data)
                 Console.WriteLine($"Multi:   Id={s.Id}  Status={s.Status}  Segments={s.Segments}");
         }

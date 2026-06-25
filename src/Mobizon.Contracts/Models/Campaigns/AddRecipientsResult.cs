@@ -21,7 +21,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets the ID of the background task created to process the add-recipients operation.
         /// Populated only for asynchronous loads (groups / file upload).
         /// </summary>
-        public int? TaskId { get; set; }
+        public long? TaskId { get; set; }
 
         /// <summary>
         /// Gets or sets the per-recipient processing results.
@@ -81,7 +81,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets the ID of the message created for this recipient.
         /// Available when the recipient was successfully added (<see cref="Code"/> == 0).
         /// </summary>
-        public int? MessageId { get; set; }
+        public long? MessageId { get; set; }
 
         /// <summary>
         /// Gets or sets the original phone number value as submitted by the caller
@@ -93,7 +93,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets the contact ID that was passed in <c>recipientContacts</c>
         /// (populated when a contact reference was used).
         /// </summary>
-        public int? Contact { get; set; }
+        public long? Contact { get; set; }
 
         /// <summary>
         /// Gets or sets the recipient type returned by the API (e.g. <c>"number"</c>, <c>"contact"</c>).

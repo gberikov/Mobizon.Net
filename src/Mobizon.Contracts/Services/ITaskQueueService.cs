@@ -23,6 +23,6 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<TaskQueueStatus>> GetStatusAsync(
-            int id, CancellationToken cancellationToken = default);
+            long id, CancellationToken cancellationToken = default);
     }
 }

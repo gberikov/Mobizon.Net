@@ -12,7 +12,7 @@ namespace Mobizon.Contracts.Models.Campaigns
     public class CampaignData
     {
         /// <summary>Gets or sets the unique ID of the campaign.</summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>Gets or sets the moderation status of the campaign.</summary>
         public CampaignCommonStatus? ModerationStatus { get; set; }

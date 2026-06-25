@@ -8,12 +8,12 @@
         /// <summary>
         /// Gets or sets the ID of the campaign that was automatically created or used for this message.
         /// </summary>
-        public int CampaignId { get; set; }
+        public long CampaignId { get; set; }
 
         /// <summary>
         /// Gets or sets the unique ID of the submitted message, which can be used to query delivery status.
         /// </summary>
-        public int MessageId { get; set; }
+        public long MessageId { get; set; }
 
         /// <summary>
         /// Gets or sets the dispatch status of the SMS campaign.

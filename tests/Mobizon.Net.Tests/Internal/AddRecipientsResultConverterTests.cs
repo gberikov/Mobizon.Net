@@ -40,5 +40,16 @@ namespace Mobizon.Net.Tests.Internal
             Assert.Equal(777, r.Data.TaskId);
             Assert.Null(r.Data.Entries);
         }
+
+        [Fact]
+        public async Task AsyncScalar_LargeTaskId_PopulatesTaskId()
+        {
+            var m = new MockHttpMessageHandler();
+            m.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
+                .Respond("application/json", @"{""code"":100,""data"":70000000004,""message"":""""}");
+            var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
+            Assert.Equal(70000000004L, r.Data.TaskId);
+            Assert.Null(r.Data.Entries);
+        }
     }
 }

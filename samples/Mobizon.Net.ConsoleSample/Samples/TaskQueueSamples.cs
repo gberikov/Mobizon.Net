@@ -7,7 +7,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
     static class TaskQueueSamples
     {
         // GET /service/TaskQueue/GetStatus
-        public static async Task GetStatusAsync(MobizonClient client, int taskId)
+        public static async Task GetStatusAsync(MobizonClient client, long taskId)
         {
             Console.WriteLine("=== TaskQueue.GetStatus ===");
             var result = await client.TaskQueue.GetStatusAsync(taskId);

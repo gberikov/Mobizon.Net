@@ -12,12 +12,12 @@ namespace Mobizon.Contracts.Models.Messages
         /// <summary>
         /// Gets or sets the unique ID of the message.
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the ID of the campaign this message belongs to.
         /// </summary>
-        public int CampaignId { get; set; }
+        public long CampaignId { get; set; }
 
         /// <summary>
         /// Gets or sets the number of SMS segments the message was split into.

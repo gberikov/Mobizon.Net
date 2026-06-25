@@ -145,5 +145,15 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(new MockHttpMessageHandler());
             await Assert.ThrowsAsync<System.ArgumentNullException>(() => service.CreateAsync(null!));
         }
+
+        [Fact]
+        public async Task CreateAsync_Parses_LargeId()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/Create")
+                .Respond("application/json", @"{""code"":0,""data"":""70000000003"",""message"":""""}");
+            var result = await CreateService(mockHttp).CreateAsync(new CreateCampaignRequest { Type = CampaignType.Bulk, Text = "x" });
+            Assert.Equal(70000000003L, result.Data);
+        }
     }
 }

@@ -116,7 +116,7 @@ namespace Mobizon.Contracts.Models.Campaigns
 
         /// <summary>Gets or sets the ID of the campaign these counters belong to.</summary>
         [JsonPropertyName("campaignId")]
-        public int CampaignId { get; set; }
+        public long CampaignId { get; set; }
 
         /// <summary>Gets or sets the ISO-4217 currency code used for billing (e.g. <c>KZT</c>).</summary>
         [JsonPropertyName("userCurrency")]

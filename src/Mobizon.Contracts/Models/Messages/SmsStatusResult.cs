@@ -11,7 +11,7 @@ namespace Mobizon.Contracts.Models.Messages
         /// <summary>
         /// Gets or sets the unique message ID.
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the current delivery status of the message.

@@ -32,12 +32,12 @@ namespace Mobizon.Contracts.Models.Campaigns
     public class CampaignCriteria
     {
         /// <summary>Gets or sets the campaign ID to search for a single campaign.</summary>
-        public int? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>
         /// Gets or sets a list of campaign IDs to search. Maximum 100 IDs.
         /// </summary>
-        public IReadOnlyList<int>? Ids { get; set; }
+        public IReadOnlyList<long>? Ids { get; set; }
 
         /// <summary>
         /// Gets or sets a recipient phone number (or partial number) to search campaigns by.

@@ -21,7 +21,7 @@ namespace Mobizon.Contracts.Services
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<int>> CreateAsync(
+        Task<MobizonResponse<long>> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<object>> DeleteAsync(
-            int id, CancellationToken cancellationToken = default);
+            long id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves the full data of a campaign by its ID.
@@ -49,7 +49,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<CampaignData>> GetAsync(
-            int id, CancellationToken cancellationToken = default);
+            long id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves the full data and delivery statistics for a campaign.
@@ -68,7 +68,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<CampaignInfo>> GetInfoAsync(
-            int id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default);
+            long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns a paginated, optionally filtered list of campaigns.
@@ -100,8 +100,8 @@ namespace Mobizon.Contracts.Services
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<int>> SendAsync(
-            int id, CancellationToken cancellationToken = default);
+        Task<MobizonResponse<long>> SendAsync(
+            long id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds recipients to an existing campaign.

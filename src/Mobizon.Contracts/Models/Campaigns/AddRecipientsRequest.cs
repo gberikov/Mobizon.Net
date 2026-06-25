@@ -14,7 +14,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// <summary>
         /// Gets or sets the ID of the campaign to which the recipients will be added.
         /// </summary>
-        public int CampaignId { get; set; }
+        public long CampaignId { get; set; }
 
         /// <summary>
         /// Gets or sets the list of recipient phone numbers to add to the campaign.

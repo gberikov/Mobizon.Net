@@ -83,7 +83,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
-            int id,
+            long id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Mobizon.Contracts.Services
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
-            int[] ids,
+            long[] ids,
             CancellationToken cancellationToken = default);
 
         /// <summary>

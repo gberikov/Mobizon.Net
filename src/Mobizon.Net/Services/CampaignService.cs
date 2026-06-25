@@ -20,7 +20,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<int>> CreateAsync(
+        public Task<MobizonResponse<long>> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
@@ -58,12 +58,12 @@ namespace Mobizon.Net.Services
             if (request.ShortenLinks.HasValue)
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
-            return _apiClient.SendAsync<int>(
+            return _apiClient.SendAsync<long>(
                 HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken);
         }
 
         public Task<MobizonResponse<object>> DeleteAsync(
-            int id, CancellationToken cancellationToken = default)
+            long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
@@ -75,7 +75,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<CampaignData>> GetAsync(
-            int id, CancellationToken cancellationToken = default)
+            long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
@@ -87,7 +87,7 @@ namespace Mobizon.Net.Services
         }
 
         public Task<MobizonResponse<CampaignInfo>> GetInfoAsync(
-            int id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default)
+            long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
@@ -169,15 +169,15 @@ namespace Mobizon.Net.Services
                 HttpMethod.Post, ModuleName, "List", parameters, cancellationToken);
         }
 
-        public Task<MobizonResponse<int>> SendAsync(
-            int id, CancellationToken cancellationToken = default)
+        public Task<MobizonResponse<long>> SendAsync(
+            long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<int>(
+            return _apiClient.SendAsync<long>(
                 HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken);
         }
 
