@@ -54,6 +54,21 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
+        [Fact]
+        public async Task Where_GroupIdEqual_LargeId_SendsEqualCriteria()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "groupId")
+                .WithFormData("criteria[0][operator]", "equal")
+                .WithFormData("criteria[0][value]",    "70000000001")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.GroupId == 70000000001L).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
         // ── Where: empty ─────────────────────────────────────────────────────
 
         [Fact]

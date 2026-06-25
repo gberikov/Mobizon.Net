@@ -22,7 +22,7 @@ namespace Mobizon.Net.Extensions.Polly
         /// services.AddMobizon(options =>
         /// {
         ///     options.ApiKey = "your-api-key";
-        ///     options.ApiUrl = "https://api.mobizon.com/service/";
+        ///     options.ApiUrl = "https://api.mobizon.kz";
         /// })
         /// .AddMobizonResilience();
         /// </code>
@@ -45,7 +45,7 @@ namespace Mobizon.Net.Extensions.Polly
         /// services.AddMobizon(options =>
         /// {
         ///     options.ApiKey = "your-api-key";
-        ///     options.ApiUrl = "https://api.mobizon.com/service/";
+        ///     options.ApiUrl = "https://api.mobizon.kz";
         /// })
         /// .AddMobizonResilience(resilience =>
         /// {

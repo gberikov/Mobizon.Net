@@ -19,6 +19,7 @@ namespace Mobizon.Net.Internal.Converters
                 case SmsStatus.Rejected:    return "REJECTD";
                 case SmsStatus.Expired:     return "EXPIRD";
                 case SmsStatus.Deleted:     return "DELETED";
+                case SmsStatus.Scheduled:   return "SCHEDUL";
                 default: throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
         }

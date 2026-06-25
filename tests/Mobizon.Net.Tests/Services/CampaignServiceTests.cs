@@ -83,6 +83,20 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
+        public async Task GetInfoAsync_NullTotalPartnerCost_DoesNotThrow()
+        {
+            const string json = @"{""code"":0,""data"":{""id"":""123"",""counters"":{""campaignId"":""123"",""totalCost"":""16.2000"",""totalPartnerCost"":null,""userCurrency"":""KZT""}},""message"":""""}";
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/GetInfo")
+                .Respond("application/json", json);
+
+            var result = await CreateService(mockHttp).GetInfoAsync(123);
+
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            Assert.Null(result.Data.Counters!.TotalPartnerCost);
+        }
+
+        [Fact]
         public async Task CreateAsync_WithShortenLinks_SendsFlag()
         {
             var mockHttp = new MockHttpMessageHandler();

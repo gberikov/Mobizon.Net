@@ -10,7 +10,7 @@ namespace Mobizon.Contracts.Models.ContactCards
     public sealed class ContactCardFilterSpec
     {
         /// <summary>Group the contact belongs to. Use <c>null</c> to match contacts without a group.</summary>
-        public int? GroupId => null;
+        public long? GroupId => null;
 
         /// <summary>Contact's title / salutation.</summary>
         public string Title { get; } = string.Empty;

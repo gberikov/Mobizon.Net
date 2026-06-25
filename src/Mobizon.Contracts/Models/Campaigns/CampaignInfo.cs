@@ -104,8 +104,8 @@ namespace Mobizon.Contracts.Models.Campaigns
         public decimal TotalPdlivrdMsgCost { get; set; }
         /// <summary>Total cost of the campaign.</summary>
         public decimal TotalCost { get; set; }
-        /// <summary>Total cost at partner rate.</summary>
-        public decimal TotalPartnerCost { get; set; }
+        /// <summary>Total cost at partner rate. <see langword="null"/> when the API omits the value.</summary>
+        public decimal? TotalPartnerCost { get; set; }
 
         /// <summary>
         /// Gets or sets the number of rejected recipients (not included in the campaign).

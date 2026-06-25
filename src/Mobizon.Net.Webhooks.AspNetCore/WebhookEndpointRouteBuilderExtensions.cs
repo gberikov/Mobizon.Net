@@ -51,7 +51,7 @@ namespace Mobizon.Net.Webhooks.AspNetCore
         /// Responses:
         /// <list type="bullet">
         ///   <item><description>200 OK — signature verified, event parsed, handler invoked (enqueue heavy work to stay within Mobizon's 5-second window).</description></item>
-        ///   <item><description>413 Payload Too Large (JSON <c>{"error":"payload_too_large"}</c>) — <c>Content-Length</c> exceeds <see cref="MobizonWebhookOptions.MaxRequestBodyBytes"/>.</description></item>
+        ///   <item><description>413 Payload Too Large (JSON <c>{"error":"payload_too_large"}</c>) — the request body exceeds <see cref="MobizonWebhookOptions.MaxRequestBodyBytes"/> (enforced by a bounded read, so a chunked or absent <c>Content-Length</c> is still capped).</description></item>
         ///   <item><description>403 Forbidden (JSON <c>{"error":"signature_mismatch"}</c>) — HMAC verification failed.</description></item>
         ///   <item><description>400 Bad Request (JSON <c>{"error":"parse_error"}</c>) — body could not be parsed.</description></item>
         /// </list>
@@ -65,13 +65,26 @@ namespace Mobizon.Net.Webhooks.AspNetCore
             var options = context.RequestServices.GetRequiredService<MobizonWebhookOptions>();
             var services = context.RequestServices;
 
-            if (context.Request.ContentLength is long len && len > options.MaxRequestBodyBytes)
+            var maxBytes = options.MaxRequestBodyBytes;
+
+            // Fast path: reject when Content-Length is present and already over the cap.
+            if (context.Request.ContentLength is long len && len > maxBytes)
                 return Results.Json(new { error = "payload_too_large" }, statusCode: StatusCodes.Status413PayloadTooLarge);
 
+            // Bounded read: enforce the cap even when Content-Length is absent, understated, or chunked.
             string body;
-            using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true))
+            using (var buffer = new MemoryStream())
             {
-                body = await reader.ReadToEndAsync().ConfigureAwait(false);
+                var chunk = new byte[8192];
+                int read;
+                while ((read = await context.Request.Body.ReadAsync(chunk, 0, chunk.Length, context.RequestAborted).ConfigureAwait(false)) > 0)
+                {
+                    if (buffer.Length + read > maxBytes)
+                        return Results.Json(new { error = "payload_too_large" }, statusCode: StatusCodes.Status413PayloadTooLarge);
+                    buffer.Write(chunk, 0, read);
+                }
+
+                body = Encoding.UTF8.GetString(buffer.GetBuffer(), 0, (int)buffer.Length);
             }
 
             var result = processor.Process(body, evt => options.SecretKeyResolver!(services, evt));

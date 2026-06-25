@@ -100,6 +100,18 @@ namespace Mobizon.Net.Webhooks.Tests
         }
 
         [Fact]
+        public async Task OversizedBody_WithoutContentLength_Returns413()
+        {
+            // Body exceeds the 262144-byte cap, but Content-Length is not set (chunked transfer).
+            var (context, _) = BuildContext(new string('x', 262145), (_, __) => Payloads.Secret);
+            Assert.Null(context.Request.ContentLength);
+
+            var status = await InvokeAsync(context, (evt, ct) => Task.CompletedTask);
+
+            Assert.Equal(413, status);
+        }
+
+        [Fact]
         public async Task SignatureMismatch_Returns403_WithJsonBody()
         {
             var (context, responseBody) = BuildContext(Payloads.Load(Payloads.SmsDeliveryReport), (_, __) => "wrong-secret");

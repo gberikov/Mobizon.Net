@@ -22,7 +22,8 @@ namespace Mobizon.Contracts.Models.Common
         }
 
         /// <summary>
-        /// Gets or sets the base URL of the Mobizon API endpoint (e.g. <c>https://api.mobizon.com/service/</c>).
+        /// Gets or sets the base URL of the Mobizon API endpoint (e.g. <c>https://api.mobizon.kz</c>).
+        /// Do not include the <c>/service/</c> segment — the client appends it automatically.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set to <see langword="null"/>.</exception>
         public string ApiUrl

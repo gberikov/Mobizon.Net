@@ -258,5 +258,22 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(70000000001L, result.Data.CampaignId);
             Assert.Equal(70000000002L, result.Data.MessageId);
         }
+
+        [Fact]
+        public async Task ListAsync_WithScheduledStatus_SendsSchedulCode()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/List")
+                .WithFormData("criteria[status]", "SCHEDUL")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            var result = await CreateService(mockHttp).ListAsync(new MessageListRequest
+            {
+                Criteria = new MessageListCriteria { Status = SmsStatus.Scheduled }
+            });
+
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }

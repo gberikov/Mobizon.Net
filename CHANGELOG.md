@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Injected `HttpClient.Timeout` no longer mutated by SDK operations
 - README documentation corrections
 - CI triggers corrected to run on `master` and `develop` branches
+- `Campaign.GetInfoAsync` no longer throws when the API returns `null` for `totalPartnerCost` (`CampaignCounters.TotalPartnerCost` is now `decimal?`)
+- `Message.ListAsync` filtering by `SmsStatus.Scheduled` no longer throws (added the missing `SCHEDUL` request-code mapping)
+- Webhook body-size cap is now enforced by a bounded read, so a chunked or absent `Content-Length` can no longer bypass `MaxRequestBodyBytes`
+- Corrected `ApiUrl` examples in XML-doc and README (the base URL must not include the `/service/` segment, which the client appends automatically)
 
 ## [1.0.0] - 2026-02-24
 

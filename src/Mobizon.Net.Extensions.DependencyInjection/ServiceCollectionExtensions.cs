@@ -28,7 +28,7 @@ namespace Mobizon.Net.Extensions.DependencyInjection
         /// services.AddMobizon(options =>
         /// {
         ///     options.ApiKey = "your-api-key";
-        ///     options.ApiUrl = "https://api.mobizon.com/service/";
+        ///     options.ApiUrl = "https://api.mobizon.kz";
         /// })
         /// .AddMobizonResilience();
         /// </code>
@@ -56,7 +56,7 @@ namespace Mobizon.Net.Extensions.DependencyInjection
         /// <example>
         /// <code>
         /// // appsettings.json:
-        /// // { "Mobizon": { "ApiKey": "...", "ApiUrl": "https://api.mobizon.com/service/" } }
+        /// // { "Mobizon": { "ApiKey": "...", "ApiUrl": "https://api.mobizon.kz" } }
         ///
         /// services.AddMobizon(configuration.GetSection("Mobizon"));
         /// </code>

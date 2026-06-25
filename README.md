@@ -189,7 +189,7 @@ var campaign = await client.Campaigns.CreateAsync(
         Text = "Flash sale — 50% off today!"
     });
 
-int campaignId = campaign.Data;   // Data is the integer campaign ID
+long campaignId = campaign.Data;   // Data is the 64-bit campaign ID
 
 // 2. Add recipients
 await client.Campaigns.AddRecipientsAsync(
@@ -209,7 +209,7 @@ var sendResult = await client.Campaigns.SendAsync(campaignId);
 // 4. If the API queued a background task, poll for completion
 if (sendResult.Code == MobizonResponseCode.BackgroundTask)
 {
-    int taskId = sendResult.Data;   // Data is the integer task ID
+    long taskId = sendResult.Data;   // Data is the 64-bit task ID
     var taskStatus = await client.TaskQueue.GetStatusAsync(taskId);
     Console.WriteLine($"Progress: {taskStatus.Data.Progress}%");
 }

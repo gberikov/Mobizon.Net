@@ -16,13 +16,13 @@
         public string Country { get; } = string.Empty;
 
         /// <summary>Region / province ID.</summary>
-        public int? RegionId { get; }
+        public long? RegionId { get; }
 
         /// <summary>Region / province name.</summary>
         public string Region { get; } = string.Empty;
 
         /// <summary>City ID.</summary>
-        public int? CityId { get; }
+        public long? CityId { get; }
 
         /// <summary>City name.</summary>
         public string City { get; } = string.Empty;
