@@ -29,7 +29,9 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             Assert.Equal(1, result.Data.TotalItemCount);
             Assert.Single(result.Data.Items);
-            Assert.Equal(58356, result.Data.Items[0].AlphanameId);
+            Assert.Equal(7719L, result.Data.Items[0].Id);
+            Assert.Equal(58356L, result.Data.Items[0].AlphanameId);
+            Assert.Equal(58356L, result.Data.Items[0].Alphaname!.Id);
             Assert.Equal("Profit", result.Data.Items[0].Alphaname!.Name);
             Assert.Equal(1, result.Data.Items[0].GlobalStatus);
         }

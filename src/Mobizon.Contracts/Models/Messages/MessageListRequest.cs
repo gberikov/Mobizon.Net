@@ -41,7 +41,7 @@ namespace Mobizon.Contracts.Models.Messages
         /// <summary>
         /// Gets or sets campaign IDs to filter by (max 100).
         /// </summary>
-        public IReadOnlyList<int>? CampaignIds { get; set; }
+        public IReadOnlyList<long>? CampaignIds { get; set; }
 
         /// <summary>
         /// Gets or sets an optional sender name or number to filter messages by.
@@ -66,7 +66,7 @@ namespace Mobizon.Contracts.Models.Messages
         /// <summary>
         /// Gets or sets contact group IDs to filter by.
         /// </summary>
-        public IReadOnlyList<int>? Groups { get; set; }
+        public IReadOnlyList<long>? Groups { get; set; }
 
         /// <summary>
         /// Gets or sets a campaign status to filter by.

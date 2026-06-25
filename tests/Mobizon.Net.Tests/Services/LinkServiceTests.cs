@@ -156,6 +156,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""items"":[{""linkId"":""1"",""date"":""2025-01-01"",""clicks"":""10""}],""totals"":""10""},""message"":""""}");
             var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1L }, Type = LinkStatsType.Daily });
             Assert.Single(result.Data.Items);
+            Assert.Equal(1L, result.Data.Items[0].LinkId);
             Assert.Equal(10, result.Data.Items[0].Clicks);
             Assert.Equal(10, result.Data.Totals);
             mockHttp.VerifyNoOutstandingExpectation();

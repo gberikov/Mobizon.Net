@@ -5,7 +5,8 @@ namespace Mobizon.Contracts.Models.Alphanames
     /// <summary>A registered sender ID (alphanumeric signature) and its moderation status.</summary>
     public class AlphanameData
     {
-        [JsonPropertyName("alphanameId")] public int AlphanameId { get; set; }
+        [JsonPropertyName("id")] public long Id { get; set; }
+        [JsonPropertyName("alphanameId")] public long AlphanameId { get; set; }
         [JsonPropertyName("globalStatus")] public int GlobalStatus { get; set; }
         [JsonPropertyName("partnerStatus")] public int PartnerStatus { get; set; }
         [JsonPropertyName("isDefault")] public int IsDefault { get; set; }
@@ -17,7 +18,7 @@ namespace Mobizon.Contracts.Models.Alphanames
     /// <summary>The signature value itself.</summary>
     public class AlphanameInfo
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Type { get; set; }
         [JsonPropertyName("createTs")] public string? CreateTs { get; set; }

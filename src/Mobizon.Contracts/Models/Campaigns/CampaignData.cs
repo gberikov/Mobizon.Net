@@ -90,7 +90,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         public bool? TrackShortLinkRecipients { get; set; }
 
         /// <summary>Gets or sets the contact group IDs used in the campaign.</summary>
-        public IReadOnlyList<int>? Groups { get; set; }
+        public IReadOnlyList<long>? Groups { get; set; }
 
         /// <summary>Gets or sets the moderator's comment if the campaign was declined.</summary>
         public string? GlobalComment { get; set; }
@@ -102,7 +102,7 @@ namespace Mobizon.Contracts.Models.Campaigns
     public class CampaignGroupInfo
     {
         /// <summary>Gets or sets the group ID.</summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>Gets or sets the group name.</summary>
         public string? Name { get; set; }
