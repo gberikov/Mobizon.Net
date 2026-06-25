@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Campaigns;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
+using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
@@ -130,20 +132,17 @@ namespace Mobizon.Net.Services
                     if (c.Text != null)
                         parameters["criteria[text]"] = c.Text;
 
-                    if (c.Status != null)
-                        parameters["criteria[status]"] = c.Status;
+                    if (c.Status.HasValue)
+                        parameters["criteria[status]"] = ApiStatusCodes.ToApiCode(c.Status.Value);
 
-                    if (c.CreateTsFrom != null)
-                        parameters["criteria[createTsFrom]"] = c.CreateTsFrom;
-
-                    if (c.CreateTsTo != null)
-                        parameters["criteria[createTsTo]"] = c.CreateTsTo;
-
-                    if (c.SentTsFrom != null)
-                        parameters["criteria[sentTsFrom]"] = c.SentTsFrom;
-
-                    if (c.SentTsTo != null)
-                        parameters["criteria[sentTsTo]"] = c.SentTsTo;
+                    if (c.CreatedFrom.HasValue)
+                        parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.CreatedTo.HasValue)
+                        parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.SentFrom.HasValue)
+                        parameters["criteria[sentTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.SentTo.HasValue)
+                        parameters["criteria[sentTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
                     if (c.Type.HasValue)
                         parameters["criteria[type]"] = c.Type.Value.ToString();
