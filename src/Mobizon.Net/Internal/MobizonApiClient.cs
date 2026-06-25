@@ -97,7 +97,8 @@ namespace Mobizon.Net.Internal
             Stream? photo = null,
             string? photoFileName = null,
             CancellationToken cancellationToken = default,
-            int[]? extraSuccessCodes = null)
+            int[]? extraSuccessCodes = null,
+            string fileFieldName = "data[photo]")
         {
             var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
 
@@ -110,7 +111,7 @@ namespace Mobizon.Net.Internal
             {
                 var fileContent = new StreamContent(photo);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                multipart.Add(fileContent, "data[photo]", photoFileName ?? "photo");
+                multipart.Add(fileContent, fileFieldName, photoFileName ?? "photo");
             }
 
             request.Content = multipart;

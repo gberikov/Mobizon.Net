@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Mobizon.Contracts.Models.Campaigns
@@ -39,6 +40,12 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets additional processing options for this add-recipients request.
         /// </summary>
         public AddRecipientsParameters? Parameters { get; set; }
+
+        /// <summary>Optional CSV/file stream of recipients to upload (asynchronous). Mutually exclusive with the other recipient sources.</summary>
+        public Stream? RecipientsFile { get; set; }
+
+        /// <summary>File name for <see cref="RecipientsFile"/>.</summary>
+        public string? RecipientsFileName { get; set; }
     }
 
     /// <summary>

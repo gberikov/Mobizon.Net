@@ -181,8 +181,27 @@ namespace Mobizon.Net.Services
         public async Task<MobizonResponse<AddRecipientsResult>> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default)
         {
-            // Groups and file recipients are asynchronous — no limit applies, send as-is.
-            if (request.RecipientGroups != null || (request.Recipients == null && request.RecipientContacts == null))
+            var sources = (request.Recipients != null ? 1 : 0)
+                        + (request.RecipientContacts != null ? 1 : 0)
+                        + (request.RecipientGroups != null ? 1 : 0)
+                        + (request.RecipientsFile != null ? 1 : 0);
+            if (sources != 1)
+                throw new ArgumentException(
+                    "Exactly one recipient source must be set (Recipients, RecipientContacts, RecipientGroups, or RecipientsFile).",
+                    nameof(request));
+
+            if (request.RecipientsFile != null)
+            {
+                var fields = new Dictionary<string, string> { ["id"] = request.CampaignId.ToString() };
+                AppendParams(fields, request.Parameters);
+                return await _apiClient.SendMultipartAsync<AddRecipientsResult>(
+                    ModuleName, "AddRecipients", fields, request.RecipientsFile,
+                    request.RecipientsFileName ?? "recipients.csv",
+                    cancellationToken, fileFieldName: "recipientsFile").ConfigureAwait(false);
+            }
+
+            // Groups are asynchronous — no limit applies, send as-is.
+            if (request.RecipientGroups != null)
                 return await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false);
 
             // Split synchronous recipients (phone numbers / contact cards) into batches of 500.
@@ -295,32 +314,35 @@ namespace Mobizon.Net.Services
                 for (var i = 0; i < request.RecipientGroups.Count; i++)
                     parameters[$"recipientGroups[{i}]"] = request.RecipientGroups[i];
 
-            if (request.Parameters != null)
-            {
-                var p = request.Parameters;
-
-                if (p.Replace.HasValue)
-                    parameters["params[replace]"] = p.Replace.Value.ToString();
-
-                if (p.PlaceholdersFlag.HasValue)
-                    parameters["params[placeholdersFlag]"] = p.PlaceholdersFlag.Value.ToString();
-
-                if (p.RecipientsFileEncoding != null)
-                    parameters["params[recipientsFileEncoding]"] = p.RecipientsFileEncoding;
-
-                if (p.RecipientsFileSkipHeader.HasValue)
-                    parameters["params[recipientsFileSkipHeader]"] = p.RecipientsFileSkipHeader.Value.ToString();
-
-                if (p.RecipientsFileDelimiter != null)
-                    parameters["params[recipientsFileDelimiter]"] = p.RecipientsFileDelimiter;
-
-                if (p.RecipientsFileEnclosure != null)
-                    parameters["params[recipientsFileEnclosure]"] = p.RecipientsFileEnclosure;
-            }
+            AppendParams(parameters, request.Parameters);
 
             return _apiClient.SendAsync<AddRecipientsResult>(
                 HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
                 extraSuccessCodes: new[] { (int)AddRecipientsResponseCode.PartiallyAdded, (int)AddRecipientsResponseCode.NoneAdded });
+        }
+
+        private static void AppendParams(IDictionary<string, string> parameters, AddRecipientsParameters? prm)
+        {
+            if (prm == null)
+                return;
+
+            if (prm.Replace.HasValue)
+                parameters["params[replace]"] = prm.Replace.Value.ToString();
+
+            if (prm.PlaceholdersFlag.HasValue)
+                parameters["params[placeholdersFlag]"] = prm.PlaceholdersFlag.Value.ToString();
+
+            if (prm.RecipientsFileEncoding != null)
+                parameters["params[recipientsFileEncoding]"] = prm.RecipientsFileEncoding;
+
+            if (prm.RecipientsFileSkipHeader.HasValue)
+                parameters["params[recipientsFileSkipHeader]"] = prm.RecipientsFileSkipHeader.Value.ToString();
+
+            if (prm.RecipientsFileDelimiter != null)
+                parameters["params[recipientsFileDelimiter]"] = prm.RecipientsFileDelimiter;
+
+            if (prm.RecipientsFileEnclosure != null)
+                parameters["params[recipientsFileEnclosure]"] = prm.RecipientsFileEnclosure;
         }
 
         private static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> source, int offset, int count)

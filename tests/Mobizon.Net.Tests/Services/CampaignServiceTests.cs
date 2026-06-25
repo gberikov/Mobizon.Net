@@ -81,5 +81,47 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal("KZT", result.Data.Counters.UserCurrency);
             Assert.Equal(123, result.Data.Counters.CampaignId);
         }
+
+        [Fact]
+        public async Task AddRecipientsAsync_NoSource_Throws()
+        {
+            var service = CreateService(new MockHttpMessageHandler());
+            await Assert.ThrowsAsync<System.ArgumentException>(() =>
+                service.AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1 }));
+        }
+
+        [Fact]
+        public async Task AddRecipientsAsync_MultipleSources_Throws()
+        {
+            var service = CreateService(new MockHttpMessageHandler());
+            await Assert.ThrowsAsync<System.ArgumentException>(() =>
+                service.AddRecipientsAsync(new AddRecipientsRequest
+                {
+                    CampaignId = 1,
+                    Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
+                    RecipientGroups = new[] { "9" }
+                }));
+        }
+
+        [Fact]
+        public async Task AddRecipientsAsync_File_SendsMultipart()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
+                .With(req => req.Content is System.Net.Http.MultipartFormDataContent)
+                .Respond("application/json", @"{""code"":100,""data"":555,""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            using var ms = new System.IO.MemoryStream(new byte[] { 1, 2, 3 });
+            var result = await service.AddRecipientsAsync(new AddRecipientsRequest
+            {
+                CampaignId = 1,
+                RecipientsFile = ms,
+                RecipientsFileName = "recipients.csv"
+            });
+
+            Assert.Equal(555, result.Data.TaskId);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }
