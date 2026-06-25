@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - List endpoints now return `MobizonResponse<MobizonListResult<T>>` (Campaign, Link, Message, ContactCard list operations)
 - `Campaign.CreateAsync` and `SendAsync` now return `MobizonResponse<long>` instead of `MobizonResponse<CreateCampaignResult>` and `MobizonResponse<CampaignSendResult>`
 - `Link.GetAsync(code)` replaced by `Link.GetByIdAsync`, `Link.GetByCodeAsync`, and `Link.GetByShortLinkAsync`
-- `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code` or `FullLink`)
+- `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code`)
 - `LinkData.Clicks` property renamed to `ClickCnt`
 - `Link.GetStatsAsync` now returns `LinkStatsResult { Items, Totals }` with individual stat points typed as `LinkStatPoint`
 - `MessageInfo.SegUserBuy` now typed as `decimal` instead of `int`
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AddRecipients` file upload support with single-source validation
 - `Campaign.CreateAsync` accepts new `shortenLinks` parameter
 - `Link.ListAsync` criteria support for filtering and pagination
+- `UpdateLinkRequest.FullLink` to repoint an existing short link's destination URL via `Link.UpdateAsync`
 - `LinkStatsType` enum extended with `Hourly` and `Minute` statistic types
 - Webhook endpoint body-size cap enforcement and JSON problem responses
 - Tag-driven versioning via MinVer
@@ -42,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Message.ListAsync` filtering by `SmsStatus.Scheduled` no longer throws (added the missing `SCHEDUL` request-code mapping)
 - Webhook body-size cap is now enforced by a bounded read, so a chunked or absent `Content-Length` can no longer bypass `MaxRequestBodyBytes`
 - Corrected `ApiUrl` examples in XML-doc and README (the base URL must not include the `/service/` segment, which the client appends automatically)
+- `AddMobizon` (DI) now applies the configured `MobizonClientOptions.Timeout` to the named `HttpClient`; previously the timeout was silently ignored on the DI path (the externally-owned client kept the 100s `HttpClient` default)
+- Contact-card reads no longer fail when the PHP API serialises an unset object field (mobile/email/viber/whatsapp/landline/skype/telegram/address) as `[]` or `""` — such values now deserialize to `null`
+- Unknown/future contact `type` values no longer fail the entire contact-card read — an unrecognised type degrades to `null` while the field value is preserved
+- `ContactCard.BirthDate` mapping now tolerates date+time forms (e.g. `1990-01-15 00:00:00`) instead of silently dropping the value
+- `ContactCards` query terminal operations (`ToListAsync`/`ToPageAsync`/`CountAsync`/`FirstOrDefaultAsync`/`SingleOrDefaultAsync`) no longer throw `NullReferenceException` when the API returns a `null` `data` payload
+- `ContactCardSet.GetGroupsAsync` returns an empty list instead of `null` when the API returns no groups
+- Contact-card enum filter values are now upper-cased with invariant culture, so locale-specific casing (e.g. tr-TR) no longer corrupts the wire value
 
 ## [1.0.0] - 2026-02-24
 

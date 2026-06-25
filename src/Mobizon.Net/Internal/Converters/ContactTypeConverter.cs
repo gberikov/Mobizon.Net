@@ -16,6 +16,16 @@ namespace Mobizon.Net.Internal.Converters
             if (reader.TokenType == JsonTokenType.Null)
                 return null;
 
+            // An empty array/object/string is how the PHP API may serialise an unset field — treat
+            // anything that is not a recognised type string as "no type" rather than failing the
+            // whole contactcard read. Unknown/future type values (e.g. a new "WORK") also degrade to
+            // null so one field can't break deserialisation of the entire response.
+            if (reader.TokenType != JsonTokenType.String)
+            {
+                reader.Skip();
+                return null;
+            }
+
             var s = reader.GetString();
 
             if (string.IsNullOrWhiteSpace(s))
@@ -24,7 +34,7 @@ namespace Mobizon.Net.Internal.Converters
             if (Enum.TryParse<ContactType>(s, ignoreCase: true, out var result))
                 return result;
 
-            throw new JsonException($"Cannot convert \"{s}\" to {nameof(ContactType)}.");
+            return null;
         }
 
         public override void Write(Utf8JsonWriter writer, ContactType? value, JsonSerializerOptions options)

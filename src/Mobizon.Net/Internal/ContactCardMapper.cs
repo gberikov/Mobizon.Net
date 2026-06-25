@@ -76,9 +76,28 @@ namespace Mobizon.Net.Internal
                 Info        = e.Info
             };
 
-        private static DateTime? ParseDate(string? s) =>
-            string.IsNullOrWhiteSpace(s) ? (DateTime?)null
-            : DateTime.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt)
-                ? dt : (DateTime?)null;
+        // Mobizon documents birth_date as YYYY-MM-DD, but the PHP API has been observed to return
+        // date+time forms (e.g. "1990-01-15 00:00:00"). Accept the documented format plus common
+        // variants, then fall back to a lenient invariant parse so a non-canonical value is preserved
+        // rather than silently dropped.
+        private static readonly string[] BirthDateFormats =
+        {
+            "yyyy-MM-dd",
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-ddTHH:mm:ss"
+        };
+
+        private static DateTime? ParseDate(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+                return null;
+
+            if (DateTime.TryParseExact(s, BirthDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+                return dt;
+
+            return DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt)
+                ? dt
+                : (DateTime?)null;
+        }
     }
 }

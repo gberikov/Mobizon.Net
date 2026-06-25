@@ -190,6 +190,59 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
+        // ── Empty / sparse field tolerance (PHP loose typing) ────────────────
+
+        [Fact]
+        public async Task ListAsync_EmptyFieldsAsArrays_DeserializeToNull()
+        {
+            // The PHP API serialises unset object fields as an empty array `[]`.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, $"{BaseUrl}/service/contactcard/list")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""name"":""John"",""mobile"":[],""email"":[],""address"":[]},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var f = (await service.ListAsync()).Data.Items[0].Fields!;
+
+            Assert.Equal("John", f.Name);
+            Assert.Null(f.Mobile);
+            Assert.Null(f.Email);
+            Assert.Null(f.Address);
+        }
+
+        [Fact]
+        public async Task ListAsync_EmptyFieldsAsStrings_DeserializeToNull()
+        {
+            // The PHP API may also serialise an unset field as an empty string `""`.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, $"{BaseUrl}/service/contactcard/list")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""name"":""John"",""mobile"":"""",""email"":""""},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var f = (await service.ListAsync()).Data.Items[0].Fields!;
+
+            Assert.Null(f.Mobile);
+            Assert.Null(f.Email);
+        }
+
+        [Fact]
+        public async Task ListAsync_UnknownContactType_DegradesToNullType()
+        {
+            // An unknown/future type string must not fail the whole read — the field value survives,
+            // only the unrecognised Type degrades to null.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, $"{BaseUrl}/service/contactcard/list")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""mobile"":{""value"":""77001234567"",""type"":""WORK""}},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var f = (await service.ListAsync()).Data.Items[0].Fields!;
+
+            Assert.Equal("77001234567", f.Mobile!.Value);
+            Assert.Null(f.Mobile.Type);
+        }
+
         // ── GetAsync ─────────────────────────────────────────────────────────
 
         [Fact]

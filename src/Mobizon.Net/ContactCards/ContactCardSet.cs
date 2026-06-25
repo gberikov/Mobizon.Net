@@ -114,7 +114,7 @@ namespace Mobizon.Net.ContactCards
             CancellationToken cancellationToken = default)
         {
             var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken);
-            return response.Data;
+            return response.Data ?? Array.Empty<ContactGroupRef>();
         }
     }
 }

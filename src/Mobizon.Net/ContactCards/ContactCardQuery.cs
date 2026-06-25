@@ -105,7 +105,7 @@ namespace Mobizon.Net.ContactCards
             CancellationToken ct = default)
         {
             var response = await _service.ListAsync(BuildRequest(), ct);
-            return Map(response.Data.Items);
+            return Map(ItemsOf(response));
         }
 
         /// <summary>Executes the query and returns the page with pagination metadata.</summary>
@@ -116,8 +116,8 @@ namespace Mobizon.Net.ContactCards
             var response = await _service.ListAsync(request, ct);
             return new PaginatedResponse<ContactCard>
             {
-                Items       = Map(response.Data.Items),
-                TotalCount  = response.Data.TotalItemCount,
+                Items       = Map(ItemsOf(response)),
+                TotalCount  = response.Data?.TotalItemCount ?? 0,
                 CurrentPage = request.Pagination?.CurrentPage ?? 0,
                 PageSize    = request.Pagination?.PageSize    ?? 0
             };
@@ -127,7 +127,7 @@ namespace Mobizon.Net.ContactCards
         public async Task<int> CountAsync(CancellationToken ct = default)
         {
             var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct);
-            return response.Data.TotalItemCount;
+            return response.Data?.TotalItemCount ?? 0;
         }
 
         /// <summary>
@@ -137,8 +137,9 @@ namespace Mobizon.Net.ContactCards
             CancellationToken ct = default)
         {
             var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct);
-            return response.Data.Items.Count > 0
-                ? ContactCardMapper.ToEntity(response.Data.Items[0])
+            var items = ItemsOf(response);
+            return items.Count > 0
+                ? ContactCardMapper.ToEntity(items[0])
                 : null;
         }
 
@@ -158,10 +159,11 @@ namespace Mobizon.Net.ContactCards
             CancellationToken ct = default)
         {
             var response = await _service.ListAsync(BuildRequest(takeOverride: 2), ct);
-            if (response.Data.Items.Count > 1)
+            var items = ItemsOf(response);
+            if (items.Count > 1)
                 throw new InvalidOperationException("Sequence contains more than one element.");
-            return response.Data.Items.Count == 1
-                ? ContactCardMapper.ToEntity(response.Data.Items[0])
+            return items.Count == 1
+                ? ContactCardMapper.ToEntity(items[0])
                 : null;
         }
 
@@ -200,6 +202,11 @@ namespace Mobizon.Net.ContactCards
 
         private static IReadOnlyList<ContactCard> Map(IReadOnlyList<ContactCardData> items)
             => items.Select(ContactCardMapper.ToEntity).ToArray();
+
+        // contactcard/list may return success with a null data payload; treat it as an empty page
+        // rather than dereferencing null (mirrors the Data null-check in FindAsync/ContactCardSet).
+        private static IReadOnlyList<ContactCardData> ItemsOf(MobizonResponse<ContactCardListResult> response)
+            => response.Data?.Items ?? Array.Empty<ContactCardData>();
 
         private static string ExtractFieldName<TKey>(
             Expression<Func<ContactCardFilterSpec, TKey>> expr)

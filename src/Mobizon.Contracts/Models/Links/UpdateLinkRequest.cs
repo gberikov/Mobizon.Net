@@ -11,6 +11,12 @@ namespace Mobizon.Contracts.Models.Links
         public long Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the new destination URL the short link points to.
+        /// When <see langword="null"/>, the existing destination is preserved.
+        /// </summary>
+        public string? FullLink { get; set; }
+
+        /// <summary>
         /// Gets or sets the new status for the link.
         /// When <see langword="null"/>, the existing status is preserved.
         /// </summary>

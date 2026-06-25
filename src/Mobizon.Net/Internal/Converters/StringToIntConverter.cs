@@ -22,16 +22,6 @@ namespace Mobizon.Net.Internal.Converters
                 }
                 case JsonTokenType.Number:
                     return reader.GetInt32();
-                case JsonTokenType.None:
-                case JsonTokenType.StartObject:
-                case JsonTokenType.EndObject:
-                case JsonTokenType.StartArray:
-                case JsonTokenType.EndArray:
-                case JsonTokenType.PropertyName:
-                case JsonTokenType.Comment:
-                case JsonTokenType.True:
-                case JsonTokenType.False:
-                case JsonTokenType.Null:
                 default:
                     throw new JsonException($"Unexpected token type {reader.TokenType} when parsing int.");
             }

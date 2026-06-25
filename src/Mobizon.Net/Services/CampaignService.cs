@@ -279,7 +279,12 @@ namespace Mobizon.Net.Services
                 }
                 else
                 {
-                    aggregated.Data?.MergeEntries(response.Data);
+                    // If the first batch came back with a null payload, adopt the next batch's payload
+                    // so its entries are not silently dropped; otherwise merge into the aggregate.
+                    if (aggregated.Data == null)
+                        aggregated.Data = response.Data;
+                    else if (response.Data != null)
+                        aggregated.Data.MergeEntries(response.Data);
 
                     // Reflect worst-case response code: prefer 99 (all failed) > 98 (partial) > 0 (success).
                     if (response.RawCode > aggregated.RawCode)

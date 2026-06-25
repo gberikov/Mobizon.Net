@@ -249,15 +249,30 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task UpdateAsync_SendsIdAndFields_NoFullLink()
+        public async Task UpdateAsync_WithoutFullLink_OmitsFullLink()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/update")
                 .WithFormData("id", "42")
                 .WithFormData("data[status]", "0")
                 .WithFormData("data[comment]", "c")
+                .With(req => !req.Content!.ReadAsStringAsync().GetAwaiter().GetResult().Contains("fullLink"))
                 .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
             var result = await CreateService(mockHttp).UpdateAsync(new UpdateLinkRequest { Id = 42, Status = 0, Comment = "c" });
+            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WithFullLink_SendsDataFullLink()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/update")
+                .WithFormData("id", "42")
+                .WithFormData("data[fullLink]", "https://new-target.example")
+                .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
+            var result = await CreateService(mockHttp).UpdateAsync(
+                new UpdateLinkRequest { Id = 42, FullLink = "https://new-target.example" });
             Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }

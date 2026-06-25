@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq.Expressions;
 using Mobizon.Contracts.Models.ContactCards;
 
@@ -90,14 +91,16 @@ namespace Mobizon.Net.Internal
 
             string apiValue;
             if (value is DateTime dt)
-                apiValue = dt.ToString("yyyy-MM-dd HH:mm:ss");
+                apiValue = dt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
             else if (value is Enum e)
             {
                 // Gender.Undefined (and any future "Undefined" enum value) → empty operator
                 if (e.ToString() == nameof(Gender.Undefined))
                     return new ContactCardCriteria { Field = field, Operator = "empty", Value = string.Empty };
 
-                apiValue = e.ToString().ToUpper();   // ContactType.Main → "MAIN", Gender.Male → "MALE"
+                // Invariant casing so the wire value matches the API's literals regardless of the
+                // current culture (e.g. tr-TR would otherwise turn "Additional" into "ADDİTİONAL").
+                apiValue = e.ToString().ToUpperInvariant();   // ContactType.Main → "MAIN", Gender.Male → "MALE"
             }
             else
                 apiValue = value?.ToString() ?? string.Empty;
