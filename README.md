@@ -2,7 +2,8 @@
 
 A .NET SDK for the [Mobizon](https://mobizon.kz) SMS gateway REST API (v1). Provides a strongly-typed,
 async-first client for sending SMS messages, managing bulk campaigns, tracking short links, checking
-account balance, and monitoring background tasks — all from a single `IMobizonClient` interface.
+account balance, monitoring background tasks, managing contact groups and cards, maintaining a
+number stop-list, and querying registered sender IDs — all from a single `IMobizonClient` interface.
 
 [![NuGet](https://img.shields.io/nuget/v/Mobizon.Net.svg)](https://www.nuget.org/packages/Mobizon.Net)
 [![NuGet](https://img.shields.io/nuget/v/Mobizon.Net.Extensions.DependencyInjection.svg)](https://www.nuget.org/packages/Mobizon.Net.Extensions.DependencyInjection)
@@ -13,13 +14,15 @@ account balance, and monitoring background tasks — all from a single `IMobizon
 
 ## Features
 
-- **5 API modules** — Messages, Campaigns, Links, User, and TaskQueue — with full method coverage
+- **9 API modules** — Messages, Campaigns, Links, User, TaskQueue, ContactGroups, ContactCards,
+  NumberStopList, and Alphanames — with full method coverage
+- **ContactCards LINQ-style query API** via `IContactCardQuery` for composable server-side filtering
 - **Inbound webhooks** — verify signatures and parse delivery-report and form events, with optional ASP.NET Core helpers
 - **Strongly-typed requests and responses** via `MobizonResponse<T>` with typed exceptions
 - **ASP.NET Core DI integration** — register with a single `AddMobizon()` call
-- **Polly resilience** — retry, circuit breaker, and timeout policies out of the box
+- **Polly resilience** — retry and circuit breaker policies out of the box
 - **`netstandard2.0` target** — compatible with .NET Framework 4.6.1+, .NET Core 2.0+, and .NET 5+
-- **Zero third-party dependencies** in the core package (only `System.Text.Json`)
+- **`System.Text.Json` serialisation** — no other runtime dependencies in the core packages
 - **`CancellationToken` support** on every public async method
 
 ---
@@ -43,8 +46,8 @@ The primary package. Provides `MobizonClient` and all API modules. Depends only 
 dotnet add package Mobizon.Contracts
 ```
 
-Interfaces, request/response DTOs, and exception types. Zero dependencies. Reference this package
-when you want to accept `IMobizonClient` without depending on the implementation.
+Interfaces, request/response DTOs, and exception types. References `System.Text.Json`. Reference
+this package when you want to accept `IMobizonClient` without depending on the implementation.
 
 ### DI integration (ASP.NET Core)
 
@@ -60,8 +63,8 @@ Adds `AddMobizon()` extension methods on `IServiceCollection` and wires up `IHtt
 dotnet add package Mobizon.Net.Extensions.Polly
 ```
 
-Adds `AddMobizonResilience()` on `IHttpClientBuilder` with retry, circuit breaker, and timeout
-policies. Requires the DI package.
+Adds `AddMobizonResilience()` on `IHttpClientBuilder` with retry and circuit breaker policies.
+Requires the DI package.
 
 ### Webhooks (incoming events)
 
@@ -105,31 +108,38 @@ Console.WriteLine($"Message ID: {result.Data.MessageId}");
 
 ## API Modules
 
-`IMobizonClient` exposes five sub-services as properties:
+`IMobizonClient` exposes nine sub-services as properties:
 
 ```
 IMobizonClient
-├── .Messages   — IMessageService
-├── .Campaigns  — ICampaignService
-├── .Links      — ILinkService
-├── .User       — IUserService
-└── .TaskQueue  — ITaskQueueService
+├── .Messages        — IMessageService
+├── .Campaigns       — ICampaignService
+├── .Links           — ILinkService
+├── .User            — IUserService
+├── .TaskQueue       — ITaskQueueService
+├── .ContactGroups   — IContactGroupService
+├── .ContactCards    — IContactCardSet  (also implements IContactCardQuery)
+├── .NumberStopList  — INumberStopListService
+└── .Alphanames      — IAlphanameService
 ```
 
 ### Messages
 
 Send individual SMS messages and query delivery status.
 
-**Send an SMS:**
+**Send an SMS with optional parameters:**
 
 ```csharp
 var result = await client.Messages.SendSmsMessageAsync(
     new SendSmsMessageRequest
     {
-        Recipient = "77001234567",
-        Text     = "Your verification code: 8421",
-        From     = "MyBrand",   // optional sender name / alphaname
-        Validity = 60           // optional, minutes
+        Recipient  = "77001234567",
+        Text       = "Your verification code: 8421",
+        From       = "MyBrand",   // optional sender name / alphaname
+        Parameters = new SmsMessageParameters
+        {
+            Validity = TimeSpan.FromMinutes(60)   // optional delivery window
+        }
     });
 
 Console.WriteLine($"Campaign: {result.Data.CampaignId}");
@@ -153,12 +163,12 @@ foreach (var item in status.Data)
 var messages = await client.Messages.ListAsync(
     new MessageListRequest
     {
-        Criteria   = new MessageListCriteria { Status = 3 },
+        Criteria   = new MessageListCriteria { Status = SmsStatus.Delivered },
         Pagination = new PaginationRequest   { CurrentPage = 0, PageSize = 50 },
         Sort       = new SortRequest         { Field = "id", Direction = SortDirection.DESC }
     });
 
-Console.WriteLine($"Total: {messages.Data.TotalCount}");
+Console.WriteLine($"Total: {messages.Data.TotalItemCount}");
 foreach (var msg in messages.Data.Items)
     Console.WriteLine($"[{msg.Id}] {msg.Text}");
 ```
@@ -174,34 +184,39 @@ Create and send bulk SMS campaigns, then retrieve delivery statistics.
 var campaign = await client.Campaigns.CreateAsync(
     new CreateCampaignRequest
     {
-        Type = 1,
+        Type = CampaignType.Bulk,
         From = "MyBrand",
         Text = "Flash sale — 50% off today!"
     });
+
+int campaignId = campaign.Data;   // Data is the integer campaign ID
 
 // 2. Add recipients
 await client.Campaigns.AddRecipientsAsync(
     new AddRecipientsRequest
     {
-        CampaignId = campaign.Data.CampaignId,
-        Type       = 1,
-        Data       = new[] { "77001111111", "77002222222" }
+        CampaignId = campaignId,
+        Recipients = new[]
+        {
+            new RecipientEntry { Recipient = "77001111111" },
+            new RecipientEntry { Recipient = "77002222222" }
+        }
     });
 
 // 3. Send
-var sendResult = await client.Campaigns.SendAsync(campaign.Data.CampaignId);
+var sendResult = await client.Campaigns.SendAsync(campaignId);
 
 // 4. If the API queued a background task, poll for completion
 if (sendResult.Code == MobizonResponseCode.BackgroundTask)
 {
-    var taskStatus = await client.TaskQueue.GetStatusAsync(
-        sendResult.Data.TaskId.Value);
+    int taskId = sendResult.Data;   // Data is the integer task ID
+    var taskStatus = await client.TaskQueue.GetStatusAsync(taskId);
     Console.WriteLine($"Progress: {taskStatus.Data.Progress}%");
 }
 
 // 5. Get delivery statistics
-var info = await client.Campaigns.GetInfoAsync(campaign.Data.CampaignId);
-Console.WriteLine($"Sent: {info.Data.Sent}  Delivered: {info.Data.Delivered}  Failed: {info.Data.Failed}");
+var info = await client.Campaigns.GetInfoAsync(campaignId);
+Console.WriteLine($"Delivered: {info.Data.Counters?.TotalDelivrdMsgNum}");
 ```
 
 Other available methods: `GetAsync`, `ListAsync`, `DeleteAsync`.
@@ -226,11 +241,14 @@ var link = await client.Links.CreateAsync(
 Console.WriteLine($"Short code: {link.Data.Code}");
 ```
 
-**Retrieve a link by short code:**
+**Retrieve a link by short code, numeric ID, or full short URL:**
 
 ```csharp
-var link = await client.Links.GetAsync("abc123");
-Console.WriteLine($"URL: {link.Data.FullLink}  Clicks: {link.Data.Clicks}");
+var byCode      = await client.Links.GetByCodeAsync("abc123");
+var byId        = await client.Links.GetByIdAsync(link.Data.Id);
+var byShortLink = await client.Links.GetByShortLinkAsync("https://mbzn.co/abc123");
+
+Console.WriteLine($"URL: {byCode.Data.FullLink}  Clicks: {byCode.Data.ClickCnt}");
 ```
 
 **Get click statistics:**
@@ -245,7 +263,9 @@ var stats = await client.Links.GetStatsAsync(
         DateTo   = "2026-01-31"
     });
 
-foreach (var entry in stats.Data)
+// stats.Data is a LinkStatsResult with Items (per-period points) and Totals (aggregate)
+Console.WriteLine($"Total clicks: {stats.Data.Totals}");
+foreach (var entry in stats.Data.Items)
     Console.WriteLine($"{entry.Date}: {entry.Clicks} clicks");
 ```
 
@@ -255,9 +275,8 @@ foreach (var entry in stats.Data)
 await client.Links.UpdateAsync(
     new UpdateLinkRequest
     {
-        Code     = "abc123",
-        FullLink = "https://example.com/promo-v2",
-        Comment  = "Updated URL"
+        Id      = link.Data.Id,
+        Comment = "Updated comment"
     });
 ```
 
@@ -295,6 +314,18 @@ Console.WriteLine($"Task {taskStatus.Data.Id}: {taskStatus.Data.Progress}% compl
 ```
 
 `TaskQueueStatus` fields: `Id`, `Status`, `Progress` (0–100).
+
+---
+
+### Alphanames
+
+List the registered sender IDs available to the account.
+
+```csharp
+var alphanames = await client.Alphanames.ListAsync();
+foreach (var a in alphanames.Data.Items)
+    Console.WriteLine($"{a.Alphaname?.Name}  (id={a.AlphanameId})");
+```
 
 ---
 
@@ -395,7 +426,7 @@ services.AddMobizon(configuration.GetSection("Mobizon"));
 ```
 
 Both overloads return `IHttpClientBuilder` for chaining additional HTTP client configuration.
-`IMobizonClient` is registered as a **scoped** service backed by `IHttpClientFactory`.
+`IMobizonClient` is registered as a **transient** service backed by `IHttpClientFactory`.
 
 ### Inject and use in a service
 
@@ -425,16 +456,16 @@ public class NotificationService
 
 ## Polly Resilience
 
-Chain `AddMobizonResilience()` after `AddMobizon()` to apply retry, circuit breaker, and timeout
-policies to all HTTP calls.
+Chain `AddMobizonResilience()` after `AddMobizon()` to apply retry and circuit breaker policies to
+all HTTP calls. Note: `AddMobizonResilience` adds retry and circuit breaker only — there is no
+separate timeout policy; use `MobizonClientOptions.Timeout` to configure the `HttpClient` timeout.
 
 ### Default policies
 
 | Policy | Default |
 |--------|---------|
-| Retry | 3 attempts, exponential backoff: 2 s, 4 s, 8 s |
+| Retry | 3 attempts, exponential backoff: 1 s, 2 s, 4 s |
 | Circuit breaker | Opens after 5 consecutive failures, breaks for 30 s |
-| Timeout | 30 s per request |
 
 ```csharp
 services.AddMobizon(options =>
@@ -442,7 +473,7 @@ services.AddMobizon(options =>
     options.ApiKey = configuration["Mobizon:ApiKey"];
     options.ApiUrl = configuration["Mobizon:ApiUrl"];
 })
-.AddMobizonResilience(); // apply default retry + circuit breaker + timeout
+.AddMobizonResilience(); // apply default retry + circuit breaker
 ```
 
 ### Customise resilience options
@@ -451,17 +482,12 @@ services.AddMobizon(options =>
 services.AddMobizon(configuration.GetSection("Mobizon"))
     .AddMobizonResilience(resilience =>
     {
-        resilience.RetryCount                = 5;
-        resilience.RetryBaseDelay            = TimeSpan.FromSeconds(1);
-        resilience.CircuitBreakerCount       = 10;
-        resilience.CircuitBreakerDuration    = TimeSpan.FromSeconds(60);
-        resilience.Timeout                   = TimeSpan.FromSeconds(15);
+        resilience.RetryCount                       = 5;
+        resilience.RetryBaseDelay                   = TimeSpan.FromSeconds(1);
+        resilience.CircuitBreakerFailureThreshold   = 10;
+        resilience.CircuitBreakerDuration           = TimeSpan.FromSeconds(60);
     });
 ```
-
-> **Timeout note**: `MobizonClientOptions.Timeout` sets `HttpClient.Timeout` and applies when
-> Polly is not used. When `AddMobizonResilience()` is active, configure timeout exclusively via
-> `MobizonResilienceOptions.Timeout` to avoid conflicting policies.
 
 ---
 
@@ -482,6 +508,8 @@ var options = new MobizonClientOptions
     ApiUrl = "https://api.mobizon.uz"  // Uzbekistan
 };
 ```
+
+The client automatically appends `/service/` and the API version path; do not include them in `ApiUrl`.
 
 ---
 
@@ -517,12 +545,25 @@ catch (MobizonException ex)
 | `MobizonResponseCode` | Value | Meaning |
 |-----------------------|-------|---------|
 | `Success` | 0 | Operation completed successfully |
-| `BackgroundTask` | 100 | Task queued; `Data` contains the task ID |
-| `InvalidData` | 1 | Invalid request parameters |
-| `AuthFailed` | 2 | Authentication failed |
-| `NotFound` | 3 | Resource not found |
-| `AccessDenied` | 4 | Insufficient permissions |
-| `InternalError` | 5 | Server-side error |
+| `ValidationError` | 1 | Transmitted data contains invalid values |
+| `NotFound` | 2 | Record not found or access denied by ID |
+| `UnknownError` | 3 | Unknown application error |
+| `InvalidModule` | 4 | Invalid `module` parameter |
+| `InvalidMethod` | 5 | Invalid `method` parameter |
+| `InvalidFormat` | 6 | Invalid `format` parameter |
+| `LoginError` | 8 | Incorrect credentials or expired session |
+| `AccessDenied` | 9 | Access to this API method is denied |
+| `SaveError` | 10 | Server data save error |
+| `MissingParameters` | 11 | Required parameters missing from the request |
+| `InvalidParameter` | 12 | An input parameter violates constraints |
+| `WrongServer` | 13 | Wrong regional API server |
+| `AccountBlocked` | 14 | User account is blocked or deleted |
+| `OperationError` | 15 | Operation error unrelated to data update |
+| `RateLimitExceeded` | 30 | Too many requests; decrease the request frequency |
+| `BulkPartialSuccess` | 98 | Bulk operation partially completed |
+| `BulkCompleteFailure` | 99 | Bulk operation completely failed |
+| `BackgroundTask` | 100 | Operation queued; `Data` contains the task ID |
+| `ServiceError` | 999 | General service error |
 
 `BackgroundTask` (100) is not an error — the SDK returns the response normally. `MobizonApiException`
 is thrown only for codes that represent actual failures.
@@ -534,7 +575,7 @@ is thrown only for codes that represent actual failures.
 Contributions are welcome. Please open an issue to discuss significant changes before submitting a
 pull request.
 
-1. Fork the repository and create a feature branch from `main`.
+1. Fork the repository and create a feature branch from `master`.
 2. Add tests for any new behaviour. The test suite must pass without network access.
 3. Follow the existing C# code style (standard .NET conventions, XML documentation on all public
    members).
