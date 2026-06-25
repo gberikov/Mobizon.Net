@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -198,12 +199,7 @@ namespace Mobizon.Net.ContactCards
         }
 
         private static IReadOnlyList<ContactCard> Map(IReadOnlyList<ContactCardData> items)
-        {
-            var result = new ContactCard[items.Count];
-            for (var i = 0; i < items.Count; i++)
-                result[i] = ContactCardMapper.ToEntity(items[i]);
-            return result;
-        }
+            => items.Select(ContactCardMapper.ToEntity).ToArray();
 
         private static string ExtractFieldName<TKey>(
             Expression<Func<ContactCardFilterSpec, TKey>> expr)
