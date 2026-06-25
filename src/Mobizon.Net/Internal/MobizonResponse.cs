@@ -1,13 +1,14 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts.Models.Common;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Universal response wrapper returned by all Mobizon API endpoints.
+    /// Internal implementation detail — consumers receive unwrapped domain types from service methods.
     /// </summary>
     /// <typeparam name="T">The type of the payload contained in <see cref="Data"/>.</typeparam>
-    public class MobizonResponse<T>
+    internal class MobizonResponse<T>
     {
         /// <summary>
         /// Gets or sets the raw integer response code returned by the API.
