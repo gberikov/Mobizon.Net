@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -97,21 +98,31 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
                 .WithFormData("code", "abc123")
-                .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""abc123"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""5""},""message"":""""}");
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""abc123"",""fullLink"":""https://e.com"",""status"":""1"",""moderatorStatus"":""1"",""clickCnt"":""5"",""redirectCnt"":""2"",""createTs"":""2026-03-10 12:00:00""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByCodeAsync("abc123");
-            Assert.Equal(5, result.ClickCnt);
+            Assert.Equal(5, result.Clicks);
+            Assert.Equal(2, result.Redirects);
+            Assert.Equal(LinkStatus.Active, result.Status);
+            Assert.Equal(LinkModeratorStatus.Approved, result.ModeratorStatus);
+            Assert.Equal(new DateTime(2026, 3, 10, 12, 0, 0), result.Created);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
         [Fact]
         public async Task GetByIdAsync_SendsId()
         {
+            // payload: {"code":0,"data":{"id":"42","code":"x","fullLink":"https://e.com","status":"1","moderatorStatus":"1","clickCnt":"7","redirectCnt":"3","createTs":"2026-01-02 03:04:05"},"message":""}
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
                 .WithFormData("id", "42")
-                .Respond("application/json", @"{""code"":0,""data"":{""id"":""42"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
+                .Respond("application/json", @"{""code"":0,""data"":{""id"":""42"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""moderatorStatus"":""1"",""clickCnt"":""7"",""redirectCnt"":""3"",""createTs"":""2026-01-02 03:04:05""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByIdAsync(42);
             Assert.Equal(42, result.Id);
+            Assert.Equal(LinkStatus.Active, result.Status);
+            Assert.Equal(LinkModeratorStatus.Approved, result.ModeratorStatus);
+            Assert.Equal(7, result.Clicks);
+            Assert.Equal(3, result.Redirects);
+            Assert.Equal(new DateTime(2026, 1, 2, 3, 4, 5), result.Created);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -261,7 +272,10 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(2, result.TotalItemCount);
             Assert.Equal(2, result.Items.Count);
             Assert.Equal("tyz2", result.Items[0].Code);
-            Assert.Equal(1, result.Items[1].ClickCnt); // second link has clickCnt "1"
+            Assert.Equal(1, result.Items[1].Clicks); // second link has clickCnt "1"
+            Assert.Equal(LinkStatus.Active, result.Items[0].Status);
+            Assert.Equal(LinkModeratorStatus.Approved, result.Items[0].ModeratorStatus);
+            Assert.Equal(new DateTime(2025, 10, 28, 13, 42, 54), result.Items[0].Created);
         }
 
         [Fact]
