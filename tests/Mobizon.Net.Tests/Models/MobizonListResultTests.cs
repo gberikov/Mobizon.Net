@@ -37,10 +37,10 @@ namespace Mobizon.Net.Tests.Models
             var service = CreateService(mockHttp);
             var result  = await service.ListAsync();
 
-            Assert.NotNull(result.Data);
-            Assert.NotNull(result.Data.Items);
-            Assert.Empty(result.Data.Items);
-            Assert.Equal(0, result.Data.TotalItemCount);
+            Assert.NotNull(result);
+            Assert.NotNull(result.Items);
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItemCount);
 
             mockHttp.VerifyNoOutstandingExpectation();
         }

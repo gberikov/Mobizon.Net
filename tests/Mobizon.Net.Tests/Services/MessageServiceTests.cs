@@ -7,6 +7,7 @@ using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Mobizon.Net.Tests.Services
 {
@@ -43,9 +44,8 @@ namespace Mobizon.Net.Tests.Services
                 Text = "Hello world"
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(42, result.Data.MessageId);
-            Assert.Equal(1, result.Data.CampaignId);
+            Assert.Equal(42, result.MessageId);
+            Assert.Equal(1, result.CampaignId);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -63,8 +63,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.QuickSendAsync("77001234567", "Hello world");
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(42, result.Data.MessageId);
+            Assert.Equal(42, result.MessageId);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -181,15 +180,14 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.GetSmsStatusAsync(new[] { 100L, 200L });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(2, result.Data.Count);
-            Assert.Equal(100L, result.Data[0].Id);
-            Assert.Equal(SmsStatus.Delivered, result.Data[0].Status);
-            Assert.Equal(new DateTime(2024, 1, 1, 12, 5, 0), result.Data[0].StatusUpdated);
-            Assert.Equal(new DateTime(2024, 1, 1, 12, 0, 0), result.Data[0].SendStarted);
-            Assert.Null(result.Data[1].StatusUpdated);
-            Assert.Null(result.Data[1].SendStarted);
-            Assert.Equal(SmsStatus.New, result.Data[1].Status);
+            Assert.Equal(2, result.Count);
+            Assert.Equal(100L, result[0].Id);
+            Assert.Equal(SmsStatus.Delivered, result[0].Status);
+            Assert.Equal(new DateTime(2024, 1, 1, 12, 5, 0), result[0].StatusUpdated);
+            Assert.Equal(new DateTime(2024, 1, 1, 12, 0, 0), result[0].SendStarted);
+            Assert.Null(result[1].StatusUpdated);
+            Assert.Null(result[1].SendStarted);
+            Assert.Equal(SmsStatus.New, result[1].Status);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -215,10 +213,9 @@ namespace Mobizon.Net.Tests.Services
                 Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data.Items);
-            Assert.Equal("Alpha", result.Data.Items[0].From);
-            Assert.Equal(1, result.Data.TotalItemCount);
+            Assert.Single(result.Items);
+            Assert.Equal("Alpha", result.Items[0].From);
+            Assert.Equal(1, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -234,9 +231,8 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data.Items);
-            Assert.Equal(0, result.Data.TotalItemCount);
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -255,8 +251,8 @@ namespace Mobizon.Net.Tests.Services
                 .Respond("application/json",
                     @"{""code"":0,""data"":{""campaignId"":""70000000001"",""messageId"":""70000000002"",""status"":0},""message"":""""}");
             var result = await CreateService(mockHttp).SendSmsMessageAsync(new SendSmsMessageRequest { Recipient = "7700", Text = "x" });
-            Assert.Equal(70000000001L, result.Data.CampaignId);
-            Assert.Equal(70000000002L, result.Data.MessageId);
+            Assert.Equal(70000000001L, result.CampaignId);
+            Assert.Equal(70000000002L, result.MessageId);
         }
 
         [Fact]
@@ -272,7 +268,6 @@ namespace Mobizon.Net.Tests.Services
                 Criteria = new MessageListCriteria { Status = SmsStatus.Scheduled }
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

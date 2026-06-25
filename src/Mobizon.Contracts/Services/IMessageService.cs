@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -22,21 +22,18 @@ namespace Mobizon.Contracts.Services
         /// <param name="text">The body text of the SMS message.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="SendSmsResult"/> with the
-        /// campaign ID, message ID, and initial delivery status.
+        /// A <see cref="SendSmsResult"/> with the campaign ID, message ID, and initial delivery status.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>
         /// <code>
-        /// var response = await client.Messages.QuickSendAsync("79991234567", "Hello from Mobizon!");
-        ///
-        /// if (response.Code == MobizonResponseCode.Success)
-        ///     Console.WriteLine($"Message ID: {response.Data.MessageId}");
+        /// var result = await client.Messages.QuickSendAsync("79991234567", "Hello from Mobizon!");
+        /// Console.WriteLine($"Message ID: {result.MessageId}");
         /// </code>
         /// </example>
-        Task<MobizonResponse<SendSmsResult>> QuickSendAsync(
+        Task<SendSmsResult> QuickSendAsync(
             string recipient,
             string text,
             CancellationToken cancellationToken = default);
@@ -47,26 +44,23 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The message details including recipient, text, and optional sender name.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="SendSmsResult"/> with the
-        /// campaign ID, message ID, and initial delivery status.
+        /// A <see cref="SendSmsResult"/> with the campaign ID, message ID, and initial delivery status.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>
         /// <code>
-        /// var response = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
+        /// var result = await client.Messages.SendSmsMessageAsync(new SendSmsMessageRequest
         /// {
         ///     Recipient = "79991234567",
         ///     Text = "Hello from Mobizon!",
         ///     From = "MyCompany"
         /// });
-        ///
-        /// if (response.Code == MobizonResponseCode.Success)
-        ///     Console.WriteLine($"Message ID: {response.Data.MessageId}");
+        /// Console.WriteLine($"Message ID: {result.MessageId}");
         /// </code>
         /// </example>
-        Task<MobizonResponse<SendSmsResult>> SendSmsMessageAsync(
+        Task<SendSmsResult> SendSmsMessageAsync(
             SendSmsMessageRequest request,
             CancellationToken cancellationToken = default);
 
@@ -76,15 +70,14 @@ namespace Mobizon.Contracts.Services
         /// <param name="id">The message ID to query.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="SmsStatusResult"/> entries
-        /// with a single element for the requested message ID.
+        /// A list of <see cref="SmsStatusResult"/> entries with a single element for the requested message ID.
         /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
         /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+        Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long id,
             CancellationToken cancellationToken = default);
 
@@ -94,15 +87,14 @@ namespace Mobizon.Contracts.Services
         /// <param name="ids">An array of message IDs to query.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="SmsStatusResult"/> entries,
-        /// one for each requested message ID.
+        /// A list of <see cref="SmsStatusResult"/> entries, one for each requested message ID.
         /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
         /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<IReadOnlyList<SmsStatusResult>>> GetSmsStatusAsync(
+        Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long[] ids,
             CancellationToken cancellationToken = default);
 
@@ -112,12 +104,12 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">Optional filter, pagination, and sort criteria. Pass <see langword="null"/> to use API defaults.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MobizonListResult{T}"/> of <see cref="MessageInfo"/> with items and total count.
+        /// A <see cref="MobizonListResult{T}"/> of <see cref="MessageInfo"/> with items and total count.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<MobizonListResult<MessageInfo>>> ListAsync(
+        Task<MobizonListResult<MessageInfo>> ListAsync(
             MessageListRequest? request = null,
             CancellationToken cancellationToken = default);
     }
