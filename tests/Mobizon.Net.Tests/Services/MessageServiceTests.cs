@@ -268,6 +268,8 @@ namespace Mobizon.Net.Tests.Services
                 Criteria = new MessageListCriteria { Status = SmsStatus.Scheduled }
             });
 
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

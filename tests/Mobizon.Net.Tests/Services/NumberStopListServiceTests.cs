@@ -137,7 +137,7 @@ namespace Mobizon.Net.Tests.Services
         // ── AddNumberRangeAsync ────────────────────────────────────────────────────
 
         [Fact]
-        public async Task AddNumberRangeAsync_SendsFormData_ReturnsTrue()
+        public async Task AddNumberRangeAsync_SendsFormData()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
@@ -177,7 +177,7 @@ namespace Mobizon.Net.Tests.Services
         // ── DeleteAsync ──────────────────────────────────────────────────────
 
         [Fact]
-        public async Task DeleteAsync_SendsFormData_ReturnsTrue()
+        public async Task DeleteAsync_SendsFormData()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,

@@ -39,6 +39,7 @@ namespace Mobizon.Net.Tests.Internal
             var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
             Assert.Equal(777, r.TaskId);
             Assert.Null(r.Entries);
+            Assert.Equal(AddRecipientsOutcome.AllAdded, r.Outcome);
         }
 
         [Fact]
@@ -50,6 +51,7 @@ namespace Mobizon.Net.Tests.Internal
             var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
             Assert.Equal(70000000004L, r.TaskId);
             Assert.Null(r.Entries);
+            Assert.Equal(AddRecipientsOutcome.AllAdded, r.Outcome);
         }
     }
 }

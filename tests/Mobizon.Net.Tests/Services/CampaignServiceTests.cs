@@ -163,6 +163,7 @@ namespace Mobizon.Net.Tests.Services
             });
 
             Assert.Equal(555, result.TaskId);
+            Assert.Equal(AddRecipientsOutcome.AllAdded, result.Outcome);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

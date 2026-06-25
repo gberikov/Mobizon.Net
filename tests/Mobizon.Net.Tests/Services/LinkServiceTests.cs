@@ -60,7 +60,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""id"":1,""code"":""abc123"",""fullLink"":""https://example.com"",""status"":1,""expirationDate"":""2025-12-31"",""comment"":""Test link"",""clicks"":0},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.CreateAsync(new CreateLinkRequest
+            var result = await service.CreateAsync(new CreateLinkRequest
             {
                 FullLink = "https://example.com",
                 Status = 1,
@@ -68,6 +68,9 @@ namespace Mobizon.Net.Tests.Services
                 Comment = "Test link"
             });
 
+            Assert.Equal(1, result.Id);
+            Assert.Equal("abc123", result.Code);
+            Assert.Equal("https://example.com", result.FullLink);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -119,7 +122,10 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
                 .WithFormData("shortLink", "https://mbzn.co/x")
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
-            await CreateService(mockHttp).GetByShortLinkAsync("https://mbzn.co/x");
+            var result = await CreateService(mockHttp).GetByShortLinkAsync("https://mbzn.co/x");
+            Assert.Equal(1, result.Id);
+            Assert.Equal("x", result.Code);
+            Assert.Equal("https://e.com", result.FullLink);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
