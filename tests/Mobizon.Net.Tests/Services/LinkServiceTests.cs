@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Links;
@@ -40,10 +40,9 @@ namespace Mobizon.Net.Tests.Services
                 FullLink = "https://example.com"
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(1, result.Data.Id);
-            Assert.Equal("abc123", result.Data.Code);
-            Assert.Equal("https://example.com", result.Data.FullLink);
+            Assert.Equal(1, result.Id);
+            Assert.Equal("abc123", result.Code);
+            Assert.Equal("https://example.com", result.FullLink);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -84,9 +83,8 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync(new[] { 10L, 20L });
+            await service.DeleteAsync(new[] { 10L, 20L });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -98,7 +96,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("code", "abc123")
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""abc123"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""5""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByCodeAsync("abc123");
-            Assert.Equal(5, result.Data.ClickCnt);
+            Assert.Equal(5, result.ClickCnt);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -110,7 +108,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("id", "42")
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""42"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByIdAsync(42);
-            Assert.Equal(42, result.Data.Id);
+            Assert.Equal(42, result.Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -121,8 +119,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/get")
                 .WithFormData("shortLink", "https://mbzn.co/x")
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""1"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
-            var result = await CreateService(mockHttp).GetByShortLinkAsync("https://mbzn.co/x");
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            await CreateService(mockHttp).GetByShortLinkAsync("https://mbzn.co/x");
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -139,10 +136,9 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.GetLinksAsync(42);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(2, result.Data.Count);
-            Assert.Equal("abc", result.Data[0].Code);
-            Assert.Equal("def", result.Data[1].Code);
+            Assert.Equal(2, result.Count);
+            Assert.Equal("abc", result[0].Code);
+            Assert.Equal("def", result[1].Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -156,7 +152,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""items"":[{""param"":""2025-01-01"",""clicks0"":""10"",""redirects0"":2}],""totals"":{""totalClicks0"":""10"",""totalRedirects0"":2}},""message"":""""}");
             var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1L }, Type = LinkStatsType.Daily });
 
-            var series = Assert.Single(result.Data.Links);
+            var series = Assert.Single(result.Links);
             Assert.Equal(0, series.Index);
             Assert.Equal(1L, series.LinkId);           // resolved from the request's Ids by index
             Assert.Equal(10, series.TotalClicks);
@@ -179,9 +175,9 @@ namespace Mobizon.Net.Tests.Services
             var result = await CreateService(mockHttp).GetStatsAsync(
                 new GetLinkStatsRequest { Ids = new[] { 400151L, 400145L }, Type = LinkStatsType.Monthly });
 
-            Assert.Equal(2, result.Data.Links.Count);
+            Assert.Equal(2, result.Links.Count);
 
-            var first = result.Data.Links[0];
+            var first = result.Links[0];
             Assert.Equal(400151L, first.LinkId);
             Assert.Equal(1, first.TotalClicks);
             Assert.Equal(3, first.Points.Count);
@@ -189,7 +185,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(1, october.Clicks);
             Assert.Equal(1, october.Redirects);
 
-            var second = result.Data.Links[1];
+            var second = result.Links[1];
             Assert.Equal(400145L, second.LinkId);
             Assert.Equal(0, second.TotalClicks);
             Assert.All(second.Points, p => Assert.Equal(0, p.Clicks));
@@ -205,7 +201,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("ids[0]", "1").WithFormData("type", expected)
                 .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totals"":{}},""message"":""""}");
             var result = await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest { Ids = new[] { 1L }, Type = type });
-            Assert.Empty(result.Data.Links);
+            Assert.Empty(result.Links);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -227,9 +223,8 @@ namespace Mobizon.Net.Tests.Services
                 Sort = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data.Items);
-            Assert.Equal(1, result.Data.TotalItemCount);
+            Assert.Single(result.Items);
+            Assert.Equal(1, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -243,8 +238,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data.Items);
+            Assert.Empty(result.Items);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -258,10 +252,10 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new LinkListRequest());
 
-            Assert.Equal(2, result.Data.TotalItemCount);
-            Assert.Equal(2, result.Data.Items.Count);
-            Assert.Equal("tyz2", result.Data.Items[0].Code);
-            Assert.Equal(1, result.Data.Items[1].ClickCnt); // second link has clickCnt "1"
+            Assert.Equal(2, result.TotalItemCount);
+            Assert.Equal(2, result.Items.Count);
+            Assert.Equal("tyz2", result.Items[0].Code);
+            Assert.Equal(1, result.Items[1].ClickCnt); // second link has clickCnt "1"
         }
 
         [Fact]
@@ -292,8 +286,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("data[comment]", "c")
                 .With(req => !req.Content!.ReadAsStringAsync().GetAwaiter().GetResult().Contains("fullLink"))
                 .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
-            var result = await CreateService(mockHttp).UpdateAsync(new UpdateLinkRequest { Id = 42, Status = 0, Comment = "c" });
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
+            await CreateService(mockHttp).UpdateAsync(new UpdateLinkRequest { Id = 42, Status = 0, Comment = "c" });
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -305,9 +298,8 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("id", "42")
                 .WithFormData("data[fullLink]", "https://new-target.example")
                 .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
-            var result = await CreateService(mockHttp).UpdateAsync(
+            await CreateService(mockHttp).UpdateAsync(
                 new UpdateLinkRequest { Id = 42, FullLink = "https://new-target.example" });
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -319,7 +311,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("id", "70000000005")
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""70000000005"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByIdAsync(70000000005L);
-            Assert.Equal(70000000005L, result.Data.Id);
+            Assert.Equal(70000000005L, result.Id);
         }
     }
 }
