@@ -14,7 +14,7 @@
         /// Gets or sets the initial status of the link.
         /// When <see langword="null"/>, the API default status is applied.
         /// </summary>
-        public int? Status { get; set; }
+        public LinkStatus? Status { get; set; }
 
         /// <summary>
         /// Gets or sets the optional expiration date of the link as a string in the format expected by the API.

@@ -20,7 +20,7 @@ namespace Mobizon.Contracts.Models.Links
         /// Gets or sets the new status for the link.
         /// When <see langword="null"/>, the existing status is preserved.
         /// </summary>
-        public int? Status { get; set; }
+        public LinkStatus? Status { get; set; }
 
         /// <summary>
         /// Gets or sets the new expiration date of the link as a string in the format expected by the API.

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Mobizon.Net.Services
             };
 
             if (request.Status.HasValue)
-                parameters["data[status]"] = request.Status.Value.ToString();
+                parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
 
             if (request.ExpirationDate != null)
                 parameters["data[expirationDate]"] = request.ExpirationDate;
@@ -124,15 +125,15 @@ namespace Mobizon.Net.Services
                 if (request.Criteria != null)
                 {
                     var c = request.Criteria;
-                    if (c.Status.HasValue) parameters["criteria[status]"] = c.Status.Value.ToString();
-                    if (c.ModeratorStatus.HasValue) parameters["criteria[moderatorStatus]"] = c.ModeratorStatus.Value.ToString();
+                    if (c.Status.HasValue) parameters["criteria[status]"] = ((int)c.Status.Value).ToString(CultureInfo.InvariantCulture);
+                    if (c.ModeratorStatus.HasValue) parameters["criteria[moderatorStatus]"] = ((int)c.ModeratorStatus.Value).ToString(CultureInfo.InvariantCulture);
                     if (c.Code != null) parameters["criteria[code]"] = c.Code;
                     if (c.FullLink != null) parameters["criteria[fullLink]"] = c.FullLink;
                     if (c.Comment != null) parameters["criteria[comment]"] = c.Comment;
-                    if (c.CreateTsFrom != null) parameters["criteria[createTsFrom]"] = c.CreateTsFrom;
-                    if (c.CreateTsTo != null) parameters["criteria[createTsTo]"] = c.CreateTsTo;
-                    if (c.ClickCntFrom.HasValue) parameters["criteria[clickCntFrom]"] = c.ClickCntFrom.Value.ToString();
-                    if (c.ClickCntTo.HasValue) parameters["criteria[clickCntTo]"] = c.ClickCntTo.Value.ToString();
+                    if (c.CreatedFrom.HasValue) parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.CreatedTo.HasValue) parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.ClicksFrom.HasValue) parameters["criteria[clickCntFrom]"] = c.ClicksFrom.Value.ToString(CultureInfo.InvariantCulture);
+                    if (c.ClicksTo.HasValue) parameters["criteria[clickCntTo]"] = c.ClicksTo.Value.ToString(CultureInfo.InvariantCulture);
                 }
 
                 if (request.Pagination != null)
@@ -155,7 +156,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
-            if (request.Status.HasValue) parameters["data[status]"] = request.Status.Value.ToString();
+            if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
             if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
             await _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
