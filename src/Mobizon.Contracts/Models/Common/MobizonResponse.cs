@@ -22,7 +22,15 @@ namespace Mobizon.Contracts.Models.Common
         public MobizonResponseCode Code => (MobizonResponseCode)RawCode;
 
         /// <summary>
-        /// Gets or sets the payload returned by the API. May be the default value of <typeparamref name="T"/> when no data is present.
+        /// Gets or sets the payload returned by the API.
+        /// <para>
+        /// For endpoints that return a payload, <see cref="Data"/> is populated on success
+        /// (<see cref="Code"/> is <see cref="MobizonResponseCode.Success"/> or
+        /// <see cref="MobizonResponseCode.BackgroundTask"/>).
+        /// For endpoints that return no payload, or for value-type <typeparamref name="T"/>,
+        /// <see cref="Data"/> may be the default value of <typeparamref name="T"/> — this is
+        /// legitimate and should not be treated as an error.
+        /// </para>
         /// </summary>
         [JsonPropertyName("data")]
         public T Data { get; set; } = default!;

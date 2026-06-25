@@ -504,6 +504,29 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
+        // ── Where: chained calls combine with AND ─────────────────────────────
+
+        [Fact]
+        public async Task Where_CalledTwice_CombinesWithAnd()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "groupId")
+                .WithFormData("criteria[0][operator]", "equal")
+                .WithFormData("criteria[0][value]",    "100")
+                .WithFormData("criteria[1][field]",    "surname")
+                .WithFormData("criteria[1][operator]", "equal")
+                .WithFormData("criteria[1][value]",    "Doe")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp)
+                .Where(x => x.GroupId == 100)
+                .Where(x => x.Surname == "Doe")
+                .ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
         // ── Unsupported expression ────────────────────────────────────────────
 
         [Fact]

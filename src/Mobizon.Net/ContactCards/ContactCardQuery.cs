@@ -31,11 +31,33 @@ namespace Mobizon.Net.ContactCards
             _service = service;
         }
 
-        /// <summary>Adds a filter predicate.</summary>
+        /// <summary>
+        /// Adds a filter predicate. Each successive call is combined with the previous one
+        /// using a logical AND, so <c>.Where(a).Where(b)</c> filters by <c>a AND b</c>.
+        /// </summary>
         public IContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate)
         {
-            _predicate = predicate;
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+            _predicate = _predicate == null ? predicate : CombineAnd(_predicate, predicate);
             return this;
+        }
+
+        private static Expression<Func<ContactCardFilterSpec, bool>> CombineAnd(
+            Expression<Func<ContactCardFilterSpec, bool>> left,
+            Expression<Func<ContactCardFilterSpec, bool>> right)
+        {
+            var param = Expression.Parameter(typeof(ContactCardFilterSpec), "x");
+            var body = Expression.AndAlso(
+                new ReplaceParam(left.Parameters[0], param).Visit(left.Body),
+                new ReplaceParam(right.Parameters[0], param).Visit(right.Body));
+            return Expression.Lambda<Func<ContactCardFilterSpec, bool>>(body, param);
+        }
+
+        private sealed class ReplaceParam : ExpressionVisitor
+        {
+            private readonly ParameterExpression _from, _to;
+            public ReplaceParam(ParameterExpression from, ParameterExpression to) { _from = from; _to = to; }
+            protected override Expression VisitParameter(ParameterExpression node) => node == _from ? _to : base.VisitParameter(node);
         }
 
         /// <summary>Sets the maximum number of items to return (page size).</summary>
@@ -47,8 +69,9 @@ namespace Mobizon.Net.ContactCards
 
         /// <summary>
         /// Skips the first <paramref name="count"/> items.
-        /// Translated to <c>currentPage = count / pageSize</c>.
-        /// Requires <see cref="Take"/> to be set for accurate results.
+        /// This value is page-based: it is translated to <c>currentPage = Skip / pageSize</c>,
+        /// so skip is accurate only at exact multiples of the page size.
+        /// Always pair with <see cref="Take"/> to set the page size; otherwise a default of 25 is used.
         /// </summary>
         public IContactCardQuery Skip(int count)
         {

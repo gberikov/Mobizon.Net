@@ -14,13 +14,21 @@ namespace Mobizon.Contracts.Services
     {
         // ── Query entry points ────────────────────────────────────────────────
 
-        /// <summary>Begins a filtered query.</summary>
+        /// <summary>
+        /// Begins a filtered query. Each successive <c>Where</c> call on the returned
+        /// <see cref="IContactCardQuery"/> is combined with the previous one using a logical AND.
+        /// </summary>
         IContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate);
 
         /// <summary>Begins a query and sets the maximum number of items to return.</summary>
         IContactCardQuery Take(int count);
 
-        /// <summary>Begins a query and skips the first <paramref name="count"/> items.</summary>
+        /// <summary>
+        /// Begins a query and skips the first <paramref name="count"/> items.
+        /// This value is page-based: it is translated to <c>currentPage = Skip / pageSize</c>,
+        /// so skip is accurate only at exact multiples of the page size.
+        /// Always pair with <see cref="Take"/> to set the page size; otherwise a default of 25 is used.
+        /// </summary>
         IContactCardQuery Skip(int count);
 
         /// <summary>Begins a query sorted by the specified field ascending.</summary>

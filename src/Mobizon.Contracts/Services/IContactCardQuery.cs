@@ -13,13 +13,21 @@ namespace Mobizon.Contracts.Services
     /// </summary>
     public interface IContactCardQuery
     {
-        /// <summary>Adds a filter predicate.</summary>
+        /// <summary>
+        /// Adds a filter predicate. Each successive call is combined with the previous one
+        /// using a logical AND, so <c>.Where(a).Where(b)</c> filters by <c>a AND b</c>.
+        /// </summary>
         IContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate);
 
         /// <summary>Sets the maximum number of items to return (page size).</summary>
         IContactCardQuery Take(int count);
 
-        /// <summary>Skips the first <paramref name="count"/> items.</summary>
+        /// <summary>
+        /// Skips the first <paramref name="count"/> items.
+        /// This value is page-based: it is translated to <c>currentPage = Skip / pageSize</c>,
+        /// so skip is accurate only at exact multiples of the page size.
+        /// Always pair with <see cref="Take"/> to set the page size; otherwise a default of 25 is used.
+        /// </summary>
         IContactCardQuery Skip(int count);
 
         /// <summary>Sorts results by the specified field ascending.</summary>
