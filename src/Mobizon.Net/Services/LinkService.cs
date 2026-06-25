@@ -141,6 +141,7 @@ namespace Mobizon.Net.Services
         public Task<MobizonResponse<object>> UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
+            if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = request.Status.Value.ToString();
             if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;

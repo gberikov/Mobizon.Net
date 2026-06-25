@@ -623,5 +623,97 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Equal(0, count);
         }
+
+        // ── Null data payload tolerance ──────────────────────────────────────
+
+        private const string NullDataJson = @"{""code"":0,""data"":null,""message"":""""}";
+
+        [Fact]
+        public async Task ToListAsync_NullData_ReturnsEmpty()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).Respond("application/json", NullDataJson);
+
+            var result = await CreateSet(mockHttp).Where(x => x.GroupId == 1).ToListAsync();
+
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task CountAsync_NullData_ReturnsZero()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).Respond("application/json", NullDataJson);
+
+            var count = await CreateSet(mockHttp).Where(x => x.GroupId == 1).CountAsync();
+
+            Assert.Equal(0, count);
+        }
+
+        [Fact]
+        public async Task FirstOrDefaultAsync_NullData_ReturnsNull()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).Respond("application/json", NullDataJson);
+
+            var card = await CreateSet(mockHttp).Where(x => x.GroupId == 1).FirstOrDefaultAsync();
+
+            Assert.Null(card);
+        }
+
+        [Fact]
+        public async Task ToPageAsync_NullData_ReturnsEmptyPage()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).Respond("application/json", NullDataJson);
+
+            var page = await CreateSet(mockHttp).Take(10).ToPageAsync();
+
+            Assert.Empty(page.Items);
+            Assert.Equal(0, page.TotalCount);
+        }
+
+        // ── BirthDate parsing (entity mapping) ───────────────────────────────
+
+        [Fact]
+        public async Task FirstOrDefaultAsync_BirthDateWithTime_ParsesToDate()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""items"":[{""id"":""1"",""isDeleted"":""0"",""isAvailable"":""1"",""fields"":{""name"":""John"",""birth_date"":""1990-01-15 00:00:00""},""groups"":[]}],""totalItemCount"":1,""fullListItemCount"":1},""message"":""""}");
+
+            var card = await CreateSet(mockHttp).Where(x => x.GroupId == 1).FirstOrDefaultAsync();
+
+            Assert.Equal(new DateTime(1990, 1, 15), card!.BirthDate);
+        }
+
+        // ── Culture invariance (enum filter values) ──────────────────────────
+
+        [Fact]
+        public async Task Where_EnumValue_UsesInvariantUpperCasing_UnderTurkishCulture()
+        {
+            var original = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture =
+                    System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+
+                var mockHttp = new MockHttpMessageHandler();
+                mockHttp.Expect(HttpMethod.Post, ListUrl)
+                    .WithFormData("criteria[0][field]",    "mobile.type")
+                    .WithFormData("criteria[0][operator]", "equal")
+                    .WithFormData("criteria[0][value]",    "ADDITIONAL")  // not the tr-TR dotted "ADDİTİONAL"
+                    .Respond("application/json", EmptyListJson);
+
+                await CreateSet(mockHttp).Where(x => x.Mobile.Type == ContactType.Additional).ToListAsync();
+
+                mockHttp.VerifyNoOutstandingExpectation();
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = original;
+            }
+        }
     }
 }
