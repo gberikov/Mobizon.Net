@@ -70,5 +70,8 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Requires short links created via the Mobizon service to be present in the text.
         /// </summary>
         public bool? TrackShortLinkRecipients { get; set; }
+
+        /// <summary>When <see langword="true"/>, the API shortens links found in the campaign text (<c>data[shortenLinks]</c>).</summary>
+        public bool? ShortenLinks { get; set; }
     }
 }

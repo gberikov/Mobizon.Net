@@ -53,6 +53,9 @@ namespace Mobizon.Net.Services
             if (request.TrackShortLinkRecipients.HasValue)
                 parameters["data[trackShortLinkRecipients]"] = request.TrackShortLinkRecipients.Value ? "1" : "0";
 
+            if (request.ShortenLinks.HasValue)
+                parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
+
             return _apiClient.SendAsync<int>(
                 HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken);
         }

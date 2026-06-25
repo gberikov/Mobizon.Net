@@ -83,6 +83,21 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
+        public async Task CreateAsync_WithShortenLinks_SendsFlag()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/Create")
+                .WithFormData("data[type]", "2")
+                .WithFormData("data[text]", "hi")
+                .WithFormData("data[shortenLinks]", "1")
+                .Respond("application/json", @"{""code"":0,""data"":""123"",""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.CreateAsync(new CreateCampaignRequest { Type = CampaignType.Bulk, Text = "hi", ShortenLinks = true });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task AddRecipientsAsync_NoSource_Throws()
         {
             var service = CreateService(new MockHttpMessageHandler());
