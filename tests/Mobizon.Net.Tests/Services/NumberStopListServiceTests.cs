@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -40,9 +40,8 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Empty(result.Data.Items);
-            Assert.Equal(0, result.Data.TotalItemCount);
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -75,13 +74,13 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/list")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""items"":[{""id"":""83486"",""userId"":""88296"",""partnerId"":""2"",""number"":""77007782006"",""ignoreSingle"":""1"",""level"":""0"",""createdByUserId"":""88296"",""createdByUserName"":null,""createdByUserSurname"":null,""createTs"":""2026-02-24 16:19:33"",""comment"":""\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430"",""isSystem"":""0"",""countryA2"":""KZ"",""operatorName"":""Altel""}],""totalItemCount"":""1""},""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":""83486"",""userId"":""88296"",""partnerId"":""2"",""number"":""77007782006"",""ignoreSingle"":""1"",""level"":""0"",""createdByUserId"":""88296"",""createdByUserName"":null,""createdByUserSurname"":null,""createTs"":""2026-02-24 16:19:33"",""comment"":""Проверка"",""isSystem"":""0"",""countryA2"":""KZ"",""operatorName"":""Altel""}],""totalItemCount"":""1""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
 
-            Assert.Equal(1, result.Data.TotalItemCount);
-            var e = result.Data.Items[0];
+            Assert.Equal(1, result.TotalItemCount);
+            var e = result.Items[0];
             Assert.Equal(83486, e.Id);
             Assert.Equal(88296, e.UserId);
             Assert.Equal(2, e.PartnerId);
@@ -112,8 +111,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.AddNumberAsync("77007782006", "Проверка");
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(83486, result.Data);
+            Assert.Equal(83486, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -132,7 +130,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.AddNumberAsync("77001234567");
 
-            Assert.Equal(99001, result.Data);
+            Assert.Equal(99001, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -152,10 +150,8 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.AddNumberRangeAsync("77470944000", "77470944099", "Тест диапазона");
+            await service.AddNumberRangeAsync("77470944000", "77470944099", "Тест диапазона");
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.True(result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -173,9 +169,8 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.AddNumberRangeAsync("77000000000", "77000000099");
+            await service.AddNumberRangeAsync("77000000000", "77000000099");
 
-            Assert.True(result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -192,10 +187,8 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.DeleteAsync(83486);
+            await service.DeleteAsync(83486);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.True(result.Data);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }
