@@ -1,0 +1,11 @@
+# .gitguardian.yaml — webhook test fixtures contain dummy secrets and
+# precomputed SHA1 signatures, not real credentials.
+version: 2
+secret:
+  ignored-paths:
+    - "tests/Mobizon.Net.Webhooks.Tests/**"
+  ignored-matches:
+    - name: "Test fixture SHA1 signatures / dummy webhook secrets"
+      match: secret123
+    - name: "Test vector secret"
+      match: topsecret
