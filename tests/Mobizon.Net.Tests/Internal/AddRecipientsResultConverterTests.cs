@@ -23,11 +23,11 @@ namespace Mobizon.Net.Tests.Internal
                 .Respond("application/json",
                     @"{""code"":0,""data"":[{""recipient"":""77001112233"",""code"":0,""messageId"":""42"",""type"":""number"",""number"":""77001112233""}],""message"":""""}");
             var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } } });
-            Assert.NotNull(r.Data.Entries);
-            Assert.Single(r.Data.Entries!);
-            Assert.Equal(0, r.Data.Entries![0].Code);
-            Assert.Equal("number", r.Data.Entries![0].Type);
-            Assert.Null(r.Data.TaskId);
+            Assert.NotNull(r.Entries);
+            Assert.Single(r.Entries!);
+            Assert.Equal(0, r.Entries![0].Code);
+            Assert.Equal("number", r.Entries![0].Type);
+            Assert.Null(r.TaskId);
         }
 
         [Fact]
@@ -37,8 +37,8 @@ namespace Mobizon.Net.Tests.Internal
             m.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
                 .Respond("application/json", @"{""code"":100,""data"":777,""message"":""""}");
             var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
-            Assert.Equal(777, r.Data.TaskId);
-            Assert.Null(r.Data.Entries);
+            Assert.Equal(777, r.TaskId);
+            Assert.Null(r.Entries);
         }
 
         [Fact]
@@ -48,8 +48,8 @@ namespace Mobizon.Net.Tests.Internal
             m.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
                 .Respond("application/json", @"{""code"":100,""data"":70000000004,""message"":""""}");
             var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
-            Assert.Equal(70000000004L, r.Data.TaskId);
-            Assert.Null(r.Data.Entries);
+            Assert.Equal(70000000004L, r.TaskId);
+            Assert.Null(r.Entries);
         }
     }
 }

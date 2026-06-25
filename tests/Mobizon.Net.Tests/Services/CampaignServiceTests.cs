@@ -32,10 +32,9 @@ namespace Mobizon.Net.Tests.Services
                 Criteria = new CampaignCriteria { Type = 2 }
             });
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Single(result.Data.Items);
-            Assert.Equal(1, result.Data.TotalItemCount);
-            Assert.Equal(123, result.Data.Items[0].Id);
+            Assert.Single(result.Items);
+            Assert.Equal(1, result.TotalItemCount);
+            Assert.Equal(123, result.Items[0].Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -47,7 +46,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("data[type]", "2").WithFormData("data[text]", "hi")
                 .Respond("application/json", @"{""code"":0,""data"":""123456"",""message"":""""}");
             var result = await CreateService(mockHttp).CreateAsync(new CreateCampaignRequest { Type = CampaignType.Bulk, Text = "hi" });
-            Assert.Equal(123456, result.Data);
+            Assert.Equal(123456, result);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -59,8 +58,24 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("id", "5")
                 .Respond("application/json", @"{""code"":0,""data"":2,""message"":""""}");
             var result = await CreateService(mockHttp).SendAsync(5);
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(2, result.Data);
+            Assert.False(result.IsQueued);
+            Assert.Equal(2L, result.Id);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task SendAsync_BackgroundTask_SetsIsQueued()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/Send")
+                .WithFormData("id", "42")
+                .Respond("application/json", @"{""code"":100,""data"":777,""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var result = await service.SendAsync(42);
+
+            Assert.True(result.IsQueued);
+            Assert.Equal(777L, result.Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -74,12 +89,11 @@ namespace Mobizon.Net.Tests.Services
 
             var result = await CreateService(mockHttp).GetInfoAsync(123);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.NotNull(result.Data.Counters);
-            Assert.Equal(1, result.Data.Counters!.TotalSegNum);
-            Assert.Equal(16.2000m, result.Data.Counters.TotalCost);
-            Assert.Equal("KZT", result.Data.Counters.UserCurrency);
-            Assert.Equal(123, result.Data.Counters.CampaignId);
+            Assert.NotNull(result.Counters);
+            Assert.Equal(1, result.Counters!.TotalSegNum);
+            Assert.Equal(16.2000m, result.Counters.TotalCost);
+            Assert.Equal("KZT", result.Counters.UserCurrency);
+            Assert.Equal(123, result.Counters.CampaignId);
         }
 
         [Fact]
@@ -92,8 +106,7 @@ namespace Mobizon.Net.Tests.Services
 
             var result = await CreateService(mockHttp).GetInfoAsync(123);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Null(result.Data.Counters!.TotalPartnerCost);
+            Assert.Null(result.Counters!.TotalPartnerCost);
         }
 
         [Fact]
@@ -149,7 +162,26 @@ namespace Mobizon.Net.Tests.Services
                 RecipientsFileName = "recipients.csv"
             });
 
-            Assert.Equal(555, result.Data.TaskId);
+            Assert.Equal(555, result.TaskId);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task AddRecipientsAsync_PartialFailure_SetsOutcomePartiallyAdded()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
+                .Respond("application/json",
+                    @"{""code"":98,""data"":[{""recipient"":""77011234567"",""code"":0,""messageId"":1},{""recipient"":""bad"",""code"":3}],""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            var result = await service.AddRecipientsAsync(new AddRecipientsRequest
+            {
+                CampaignId = 1,
+                Recipients = new[] { new RecipientEntry { Recipient = "77011234567" }, new RecipientEntry { Recipient = "bad" } }
+            });
+
+            Assert.Equal(AddRecipientsOutcome.PartiallyAdded, result.Outcome);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -167,7 +199,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/Create")
                 .Respond("application/json", @"{""code"":0,""data"":""70000000003"",""message"":""""}");
             var result = await CreateService(mockHttp).CreateAsync(new CreateCampaignRequest { Type = CampaignType.Bulk, Text = "x" });
-            Assert.Equal(70000000003L, result.Data);
+            Assert.Equal(70000000003L, result);
         }
     }
 }

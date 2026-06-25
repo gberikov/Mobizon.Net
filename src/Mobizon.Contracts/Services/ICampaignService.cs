@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Campaigns;
@@ -15,13 +15,11 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="request">The campaign configuration, including type, sender name, and message text.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> whose <c>Data</c> is the integer ID of the newly created campaign.
-        /// </returns>
+        /// <returns>The integer ID of the newly created campaign.</returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<long>> CreateAsync(
+        Task<long> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -30,11 +28,10 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="id">The ID of the campaign to delete.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>A <see cref="MobizonResponse{T}"/> confirming the deletion.</returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<object>> DeleteAsync(
+        Task DeleteAsync(
             long id, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -42,13 +39,11 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="id">The ID of the campaign to retrieve.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing the <see cref="CampaignData"/> for the specified campaign.
-        /// </returns>
+        /// <returns>The <see cref="CampaignData"/> for the specified campaign.</returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<CampaignData>> GetAsync(
+        Task<CampaignData> GetAsync(
             long id, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -61,13 +56,11 @@ namespace Mobizon.Contracts.Services
         /// <c>1</c> — return the text filled with real recipient data (default).
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="CampaignInfo"/> with full data and statistics.
-        /// </returns>
+        /// <returns>A <see cref="CampaignInfo"/> with full data and statistics.</returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<CampaignInfo>> GetInfoAsync(
+        Task<CampaignInfo> GetInfoAsync(
             long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -78,13 +71,11 @@ namespace Mobizon.Contracts.Services
         /// Pass <see langword="null"/> to use API defaults.
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items.
-        /// </returns>
+        /// <returns>A <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items.</returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<MobizonListResult<CampaignData>>> ListAsync(
+        Task<MobizonListResult<CampaignData>> ListAsync(
             CampaignListRequest? request = null, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -93,14 +84,13 @@ namespace Mobizon.Contracts.Services
         /// <param name="id">The ID of the campaign to send.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> whose <c>Data</c> is an integer scalar.
-        /// When <see cref="MobizonResponseCode.BackgroundTask"/> (<c>Code == 100</c>) the value is the
-        /// background task ID that can be tracked via <c>TaskQueue/GetStatus</c>.
+        /// A <see cref="CampaignSendResult"/>; when <c>IsQueued</c> is true, <c>Id</c> is the background task id
+        /// trackable via <c>TaskQueue/GetStatus</c>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<long>> SendAsync(
+        Task<CampaignSendResult> SendAsync(
             long id, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -118,16 +108,16 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The recipient data to add, including the campaign ID.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing an <see cref="AddRecipientsResult"/>
-        /// with per-recipient status entries (synchronous) or a background task ID (asynchronous).
-        /// When multiple batches are sent, the response aggregates all entries and reflects the
-        /// worst-case response code across batches.
+        /// An <see cref="AddRecipientsResult"/> whose <see cref="AddRecipientsResult.Outcome"/> reflects the
+        /// top-level result (AllAdded / PartiallyAdded / NoneAdded), and whose
+        /// <see cref="AddRecipientsResult.Entries"/> contains per-recipient status entries (synchronous loads)
+        /// or whose <see cref="AddRecipientsResult.TaskId"/> holds the background task ID (asynchronous loads).
+        /// For multi-batch sends, <c>Outcome</c> reflects the worst-case outcome across all batches.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
-        Task<MobizonResponse<AddRecipientsResult>> AddRecipientsAsync(
+        Task<AddRecipientsResult> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default);
     }
 }
-
