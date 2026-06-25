@@ -250,13 +250,13 @@ namespace Mobizon.Net.Services
                     contactOffset += take;
                 }
 
-                // Only the very first batch may honour Replace=1 to avoid wiping already-added recipients.
+                // Only the very first batch may honour Replace=true to avoid wiping already-added recipients.
                 var batchParams = request.Parameters;
-                if (aggregated != null && batchParams?.Replace == 1)
+                if (aggregated != null && batchParams?.Replace == true)
                 {
                     batchParams = new AddRecipientsParameters
                     {
-                        Replace = 0,
+                        Replace = false,
                         PlaceholdersFlag = request.Parameters!.PlaceholdersFlag,
                         RecipientsFileEncoding = request.Parameters.RecipientsFileEncoding,
                         RecipientsFileSkipHeader = request.Parameters.RecipientsFileSkipHeader,
@@ -348,16 +348,16 @@ namespace Mobizon.Net.Services
                 return;
 
             if (prm.Replace.HasValue)
-                parameters["params[replace]"] = prm.Replace.Value.ToString();
+                parameters["params[replace]"] = prm.Replace.Value ? "1" : "0";
 
             if (prm.PlaceholdersFlag.HasValue)
-                parameters["params[placeholdersFlag]"] = prm.PlaceholdersFlag.Value.ToString();
+                parameters["params[placeholdersFlag]"] = ((int)prm.PlaceholdersFlag.Value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             if (prm.RecipientsFileEncoding != null)
                 parameters["params[recipientsFileEncoding]"] = prm.RecipientsFileEncoding;
 
             if (prm.RecipientsFileSkipHeader.HasValue)
-                parameters["params[recipientsFileSkipHeader]"] = prm.RecipientsFileSkipHeader.Value.ToString();
+                parameters["params[recipientsFileSkipHeader]"] = prm.RecipientsFileSkipHeader.Value ? "1" : "0";
 
             if (prm.RecipientsFileDelimiter != null)
                 parameters["params[recipientsFileDelimiter]"] = prm.RecipientsFileDelimiter;

@@ -220,5 +220,22 @@ namespace Mobizon.Net.Tests.Services
                 SentTo = new System.DateTime(2026,2,3,4,5,6) } });
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task AddRecipientsAsync_BoolFlagsAndEnum_SendsCorrectWireStrings()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
+                .WithFormData("params[replace]", "1")
+                .WithFormData("params[placeholdersFlag]", "2")
+                .WithFormData("params[recipientsFileSkipHeader]", "1")
+                .Respond("application/json", @"{""code"":0,""data"":[{""recipient"":""77001112233"",""code"":0,""messageId"":""1""}],""message"":""""}");
+            await CreateService(mockHttp).AddRecipientsAsync(new AddRecipientsRequest {
+                CampaignId = 1,
+                Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
+                Parameters = new AddRecipientsParameters {
+                    Replace = true, PlaceholdersFlag = PlaceholderMissingMode.Remove, RecipientsFileSkipHeader = true } });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }
