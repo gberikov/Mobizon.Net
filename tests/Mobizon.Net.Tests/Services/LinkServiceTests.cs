@@ -230,6 +230,24 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
+        public async Task ListAsync_WithCriteria_SendsCriteriaFormData()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/list")
+                .WithFormData("criteria[status]", "1")
+                .WithFormData("criteria[code]", "abc")
+                .WithFormData("criteria[clickCntFrom]", "5")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.ListAsync(new LinkListRequest
+            {
+                Criteria = new LinkListCriteria { Status = 1, Code = "abc", ClickCntFrom = 5 }
+            });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task UpdateAsync_SendsIdAndFields_NoFullLink()
         {
             var mockHttp = new MockHttpMessageHandler();

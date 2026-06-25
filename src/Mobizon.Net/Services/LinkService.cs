@@ -108,6 +108,20 @@ namespace Mobizon.Net.Services
             {
                 parameters = new Dictionary<string, string>();
 
+                if (request.Criteria != null)
+                {
+                    var c = request.Criteria;
+                    if (c.Status.HasValue) parameters["criteria[status]"] = c.Status.Value.ToString();
+                    if (c.ModeratorStatus.HasValue) parameters["criteria[moderatorStatus]"] = c.ModeratorStatus.Value.ToString();
+                    if (c.Code != null) parameters["criteria[code]"] = c.Code;
+                    if (c.FullLink != null) parameters["criteria[fullLink]"] = c.FullLink;
+                    if (c.Comment != null) parameters["criteria[comment]"] = c.Comment;
+                    if (c.CreateTsFrom != null) parameters["criteria[createTsFrom]"] = c.CreateTsFrom;
+                    if (c.CreateTsTo != null) parameters["criteria[createTsTo]"] = c.CreateTsTo;
+                    if (c.ClickCntFrom.HasValue) parameters["criteria[clickCntFrom]"] = c.ClickCntFrom.Value.ToString();
+                    if (c.ClickCntTo.HasValue) parameters["criteria[clickCntTo]"] = c.ClickCntTo.Value.ToString();
+                }
+
                 if (request.Pagination != null)
                 {
                     parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
