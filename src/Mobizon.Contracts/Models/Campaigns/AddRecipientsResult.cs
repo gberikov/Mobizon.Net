@@ -30,6 +30,12 @@ namespace Mobizon.Contracts.Models.Campaigns
         public IReadOnlyList<AddRecipientEntry>? Entries { get; set; }
 
         /// <summary>
+        /// Gets or sets the top-level outcome of the operation, derived from the API response code.
+        /// For multi-batch sends this reflects the worst-case outcome across batches.
+        /// </summary>
+        public AddRecipientsOutcome Outcome { get; set; }
+
+        /// <summary>
         /// Merges entries from <paramref name="other"/> into this result by appending them
         /// to <see cref="Entries"/>. Used when batching large recipient lists.
         /// </summary>
