@@ -17,7 +17,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
                 Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
-            foreach (var l in result.Data.Items)
+            foreach (var l in result.Items)
                 Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.ClickCnt}");
         }
 
@@ -31,12 +31,12 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 FullLink = "https://example.com",
                 Comment  = "SDK test link"
             });
-            var id   = createResult.Data.Id;
-            var code = createResult.Data.Code!;
-            Console.WriteLine($"Created: id={id}  code={code}  url={createResult.Data.FullLink}");
+            var id   = createResult.Id;
+            var code = createResult.Code!;
+            Console.WriteLine($"Created: id={id}  code={code}  url={createResult.FullLink}");
 
             var getResult = await client.Links.GetByCodeAsync(code);
-            Console.WriteLine($"Get    : clicks={getResult.Data.ClickCnt}");
+            Console.WriteLine($"Get    : clicks={getResult.ClickCnt}");
 
             await client.Links.UpdateAsync(new UpdateLinkRequest
             {
@@ -45,7 +45,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             });
             Console.WriteLine("Updated comment.");
 
-            await client.Links.DeleteAsync(new[] { createResult.Data.Id });
+            await client.Links.DeleteAsync(new[] { createResult.Id });
             Console.WriteLine("Deleted.");
         }
 
@@ -59,7 +59,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Ids  = new[] { 1L },
                 Type = LinkStatsType.Daily
             });
-            foreach (var s in result.Data.Links)
+            foreach (var s in result.Links)
             {
                 Console.WriteLine($"  LinkId={s.LinkId}  TotalClicks={s.TotalClicks}  TotalRedirects={s.TotalRedirects}");
                 foreach (var pt in s.Points)

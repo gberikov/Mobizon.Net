@@ -18,7 +18,7 @@ number stop-list, and querying registered sender IDs — all from a single `IMob
   NumberStopList, and Alphanames — with full method coverage
 - **ContactCards LINQ-style query API** via `IContactCardQuery` for composable server-side filtering
 - **Inbound webhooks** — verify signatures and parse delivery-report and form events, with optional ASP.NET Core helpers
-- **Strongly-typed requests and responses** via `MobizonResponse<T>` with typed exceptions
+- **Strongly-typed requests and responses** — service methods return domain types directly; errors throw `MobizonApiException`
 - **ASP.NET Core DI integration** — register with a single `AddMobizon()` call
 - **Polly resilience** — retry and circuit breaker policies out of the box
 - **`netstandard2.0` target** — compatible with .NET Framework 4.6.1+, .NET Core 2.0+, and .NET 5+
@@ -101,7 +101,7 @@ var result = await client.Messages.SendSmsMessageAsync(
         Text = "Hello from Mobizon.Net!"
     });
 
-Console.WriteLine($"Message ID: {result.Data.MessageId}");
+Console.WriteLine($"Message ID: {result.MessageId}");
 ```
 
 ---
@@ -142,18 +142,18 @@ var result = await client.Messages.SendSmsMessageAsync(
         }
     });
 
-Console.WriteLine($"Campaign: {result.Data.CampaignId}");
-Console.WriteLine($"Message:  {result.Data.MessageId}");
-Console.WriteLine($"Status:   {result.Data.Status}");
+Console.WriteLine($"Campaign: {result.CampaignId}");
+Console.WriteLine($"Message:  {result.MessageId}");
+Console.WriteLine($"Status:   {result.Status}");
 ```
 
 **Check delivery status:**
 
 ```csharp
 var status = await client.Messages.GetSmsStatusAsync(
-    new[] { result.Data.MessageId });
+    new[] { result.MessageId });
 
-foreach (var item in status.Data)
+foreach (var item in status)
     Console.WriteLine($"ID={item.Id}  Status={item.Status}  Segments={item.Segments}");
 ```
 
@@ -168,8 +168,8 @@ var messages = await client.Messages.ListAsync(
         Sort       = new SortRequest         { Field = "id", Direction = SortDirection.DESC }
     });
 
-Console.WriteLine($"Total: {messages.Data.TotalItemCount}");
-foreach (var msg in messages.Data.Items)
+Console.WriteLine($"Total: {messages.TotalItemCount}");
+foreach (var msg in messages.Items)
     Console.WriteLine($"[{msg.Id}] {msg.Text}");
 ```
 
@@ -180,16 +180,14 @@ foreach (var msg in messages.Data.Items)
 Create and send bulk SMS campaigns, then retrieve delivery statistics.
 
 ```csharp
-// 1. Create campaign
-var campaign = await client.Campaigns.CreateAsync(
+// 1. Create campaign — returns the new campaign ID directly
+long campaignId = await client.Campaigns.CreateAsync(
     new CreateCampaignRequest
     {
         Type = CampaignType.Bulk,
         From = "MyBrand",
         Text = "Flash sale — 50% off today!"
     });
-
-long campaignId = campaign.Data;   // Data is the 64-bit campaign ID
 
 // 2. Add recipients
 await client.Campaigns.AddRecipientsAsync(
@@ -203,20 +201,20 @@ await client.Campaigns.AddRecipientsAsync(
         }
     });
 
-// 3. Send
+// 3. Send — returns CampaignSendResult; IsQueued is true when the API accepted
+//    the send as a background task (former code 100).
 var sendResult = await client.Campaigns.SendAsync(campaignId);
 
 // 4. If the API queued a background task, poll for completion
-if (sendResult.Code == MobizonResponseCode.BackgroundTask)
+if (sendResult.IsQueued)
 {
-    long taskId = sendResult.Data;   // Data is the 64-bit task ID
-    var taskStatus = await client.TaskQueue.GetStatusAsync(taskId);
-    Console.WriteLine($"Progress: {taskStatus.Data.Progress}%");
+    var taskStatus = await client.TaskQueue.GetStatusAsync(sendResult.Id);
+    Console.WriteLine($"Progress: {taskStatus.Progress}%");
 }
 
 // 5. Get delivery statistics
 var info = await client.Campaigns.GetInfoAsync(campaignId);
-Console.WriteLine($"Delivered: {info.Data.Counters?.TotalDelivrdMsgNum}");
+Console.WriteLine($"Delivered: {info.Counters?.TotalDelivrdMsgNum}");
 ```
 
 Other available methods: `GetAsync`, `ListAsync`, `DeleteAsync`.
@@ -238,17 +236,17 @@ var link = await client.Links.CreateAsync(
         ExpirationDate = "2026-12-31"
     });
 
-Console.WriteLine($"Short code: {link.Data.Code}");
+Console.WriteLine($"Short code: {link.Code}");
 ```
 
 **Retrieve a link by short code, numeric ID, or full short URL:**
 
 ```csharp
 var byCode      = await client.Links.GetByCodeAsync("abc123");
-var byId        = await client.Links.GetByIdAsync(link.Data.Id);
+var byId        = await client.Links.GetByIdAsync(link.Id);
 var byShortLink = await client.Links.GetByShortLinkAsync("https://mbzn.co/abc123");
 
-Console.WriteLine($"URL: {byCode.Data.FullLink}  Clicks: {byCode.Data.ClickCnt}");
+Console.WriteLine($"URL: {byCode.FullLink}  Clicks: {byCode.ClickCnt}");
 ```
 
 **Get click statistics:**
@@ -257,16 +255,19 @@ Console.WriteLine($"URL: {byCode.Data.FullLink}  Clicks: {byCode.Data.ClickCnt}"
 var stats = await client.Links.GetStatsAsync(
     new GetLinkStatsRequest
     {
-        Ids      = new[] { link.Data.Id },
+        Ids      = new[] { link.Id },
         Type     = LinkStatsType.Daily,
         DateFrom = "2026-01-01",
         DateTo   = "2026-01-31"
     });
 
-// stats.Data is a LinkStatsResult with Items (per-period points) and Totals (aggregate)
-Console.WriteLine($"Total clicks: {stats.Data.Totals}");
-foreach (var entry in stats.Data.Items)
-    Console.WriteLine($"{entry.Date}: {entry.Clicks} clicks");
+// GetStatsAsync returns a LinkStatsResult with Links (one entry per requested link ID)
+foreach (var s in stats.Links)
+{
+    Console.WriteLine($"LinkId={s.LinkId}  Total clicks={s.TotalClicks}");
+    foreach (var entry in s.Points)
+        Console.WriteLine($"  {entry.Param}: {entry.Clicks} clicks");
+}
 ```
 
 **Update a link:**
@@ -275,7 +276,7 @@ foreach (var entry in stats.Data.Items)
 await client.Links.UpdateAsync(
     new UpdateLinkRequest
     {
-        Id      = link.Data.Id,
+        Id      = link.Id,
         Comment = "Updated comment"
     });
 ```
@@ -283,7 +284,7 @@ await client.Links.UpdateAsync(
 **Delete links:**
 
 ```csharp
-await client.Links.DeleteAsync(new[] { link.Data.Id });
+await client.Links.DeleteAsync(new[] { link.Id });
 ```
 
 Other available methods: `GetLinksAsync` (links by campaign ID), `ListAsync`.
@@ -296,7 +297,7 @@ Check your Mobizon account balance.
 
 ```csharp
 var balance = await client.User.GetOwnBalanceAsync();
-Console.WriteLine($"{balance.Data.Balance} {balance.Data.Currency}");
+Console.WriteLine($"{balance.Balance} {balance.Currency}");
 // Output: 4043.0656 KZT
 ```
 
@@ -310,7 +311,7 @@ Poll the progress of a long-running background task (typically returned after `C
 
 ```csharp
 var taskStatus = await client.TaskQueue.GetStatusAsync(taskId);
-Console.WriteLine($"Task {taskStatus.Data.Id}: {taskStatus.Data.Progress}% complete");
+Console.WriteLine($"Task {taskStatus.Id}: {taskStatus.Progress}% complete");
 ```
 
 `TaskQueueStatus` fields: `Id`, `Status`, `Progress` (0–100).
@@ -323,7 +324,7 @@ List the registered sender IDs available to the account.
 
 ```csharp
 var alphanames = await client.Alphanames.ListAsync();
-foreach (var a in alphanames.Data.Items)
+foreach (var a in alphanames.Items)
     Console.WriteLine($"{a.Alphaname?.Name}  (id={a.AlphanameId})");
 ```
 
@@ -526,7 +527,7 @@ The SDK uses a two-level exception hierarchy:
 try
 {
     var result = await client.Messages.SendSmsMessageAsync(request);
-    Console.WriteLine($"Message ID: {result.Data.MessageId}");
+    Console.WriteLine($"Message ID: {result.MessageId}");
 }
 catch (MobizonApiException ex)
 {
@@ -562,11 +563,14 @@ catch (MobizonException ex)
 | `RateLimitExceeded` | 30 | Too many requests; decrease the request frequency |
 | `BulkPartialSuccess` | 98 | Bulk operation partially completed |
 | `BulkCompleteFailure` | 99 | Bulk operation completely failed |
-| `BackgroundTask` | 100 | Operation queued; `Data` contains the task ID |
+| `BackgroundTask` | 100 | Operation queued as a background task |
 | `ServiceError` | 999 | General service error |
 
-`BackgroundTask` (100) is not an error — the SDK returns the response normally. `MobizonApiException`
-is thrown only for codes that represent actual failures.
+Codes 98 (`BulkPartialSuccess`), 99 (`BulkCompleteFailure`), and 100 (`BackgroundTask`) are not
+surfaced as exceptions. Instead they are folded into structured result types: code 100 becomes
+`CampaignSendResult.IsQueued = true` (with `Id` holding the task ID); codes 98/99 become
+`AddRecipientsResult.Outcome` (`PartiallyAdded` / `NoneAdded`). `MobizonApiException` is thrown
+only for codes that represent actual failures.
 
 ---
 
