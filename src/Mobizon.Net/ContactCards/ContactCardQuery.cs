@@ -117,7 +117,7 @@ namespace Mobizon.Net.ContactCards
             return new PaginatedResponse<ContactCard>
             {
                 Items       = Map(ItemsOf(response)),
-                TotalCount  = response.Data?.TotalItemCount ?? 0,
+                TotalCount  = response?.TotalItemCount ?? 0,
                 CurrentPage = request.Pagination?.CurrentPage ?? 0,
                 PageSize    = request.Pagination?.PageSize    ?? 0
             };
@@ -127,7 +127,7 @@ namespace Mobizon.Net.ContactCards
         public async Task<int> CountAsync(CancellationToken ct = default)
         {
             var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct);
-            return response.Data?.TotalItemCount ?? 0;
+            return response?.TotalItemCount ?? 0;
         }
 
         /// <summary>
@@ -205,8 +205,8 @@ namespace Mobizon.Net.ContactCards
 
         // contactcard/list may return success with a null data payload; treat it as an empty page
         // rather than dereferencing null (mirrors the Data null-check in FindAsync/ContactCardSet).
-        private static IReadOnlyList<ContactCardData> ItemsOf(MobizonResponse<ContactCardListResult> response)
-            => response.Data?.Items ?? Array.Empty<ContactCardData>();
+        private static IReadOnlyList<ContactCardData> ItemsOf(ContactCardListResult response)
+            => response?.Items ?? Array.Empty<ContactCardData>();
 
         private static string ExtractFieldName<TKey>(
             Expression<Func<ContactCardFilterSpec, TKey>> expr)
