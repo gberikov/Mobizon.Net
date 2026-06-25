@@ -10,12 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking
 
 - List endpoints now return `MobizonResponse<MobizonListResult<T>>` (Campaign, Link, Message, ContactCard list operations)
-- `Campaign.CreateAsync` and `SendAsync` now return `MobizonResponse<int>` instead of `MobizonResponse<MobizonCreateResponse>`
+- `Campaign.CreateAsync` and `SendAsync` now return `MobizonResponse<long>` instead of `MobizonResponse<CreateCampaignResult>` and `MobizonResponse<CampaignSendResult>`
 - `Link.GetAsync(code)` replaced by `Link.GetByIdAsync`, `Link.GetByCodeAsync`, and `Link.GetByShortLinkAsync`
 - `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code` or `FullLink`)
 - `LinkData.Clicks` property renamed to `ClickCnt`
 - `Link.GetStatsAsync` now returns `LinkStatsResult { Items, Totals }` with individual stat points typed as `LinkStatPoint`
 - `MessageInfo.SegUserBuy` now typed as `decimal` instead of `int`
+- `ContactCardListResponse` renamed to `ContactCardListResult`
+- All ID types widened from `int` to `long` (campaign IDs, message IDs, link IDs, task IDs, etc.)
+- `IMobizonClient.Alphanames` member added (breaks hand-rolled implementers)
 - `IMobizonClient` registered as transient (previously singleton)
 
 ### Added

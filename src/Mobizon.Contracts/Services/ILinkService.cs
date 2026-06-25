@@ -86,6 +86,8 @@ namespace Mobizon.Contracts.Services
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
         /// A <see cref="MobizonResponse{T}"/> containing the list of <see cref="LinkData"/> items for the campaign.
+        /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
+        /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.

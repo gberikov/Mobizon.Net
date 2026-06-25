@@ -78,6 +78,8 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="SmsStatusResult"/> entries
         /// with a single element for the requested message ID.
+        /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
+        /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
@@ -94,6 +96,8 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A <see cref="MobizonResponse{T}"/> containing a list of <see cref="SmsStatusResult"/> entries,
         /// one for each requested message ID.
+        /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
+        /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
