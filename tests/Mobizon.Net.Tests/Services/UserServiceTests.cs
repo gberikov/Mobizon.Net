@@ -32,9 +32,8 @@ namespace Mobizon.Net.Tests.Services
             var service = new UserService(apiClient);
             var result = await service.GetOwnBalanceAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal("4043.0656", result.Data.Balance);
-            Assert.Equal("KZT", result.Data.Currency);
+            Assert.Equal("4043.0656", result.Balance);
+            Assert.Equal("KZT", result.Currency);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

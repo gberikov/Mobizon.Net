@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Users;
 
 namespace Mobizon.Contracts.Services
@@ -15,21 +14,19 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
-        /// A <see cref="MobizonResponse{T}"/> containing a <see cref="BalanceResult"/> with
-        /// the account balance amount and currency code.
+        /// A <see cref="BalanceResult"/> with the account balance amount and currency code.
+        /// Throws <see cref="Exceptions.MobizonApiException"/> on failure; success is implied by no exception.
         /// </returns>
         /// <exception cref="Exceptions.MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>
         /// <code>
-        /// var response = await client.User.GetOwnBalanceAsync();
-        ///
-        /// if (response.Code == MobizonResponseCode.Success)
-        ///     Console.WriteLine($"Balance: {response.Data.Balance} {response.Data.Currency}");
+        /// var balance = await client.User.GetOwnBalanceAsync();
+        /// Console.WriteLine($"Balance: {balance.Balance} {balance.Currency}");
         /// </code>
         /// </example>
-        Task<MobizonResponse<BalanceResult>> GetOwnBalanceAsync(
+        Task<BalanceResult> GetOwnBalanceAsync(
             CancellationToken cancellationToken = default);
     }
 }

@@ -9,7 +9,15 @@ namespace Mobizon.Contracts.Services
     public interface IAlphanameService
     {
         /// <summary>Returns the registered sender IDs (alphanumeric signatures) available to the account.</summary>
-        Task<MobizonResponse<MobizonListResult<AlphanameData>>> ListAsync(
+        /// <param name="pagination">Optional pagination parameters. Pass <see langword="null"/> to use API defaults.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>
+        /// A paged envelope of <see cref="AlphanameData"/> items.
+        /// </returns>
+        /// <exception cref="Exceptions.MobizonApiException">
+        /// Thrown when the API returns a non-success response code.
+        /// </exception>
+        Task<MobizonListResult<AlphanameData>> ListAsync(
             PaginationRequest? pagination = null, CancellationToken cancellationToken = default);
     }
 }

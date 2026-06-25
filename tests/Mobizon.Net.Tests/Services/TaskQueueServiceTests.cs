@@ -30,10 +30,9 @@ namespace Mobizon.Net.Tests.Services
             var service = new TaskQueueService(apiClient);
             var result = await service.GetStatusAsync(42);
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.Equal(42, result.Data.Id);
-            Assert.Equal(Mobizon.Contracts.Models.TaskQueues.TaskStatus.Completed, result.Data.Status);
-            Assert.Equal(100, result.Data.Progress);
+            Assert.Equal(42, result.Id);
+            Assert.Equal(Mobizon.Contracts.Models.TaskQueues.TaskStatus.Completed, result.Status);
+            Assert.Equal(100, result.Progress);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

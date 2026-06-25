@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Extensions.DependencyInjection;
 using Mobizon.Net.Extensions.Polly;
@@ -76,10 +75,9 @@ namespace Mobizon.Net.Tests.Extensions
 
             var result = await client.User.GetOwnBalanceAsync();
 
-            Assert.Equal(MobizonResponseCode.Success, result.Code);
-            Assert.NotNull(result.Data);
-            Assert.Equal("100.50", result.Data.Balance);
-            Assert.Equal("KZT", result.Data.Currency);
+            Assert.NotNull(result);
+            Assert.Equal("100.50", result.Balance);
+            Assert.Equal("KZT", result.Currency);
 
             mockHttp.VerifyNoOutstandingExpectation();
         }

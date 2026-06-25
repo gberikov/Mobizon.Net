@@ -15,7 +15,7 @@ namespace Mobizon.Net.Services
         private readonly MobizonApiClient _apiClient;
         public AlphanameService(MobizonApiClient apiClient) => _apiClient = apiClient;
 
-        public Task<MobizonResponse<MobizonListResult<AlphanameData>>> ListAsync(
+        public async Task<MobizonListResult<AlphanameData>> ListAsync(
             PaginationRequest? pagination = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string>? parameters = null;
@@ -25,8 +25,8 @@ namespace Mobizon.Net.Services
                     ["pagination[currentPage]"] = pagination.CurrentPage.ToString(),
                     ["pagination[pageSize]"] = pagination.PageSize.ToString()
                 };
-            return _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
+                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

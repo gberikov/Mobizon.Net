@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.TaskQueues;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
@@ -19,7 +18,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public Task<MobizonResponse<TaskQueueStatus>> GetStatusAsync(
+        public async Task<TaskQueueStatus> GetStatusAsync(
             long id, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -27,7 +26,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return _apiClient.SendAsync<TaskQueueStatus>(HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken);
+            return (await _apiClient.SendAsync<TaskQueueStatus>(HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }
