@@ -23,6 +23,8 @@ namespace Mobizon.Net.Services
         public Task<MobizonResponse<int>> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
             var parameters = new Dictionary<string, string>
             {
                 ["data[type]"] = ((int)request.Type).ToString(),

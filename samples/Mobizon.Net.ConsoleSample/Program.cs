@@ -71,7 +71,7 @@ namespace Mobizon.Net.ConsoleSample
                 // await ContactGroupSamples.GetCardsCountAsync(client);
 
                 // ── Contact Cards ─────────────────────────────────────────────────
-                await ContactCardSamples.ListAsync(client);
+                // await ContactCardSamples.ListAsync(client);
                 // await ContactCardSamples.ListByGroupAsync(client);
                 // await ContactCardSamples.GetAsync(client);
                 // await ContactCardSamples.CreateAndSetGroupAsync(client);

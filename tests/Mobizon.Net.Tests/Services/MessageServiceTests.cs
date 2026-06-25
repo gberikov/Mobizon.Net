@@ -239,5 +239,12 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(0, result.Data.TotalItemCount);
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task SendSmsMessageAsync_NullRequest_Throws()
+        {
+            var service = CreateService(new MockHttpMessageHandler());
+            await Assert.ThrowsAsync<System.ArgumentNullException>(() => service.SendSmsMessageAsync(null!));
+        }
     }
 }

@@ -34,6 +34,8 @@ namespace Mobizon.Net.Services
             SendSmsMessageRequest request,
             CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new System.ArgumentNullException(nameof(request));
+
             var parameters = new Dictionary<string, string>
             {
                 ["recipient"] = request.Recipient,

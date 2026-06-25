@@ -138,5 +138,12 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal(555, result.Data.TaskId);
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task CreateAsync_NullRequest_Throws()
+        {
+            var service = CreateService(new MockHttpMessageHandler());
+            await Assert.ThrowsAsync<System.ArgumentNullException>(() => service.CreateAsync(null!));
+        }
     }
 }
