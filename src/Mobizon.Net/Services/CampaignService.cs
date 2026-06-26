@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Mobizon.Contracts.Models.Common;
 using Mobizon.Contracts.Models.Campaigns;
 using Mobizon.Contracts.Services;
 using Mobizon.Net.Internal;
+using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
@@ -130,20 +132,17 @@ namespace Mobizon.Net.Services
                     if (c.Text != null)
                         parameters["criteria[text]"] = c.Text;
 
-                    if (c.Status != null)
-                        parameters["criteria[status]"] = c.Status;
+                    if (c.Status.HasValue)
+                        parameters["criteria[status]"] = ApiStatusCodes.ToApiCode(c.Status.Value);
 
-                    if (c.CreateTsFrom != null)
-                        parameters["criteria[createTsFrom]"] = c.CreateTsFrom;
-
-                    if (c.CreateTsTo != null)
-                        parameters["criteria[createTsTo]"] = c.CreateTsTo;
-
-                    if (c.SentTsFrom != null)
-                        parameters["criteria[sentTsFrom]"] = c.SentTsFrom;
-
-                    if (c.SentTsTo != null)
-                        parameters["criteria[sentTsTo]"] = c.SentTsTo;
+                    if (c.CreatedFrom.HasValue)
+                        parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.CreatedTo.HasValue)
+                        parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.SentFrom.HasValue)
+                        parameters["criteria[sentTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.SentTo.HasValue)
+                        parameters["criteria[sentTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
                     if (c.Type.HasValue)
                         parameters["criteria[type]"] = c.Type.Value.ToString();
@@ -251,13 +250,13 @@ namespace Mobizon.Net.Services
                     contactOffset += take;
                 }
 
-                // Only the very first batch may honour Replace=1 to avoid wiping already-added recipients.
+                // Only the very first batch may honour Replace=true to avoid wiping already-added recipients.
                 var batchParams = request.Parameters;
-                if (aggregated != null && batchParams?.Replace == 1)
+                if (aggregated != null && batchParams?.Replace == true)
                 {
                     batchParams = new AddRecipientsParameters
                     {
-                        Replace = 0,
+                        Replace = false,
                         PlaceholdersFlag = request.Parameters!.PlaceholdersFlag,
                         RecipientsFileEncoding = request.Parameters.RecipientsFileEncoding,
                         RecipientsFileSkipHeader = request.Parameters.RecipientsFileSkipHeader,
@@ -340,7 +339,7 @@ namespace Mobizon.Net.Services
 
             return _apiClient.SendAsync<AddRecipientsResult>(
                 HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
-                extraSuccessCodes: new[] { (int)AddRecipientsResponseCode.PartiallyAdded, (int)AddRecipientsResponseCode.NoneAdded });
+                extraSuccessCodes: new[] { (int)AddRecipientsOutcome.PartiallyAdded, (int)AddRecipientsOutcome.NoneAdded });
         }
 
         private static void AppendParams(IDictionary<string, string> parameters, AddRecipientsParameters? prm)
@@ -349,16 +348,16 @@ namespace Mobizon.Net.Services
                 return;
 
             if (prm.Replace.HasValue)
-                parameters["params[replace]"] = prm.Replace.Value.ToString();
+                parameters["params[replace]"] = prm.Replace.Value ? "1" : "0";
 
             if (prm.PlaceholdersFlag.HasValue)
-                parameters["params[placeholdersFlag]"] = prm.PlaceholdersFlag.Value.ToString();
+                parameters["params[placeholdersFlag]"] = ((int)prm.PlaceholdersFlag.Value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             if (prm.RecipientsFileEncoding != null)
                 parameters["params[recipientsFileEncoding]"] = prm.RecipientsFileEncoding;
 
             if (prm.RecipientsFileSkipHeader.HasValue)
-                parameters["params[recipientsFileSkipHeader]"] = prm.RecipientsFileSkipHeader.Value.ToString();
+                parameters["params[recipientsFileSkipHeader]"] = prm.RecipientsFileSkipHeader.Value ? "1" : "0";
 
             if (prm.RecipientsFileDelimiter != null)
                 parameters["params[recipientsFileDelimiter]"] = prm.RecipientsFileDelimiter;

@@ -202,5 +202,40 @@ namespace Mobizon.Net.Tests.Services
             var result = await CreateService(mockHttp).CreateAsync(new CreateCampaignRequest { Type = CampaignType.Bulk, Text = "x" });
             Assert.Equal(70000000003L, result);
         }
+
+        [Fact]
+        public async Task ListAsync_TypedCriteria_SendsCorrectWireStrings()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/List")
+                .WithFormData("criteria[status]", "READY_FOR_SEND")
+                .WithFormData("criteria[createTsFrom]", "2026-01-02 03:04:05")
+                .WithFormData("criteria[sentTsTo]", "2026-02-03 04:05:06")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            var service = CreateService(mockHttp);
+            await service.ListAsync(new CampaignListRequest { Criteria = new CampaignCriteria {
+                Status = CampaignCommonStatus.ReadyForSend,
+                CreatedFrom = new System.DateTime(2026,1,2,3,4,5),
+                SentTo = new System.DateTime(2026,2,3,4,5,6) } });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task AddRecipientsAsync_BoolFlagsAndEnum_SendsCorrectWireStrings()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
+                .WithFormData("params[replace]", "1")
+                .WithFormData("params[placeholdersFlag]", "2")
+                .WithFormData("params[recipientsFileSkipHeader]", "1")
+                .Respond("application/json", @"{""code"":0,""data"":[{""recipient"":""77001112233"",""code"":0,""messageId"":""1""}],""message"":""""}");
+            await CreateService(mockHttp).AddRecipientsAsync(new AddRecipientsRequest {
+                CampaignId = 1,
+                Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
+                Parameters = new AddRecipientsParameters {
+                    Replace = true, PlaceholdersFlag = PlaceholderMissingMode.Remove, RecipientsFileSkipHeader = true } });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }

@@ -78,19 +78,11 @@ namespace Mobizon.Contracts.Models.Campaigns
     /// </summary>
     public class AddRecipientsParameters
     {
-        /// <summary>
-        /// Gets or sets whether to remove all previously added recipients before adding the new ones.
-        /// <c>0</c> — append (default); <c>1</c> — replace.
-        /// </summary>
-        public int? Replace { get; set; }
+        /// <summary>Gets or sets whether to remove all previously added recipients before adding the new ones (default <see langword="false"/>).</summary>
+        public bool? Replace { get; set; }
 
-        /// <summary>
-        /// Gets or sets the behaviour when placeholder values are missing in a template campaign:
-        /// <c>1</c> — keep placeholders as-is (default);
-        /// <c>2</c> — remove placeholders from the text;
-        /// <c>3</c> — reject the message with an error.
-        /// </summary>
-        public int? PlaceholdersFlag { get; set; }
+        /// <summary>Gets or sets the behaviour when placeholder values are missing in a template campaign. Default <see cref="PlaceholderMissingMode.KeepAsIs"/>.</summary>
+        public PlaceholderMissingMode? PlaceholdersFlag { get; set; }
 
         /// <summary>
         /// Gets or sets the encoding of the uploaded recipients file.
@@ -99,12 +91,8 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// </summary>
         public string? RecipientsFileEncoding { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether to skip the first line (header row) of the recipients file.
-        /// <c>0</c> — start from line 1 (default); <c>1</c> — skip line 1.
-        /// Always <c>1</c> for template campaigns.
-        /// </summary>
-        public int? RecipientsFileSkipHeader { get; set; }
+        /// <summary>Gets or sets whether to skip the first line (header row) of the recipients file (always <see langword="true"/> for template campaigns).</summary>
+        public bool? RecipientsFileSkipHeader { get; set; }
 
         /// <summary>
         /// Gets or sets the column delimiter used in the recipients CSV file. Default: <c>,</c>.

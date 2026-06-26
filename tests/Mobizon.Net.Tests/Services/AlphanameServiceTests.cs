@@ -28,11 +28,15 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Equal(1, result.TotalItemCount);
             Assert.Single(result.Items);
-            Assert.Equal(7719L, result.Items[0].Id);
-            Assert.Equal(58356L, result.Items[0].AlphanameId);
-            Assert.Equal(58356L, result.Items[0].Alphaname!.Id);
-            Assert.Equal("Profit", result.Items[0].Alphaname!.Name);
-            Assert.Equal(1, result.Items[0].GlobalStatus);
+            var item = result.Items[0];
+            Assert.Equal(7719L, item.Id);
+            Assert.Equal(58356L, item.AlphanameId);
+            Assert.Equal(58356L, item.Alphaname!.Id);
+            Assert.Equal("Profit", item.Alphaname!.Name);
+            Assert.Equal(1, item.GlobalStatus);
+            Assert.True(item.IsDefault);
+            Assert.Equal(new System.DateTime(2026, 1, 2, 3, 4, 5), item.Created);
+            Assert.Equal(new System.DateTime(2026, 1, 2, 3, 4, 5), item.Alphaname!.Created);
         }
     }
 }

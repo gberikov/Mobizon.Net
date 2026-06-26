@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 
 namespace Mobizon.Contracts.Models.Alphanames
@@ -9,8 +10,8 @@ namespace Mobizon.Contracts.Models.Alphanames
         [JsonPropertyName("alphanameId")] public long AlphanameId { get; set; }
         [JsonPropertyName("globalStatus")] public int GlobalStatus { get; set; }
         [JsonPropertyName("partnerStatus")] public int PartnerStatus { get; set; }
-        [JsonPropertyName("isDefault")] public int IsDefault { get; set; }
-        [JsonPropertyName("createTs")] public string? CreateTs { get; set; }
+        [JsonPropertyName("isDefault")] public bool IsDefault { get; set; }
+        [JsonPropertyName("createTs")] public DateTime? Created { get; set; }
         [JsonPropertyName("alphaname")] public AlphanameInfo? Alphaname { get; set; }
         [JsonPropertyName("details")] public AlphanameDetails? Details { get; set; }
     }
@@ -21,7 +22,7 @@ namespace Mobizon.Contracts.Models.Alphanames
         public long Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Type { get; set; }
-        [JsonPropertyName("createTs")] public string? CreateTs { get; set; }
+        [JsonPropertyName("createTs")] public DateTime? Created { get; set; }
     }
 
     /// <summary>Free-form details for a signature.</summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Exceptions;
@@ -200,12 +201,13 @@ namespace Mobizon.Net.Tests.Internal
             var result = await client.SendAsync<TestSegResult>(
                 HttpMethod.Post, "message", "list", null);
 
-            Assert.Equal(0.05f, result.Data.SegUserBuy, 4);
+            Assert.Equal(0.05f, result.Data.SegmentCost, 4);
         }
 
         private class TestSegResult
         {
-            public float SegUserBuy { get; set; }
+            [JsonPropertyName("segUserBuy")]
+            public float SegmentCost { get; set; }
         }
 
         private class TestSendResult

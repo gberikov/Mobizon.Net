@@ -1,4 +1,5 @@
 ﻿using Mobizon.Contracts.Models.Common;
+using System;
 using System.Collections.Generic;
 
 namespace Mobizon.Contracts.Models.Campaigns
@@ -51,31 +52,19 @@ namespace Mobizon.Contracts.Models.Campaigns
         public string? Text { get; set; }
 
         /// <summary>Gets or sets the campaign status to filter by.</summary>
-        public string? Status { get; set; }
+        public CampaignCommonStatus? Status { get; set; }
 
-        /// <summary>
-        /// Gets or sets the lower bound of the campaign creation date range.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? CreateTsFrom { get; set; }
+        /// <summary>Gets or sets the lower bound of the campaign creation date range.</summary>
+        public DateTime? CreatedFrom { get; set; }
 
-        /// <summary>
-        /// Gets or sets the upper bound of the campaign creation date range.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? CreateTsTo { get; set; }
+        /// <summary>Gets or sets the upper bound of the campaign creation date range.</summary>
+        public DateTime? CreatedTo { get; set; }
 
-        /// <summary>
-        /// Gets or sets the lower bound of the campaign send date range.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? SentTsFrom { get; set; }
+        /// <summary>Gets or sets the lower bound of the campaign send date range.</summary>
+        public DateTime? SentFrom { get; set; }
 
-        /// <summary>
-        /// Gets or sets the upper bound of the campaign send date range.
-        /// Format: <c>YYYY-MM-DD HH:MM:SS</c>.
-        /// </summary>
-        public string? SentTsTo { get; set; }
+        /// <summary>Gets or sets the upper bound of the campaign send date range.</summary>
+        public DateTime? SentTo { get; set; }
 
         /// <summary>
         /// Gets or sets the campaign type to filter by:

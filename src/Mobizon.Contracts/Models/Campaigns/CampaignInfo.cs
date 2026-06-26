@@ -28,7 +28,8 @@ namespace Mobizon.Contracts.Models.Campaigns
     public class CampaignCounters
     {
         /// <summary>Gets or sets the timestamp of the last counter update.</summary>
-        public DateTime? UpdateTs { get; set; }
+        [JsonPropertyName("updateTs")]
+        public DateTime? Updated { get; set; }
 
         // ── Segment counters ────────────────────────────────────────────────
 

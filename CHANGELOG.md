@@ -17,10 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Campaign.CreateAsync` returns `long` (the new campaign ID) directly
 - `Link.GetAsync(code)` replaced by `Link.GetByIdAsync`, `Link.GetByCodeAsync`, and `Link.GetByShortLinkAsync`
 - `UpdateLinkRequest` now keyed by `Id` (no longer accepts `Code`)
-- `LinkData.Clicks` property renamed to `ClickCnt`
 - `Link.GetStatsAsync` now returns `LinkStatsResult { Links }` — one `LinkStatSeries` per requested link (with `LinkId`, `TotalClicks`, `TotalRedirects`, and per-period `LinkStatPoint { Param, Clicks, Redirects }`); the SDK transposes the API's period-major `clicks{i}`/`redirects{i}` grid and resolves each series back to its link ID
-- `MessageInfo.SegUserBuy` now typed as `decimal` instead of `int`
 - `ContactCardListResponse` renamed to `ContactCardListResult`
+- Idiomatic model names & types: `LinkData.Created`/`Updated` (`DateTime?`, were `CreateTs`/`UpdateTs` strings), `LinkData.Clicks`/`Redirects` (were `ClickCnt`/`RedirectCnt`), `LinkData.Status`/`ModeratorStatus` now `LinkStatus`/`LinkModeratorStatus` enums; `AlphanameData.Created` + `IsDefault` (`bool`); `AlphanameInfo.Created`; `CampaignInfo.Updated`; `MessageInfo.SegmentCost` (was `SegUserBuy`); `SmsDeliveryReport.Segments` (was `SegNum`)
+- Filter/request types: `LinkListCriteria.Status`/`ModeratorStatus` enums, `CreatedFrom`/`CreatedTo` (`DateTime?`), `ClicksFrom`/`ClicksTo`; `CreateLinkRequest`/`UpdateLinkRequest.Status` now `LinkStatus?`; `CampaignCriteria.Status` now `CampaignCommonStatus?`, `CreatedFrom`/`CreatedTo`/`SentFrom`/`SentTo` (`DateTime?`); `AddRecipientsParameters.Replace`/`RecipientsFileSkipHeader` now `bool?`, `PlaceholdersFlag` now `PlaceholderMissingMode`
+- Removed duplicate `AddRecipientsResponseCode` enum — use `AddRecipientsOutcome`
 - All ID types widened from `int` to `long` (campaign IDs, message IDs, link IDs, task IDs, etc.)
 - `IMobizonClient.Alphanames` member added (breaks hand-rolled implementers)
 - `IMobizonClient` registered as transient (previously singleton)

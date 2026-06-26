@@ -203,7 +203,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]", "10")
                 .WithFormData("sort[campaignId]", "DESC")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""items"":[{""id"":1,""campaignId"":5,""segNum"":1,""from"":""Alpha"",""to"":""77001234567"",""status"":""DELIVRD"",""text"":""Hi""}],""totalItemCount"":1},""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":1,""campaignId"":5,""segNum"":1,""segUserBuy"":0.06,""from"":""Alpha"",""to"":""77001234567"",""status"":""DELIVRD"",""text"":""Hi""}],""totalItemCount"":1},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new MessageListRequest
@@ -216,6 +216,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Single(result.Items);
             Assert.Equal("Alpha", result.Items[0].From);
             Assert.Equal(1, result.TotalItemCount);
+            Assert.Equal(0.06m, result.Items[0].SegmentCost);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

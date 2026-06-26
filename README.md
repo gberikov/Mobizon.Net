@@ -249,7 +249,7 @@ var byCode      = await client.Links.GetByCodeAsync("abc123");
 var byId        = await client.Links.GetByIdAsync(link.Id);
 var byShortLink = await client.Links.GetByShortLinkAsync("https://mbzn.co/abc123");
 
-Console.WriteLine($"URL: {byCode.FullLink}  Clicks: {byCode.ClickCnt}");
+Console.WriteLine($"URL: {byCode.FullLink}  Clicks: {byCode.Clicks}");
 ```
 
 **Get click statistics:**

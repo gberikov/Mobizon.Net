@@ -18,7 +18,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
             });
             foreach (var l in result.Items)
-                Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.ClickCnt}");
+                Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.Clicks}");
         }
 
         // POST /service/link/Create  →  /service/link/Get  →  /service/link/Update  →  /service/link/Delete
@@ -36,7 +36,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             Console.WriteLine($"Created: id={id}  code={code}  url={createResult.FullLink}");
 
             var getResult = await client.Links.GetByCodeAsync(code);
-            Console.WriteLine($"Get    : clicks={getResult.ClickCnt}");
+            Console.WriteLine($"Get    : clicks={getResult.Clicks}");
 
             await client.Links.UpdateAsync(new UpdateLinkRequest
             {
