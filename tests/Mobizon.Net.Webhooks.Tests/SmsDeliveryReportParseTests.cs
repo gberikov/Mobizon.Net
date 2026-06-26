@@ -17,7 +17,7 @@ namespace Mobizon.Net.Webhooks.Tests
 
             Assert.Equal(245455096, data.CampaignId);
             Assert.Equal(169275418, data.MessageId);
-            Assert.Equal(3, data.SegNum);
+            Assert.Equal(3, data.Segments);
             Assert.NotNull(data.StatusUpdateTs);
             Assert.Equal(SmsStatus.Delivered, data.Status);
             Assert.Equal("DELIVRD", data.StatusRaw);

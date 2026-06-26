@@ -73,7 +73,7 @@ namespace Mobizon.Net.Webhooks.Tests
             {
                 CampaignId = 1,
                 MessageId = 2,
-                SegNum = 1,
+                Segments = 1,
                 Status = SmsStatus.Delivered,
                 StatusRaw = "DELIVRD",
                 StatusUpdateTs = new DateTimeOffset(2026, 1, 15, 11, 42, 8, TimeSpan.Zero),
@@ -101,7 +101,7 @@ namespace Mobizon.Net.Webhooks.Tests
             Assert.Equal(1, evt.WebhookId);
             Assert.Equal(5, evt.Data.CampaignId);
             Assert.Equal(6, evt.Data.MessageId);
-            Assert.Equal(2, evt.Data.SegNum);
+            Assert.Equal(2, evt.Data.Segments);
         }
 
         [Fact]

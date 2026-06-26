@@ -40,7 +40,7 @@ namespace Mobizon.Net.Webhooks.Internal.Converters
                         report.MessageId = ReadInt64(ref reader);
                         break;
                     case "segNum":
-                        report.SegNum = (int)ReadInt64(ref reader);
+                        report.Segments = (int)ReadInt64(ref reader);
                         break;
                     case "statusUpdateTs":
                         report.StatusUpdateTs = WebhookDateTimeOffsetConverter.ParseOrNull(
@@ -68,7 +68,7 @@ namespace Mobizon.Net.Webhooks.Internal.Converters
             writer.WriteStartObject();
             writer.WriteNumber("campaignId", value.CampaignId);
             writer.WriteNumber("messageId", value.MessageId);
-            writer.WriteNumber("segNum", value.SegNum);
+            writer.WriteNumber("segNum", value.Segments);
             writer.WriteString("statusUpdateTs", value.StatusUpdateTs?.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
             writer.WriteString("status", value.StatusRaw);
             writer.WriteString("to", value.To);

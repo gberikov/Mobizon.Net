@@ -16,7 +16,7 @@ namespace Mobizon.Contracts.Models.Webhooks
         public long MessageId { get; set; }
 
         /// <summary>Number of segments the message was split into.</summary>
-        public int SegNum { get; set; }
+        public int Segments { get; set; }
 
         /// <summary>Time the status was last updated, parsed for convenience.</summary>
         public DateTimeOffset? StatusUpdateTs { get; set; }
