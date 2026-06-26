@@ -26,10 +26,10 @@ namespace Mobizon.Contracts.Models.Messages
         public int Segments { get; set; }
 
         /// <summary>
-        /// Gets or sets the segment cost in user currency.
+        /// Gets or sets the per-segment cost in the user's currency.
         /// </summary>
         [JsonPropertyName("segUserBuy")]
-        public decimal SegUserBuy { get; set; }
+        public decimal SegmentCost { get; set; }
 
         /// <summary>
         /// Gets or sets the sender name or number displayed to the recipient.
