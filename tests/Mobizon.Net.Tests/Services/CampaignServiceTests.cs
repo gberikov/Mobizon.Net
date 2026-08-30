@@ -140,7 +140,7 @@ namespace Mobizon.Net.Tests.Services
                 {
                     CampaignId = 1,
                     Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
-                    RecipientGroups = new[] { "9" }
+                    RecipientGroups = new[] { 9L }
                 }));
         }
 

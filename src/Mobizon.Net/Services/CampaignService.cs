@@ -147,7 +147,7 @@ namespace Mobizon.Net.Services
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)
-                            parameters[$"criteria[groups][{i}]"] = c.Groups[i];
+                            parameters[$"criteria[groups][{i}]"] = ApiFormat.Int(c.Groups[i]);
                 }
 
                 if (request.Pagination != null)
@@ -331,7 +331,7 @@ namespace Mobizon.Net.Services
 
             if (request.RecipientGroups != null)
                 for (var i = 0; i < request.RecipientGroups.Count; i++)
-                    parameters[$"recipientGroups[{i}]"] = request.RecipientGroups[i];
+                    parameters[$"recipientGroups[{i}]"] = ApiFormat.Int(request.RecipientGroups[i]);
 
             AppendParams(parameters, request.Parameters);
 

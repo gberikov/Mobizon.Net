@@ -100,7 +100,7 @@ namespace Mobizon.Net.Services
 
         public async Task SetGroupsAsync(
             string id,
-            IReadOnlyList<string> groupIds,
+            IReadOnlyList<long> groupIds,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -109,7 +109,7 @@ namespace Mobizon.Net.Services
             };
 
             for (var i = 0; i < groupIds.Count; i++)
-                parameters[$"groupIds[{i}]"] = groupIds[i];
+                parameters[$"groupIds[{i}]"] = ApiFormat.Int(groupIds[i]);
 
             await _apiClient.SendAsync<bool>(
                 ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);

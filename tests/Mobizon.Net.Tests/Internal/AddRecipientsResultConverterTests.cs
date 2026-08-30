@@ -35,7 +35,7 @@ namespace Mobizon.Net.Tests.Internal
             var m = new MockHttpMessageHandler();
             m.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
                 .Respond("application/json", @"{""code"":100,""data"":777,""message"":""""}");
-            var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
+            var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { 9L } });
             Assert.Equal(777, r.TaskId);
             Assert.Null(r.Entries);
             Assert.Equal(AddRecipientsOutcome.AllAdded, r.Outcome);
@@ -47,7 +47,7 @@ namespace Mobizon.Net.Tests.Internal
             var m = new MockHttpMessageHandler();
             m.When(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
                 .Respond("application/json", @"{""code"":100,""data"":70000000004,""message"":""""}");
-            var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { "9" } });
+            var r = await Svc(m).AddRecipientsAsync(new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { 9L } });
             Assert.Equal(70000000004L, r.TaskId);
             Assert.Null(r.Entries);
             Assert.Equal(AddRecipientsOutcome.AllAdded, r.Outcome);

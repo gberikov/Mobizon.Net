@@ -80,7 +80,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal("77029932233", card.Fields.Mobile!.Value);
             Assert.Equal("KZ", card.Fields.Mobile.CountryA2);
             Assert.Single(card.Groups!);
-            Assert.Equal("100604", card.Groups![0].Id);
+            Assert.Equal(100604L, card.Groups![0].Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -400,7 +400,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.SetGroupsAsync("78045032", new[] { "100820" });
+            await service.SetGroupsAsync("78045032", new[] { 100820L });
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -419,7 +419,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.SetGroupsAsync("100", new List<string> { "1", "2", "3" });
+            await service.SetGroupsAsync("100", new List<long> { 1, 2, 3 });
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -440,9 +440,9 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.GetGroupsAsync("77885666");
 
             Assert.Equal(2, result.Count);
-            Assert.Equal("100604", result[0].Id);
+            Assert.Equal(100604L, result[0].Id);
             Assert.Equal("Freedom Broker", result[0].Name);
-            Assert.Equal("100820", result[1].Id);
+            Assert.Equal(100820L, result[1].Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

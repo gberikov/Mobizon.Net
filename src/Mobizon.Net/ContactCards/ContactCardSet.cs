@@ -103,7 +103,7 @@ namespace Mobizon.Net
         /// </summary>
         public Task SetGroupsAsync(
             long id,
-            IReadOnlyList<string> groupIds,
+            IReadOnlyList<long> groupIds,
             CancellationToken cancellationToken = default)
             => _service.SetGroupsAsync(id.ToString(), groupIds, cancellationToken);
 

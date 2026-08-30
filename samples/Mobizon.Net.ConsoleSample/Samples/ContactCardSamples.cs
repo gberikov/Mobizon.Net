@@ -119,7 +119,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Console.WriteLine($"  Id={g.Id}  Name={g.Name}");
 
             // Replace with real group IDs
-            await client.ContactCards.SetGroupsAsync(cardId, new List<string> { "100604" });
+            await client.ContactCards.SetGroupsAsync(cardId, new List<long> { 100604L });
             Console.WriteLine("Groups updated.");
         }
 

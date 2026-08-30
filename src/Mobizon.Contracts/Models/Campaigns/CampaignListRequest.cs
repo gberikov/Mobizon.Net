@@ -75,6 +75,6 @@ namespace Mobizon.Contracts
         /// <summary>
         /// Gets or sets the contact-group IDs to filter campaigns by.
         /// </summary>
-        public IReadOnlyList<string>? Groups { get; set; }
+        public IReadOnlyList<long>? Groups { get; set; }
     }
 }

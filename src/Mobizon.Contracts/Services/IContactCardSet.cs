@@ -59,7 +59,7 @@ namespace Mobizon.Contracts
         // ── Groups ────────────────────────────────────────────────────────────
 
         /// <summary>Replaces the group membership of a contact card.</summary>
-        Task SetGroupsAsync(long id, IReadOnlyList<string> groupIds, CancellationToken cancellationToken = default);
+        Task SetGroupsAsync(long id, IReadOnlyList<long> groupIds, CancellationToken cancellationToken = default);
 
         /// <summary>Returns the groups the specified contact card belongs to.</summary>
         Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(long id, CancellationToken cancellationToken = default);
