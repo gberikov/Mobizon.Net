@@ -159,7 +159,7 @@ namespace Mobizon.Net.Services
                 ["data[landline]"]        = landline    ?? string.Empty,
                 ["data[skype]"]           = skype       ?? string.Empty,
                 ["data[telegram]"]        = telegram    ?? string.Empty,
-                ["data[birth_date]"]      = birthDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty,
+                ["data[birth_date]"]      = birthDate.HasValue ? ApiFormat.Date(birthDate.Value) : string.Empty,
                 ["data[gender]"]          = gender      ?? string.Empty,
                 ["data[company_name]"]    = companyName ?? string.Empty,
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq.Expressions;
 using Mobizon.Contracts.Models.ContactCards;
 
@@ -91,7 +90,7 @@ namespace Mobizon.Net.Internal
 
             string apiValue;
             if (value is DateTime dt)
-                apiValue = dt.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                apiValue = ApiFormat.DateTime(dt);
             else if (value is Enum e)
             {
                 // Gender.Undefined (and any future "Undefined" enum value) → empty operator

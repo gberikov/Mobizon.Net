@@ -46,7 +46,7 @@ namespace Mobizon.Net.Services
                 parameters["data[ratePeriod]"] = request.RatePeriod.Value.ToString();
 
             if (request.DeferredTo.HasValue)
-                parameters["data[deferredToTs]"] = request.DeferredTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                parameters["data[deferredToTs]"] = ApiFormat.DateTime(request.DeferredTo.Value);
 
             if (request.MessageClass.HasValue)
                 parameters["data[mclass]"] = ((int)request.MessageClass.Value).ToString();
@@ -136,13 +136,13 @@ namespace Mobizon.Net.Services
                         parameters["criteria[status]"] = ApiStatusCodes.ToApiCode(c.Status.Value);
 
                     if (c.CreatedFrom.HasValue)
-                        parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[createTsFrom]"] = ApiFormat.DateTime(c.CreatedFrom.Value);
                     if (c.CreatedTo.HasValue)
-                        parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[createTsTo]"] = ApiFormat.DateTime(c.CreatedTo.Value);
                     if (c.SentFrom.HasValue)
-                        parameters["criteria[sentTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[sentTsFrom]"] = ApiFormat.DateTime(c.SentFrom.Value);
                     if (c.SentTo.HasValue)
-                        parameters["criteria[sentTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[sentTsTo]"] = ApiFormat.DateTime(c.SentTo.Value);
 
                     if (c.Type.HasValue)
                         parameters["criteria[type]"] = c.Type.Value.ToString();

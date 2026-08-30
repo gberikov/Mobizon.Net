@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Common;
@@ -271,6 +272,33 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Empty(result.Items);
             Assert.Equal(0, result.TotalItemCount);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_DateCriteria_AreGregorianRegardlessOfCurrentCulture()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/List")
+                .WithFormData("criteria[startSendTsFrom]", "2026-03-01 10:20:30")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            var thai = new CultureInfo("th-TH");
+            thai.DateTimeFormat.Calendar = new ThaiBuddhistCalendar(); // year 2026 renders as 2569 under this calendar
+            var original = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = thai;
+            try
+            {
+                await CreateService(mockHttp).ListAsync(new MessageListRequest
+                {
+                    Criteria = new MessageListCriteria { SentFrom = new DateTime(2026, 3, 1, 10, 20, 30) }
+                });
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = original;
+            }
+
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

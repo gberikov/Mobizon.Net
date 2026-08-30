@@ -130,8 +130,8 @@ namespace Mobizon.Net.Services
                     if (c.Code != null) parameters["criteria[code]"] = c.Code;
                     if (c.FullLink != null) parameters["criteria[fullLink]"] = c.FullLink;
                     if (c.Comment != null) parameters["criteria[comment]"] = c.Comment;
-                    if (c.CreatedFrom.HasValue) parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                    if (c.CreatedTo.HasValue) parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.CreatedFrom.HasValue) parameters["criteria[createTsFrom]"] = ApiFormat.DateTime(c.CreatedFrom.Value);
+                    if (c.CreatedTo.HasValue) parameters["criteria[createTsTo]"] = ApiFormat.DateTime(c.CreatedTo.Value);
                     if (c.ClicksFrom.HasValue) parameters["criteria[clickCntFrom]"] = c.ClicksFrom.Value.ToString(CultureInfo.InvariantCulture);
                     if (c.ClicksTo.HasValue) parameters["criteria[clickCntTo]"] = c.ClicksTo.Value.ToString(CultureInfo.InvariantCulture);
                 }

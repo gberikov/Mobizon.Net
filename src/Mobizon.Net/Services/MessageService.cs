@@ -54,7 +54,7 @@ namespace Mobizon.Net.Services
                     parameters["params[name]"] = p.Name;
 
                 if (p.DeferredTo.HasValue)
-                    parameters["params[deferredToTs]"] = p.DeferredTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                    parameters["params[deferredToTs]"] = ApiFormat.DateTime(p.DeferredTo.Value);
 
                 if (p.MessageClass.HasValue)
                     parameters["params[mclass]"] = ((int)p.MessageClass.Value).ToString();
@@ -126,28 +126,28 @@ namespace Mobizon.Net.Services
                         parameters["criteria[campaignStatus]"] = ApiStatusCodes.ToApiCode(c.CampaignStatus.Value);
 
                     if (c.CampaignCreatedFrom.HasValue)
-                        parameters["criteria[campaignCreateTsFrom]"] = c.CampaignCreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignCreateTsFrom]"] = ApiFormat.DateTime(c.CampaignCreatedFrom.Value);
 
                     if (c.CampaignCreatedTo.HasValue)
-                        parameters["criteria[campaignCreateTsTo]"] = c.CampaignCreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignCreateTsTo]"] = ApiFormat.DateTime(c.CampaignCreatedTo.Value);
 
                     if (c.CampaignSentFrom.HasValue)
-                        parameters["criteria[campaignSentTsFrom]"] = c.CampaignSentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignSentTsFrom]"] = ApiFormat.DateTime(c.CampaignSentFrom.Value);
 
                     if (c.CampaignSentTo.HasValue)
-                        parameters["criteria[campaignSentTsTo]"] = c.CampaignSentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignSentTsTo]"] = ApiFormat.DateTime(c.CampaignSentTo.Value);
 
                     if (c.SentFrom.HasValue)
-                        parameters["criteria[startSendTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[startSendTsFrom]"] = ApiFormat.DateTime(c.SentFrom.Value);
 
                     if (c.SentTo.HasValue)
-                        parameters["criteria[startSendTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[startSendTsTo]"] = ApiFormat.DateTime(c.SentTo.Value);
 
                     if (c.StatusUpdatedFrom.HasValue)
-                        parameters["criteria[statusUpdateTsFrom]"] = c.StatusUpdatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[statusUpdateTsFrom]"] = ApiFormat.DateTime(c.StatusUpdatedFrom.Value);
 
                     if (c.StatusUpdatedTo.HasValue)
-                        parameters["criteria[statusUpdateTsTo]"] = c.StatusUpdatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[statusUpdateTsTo]"] = ApiFormat.DateTime(c.StatusUpdatedTo.Value);
                 }
 
                 if (request.WithNumberInfo.HasValue)
