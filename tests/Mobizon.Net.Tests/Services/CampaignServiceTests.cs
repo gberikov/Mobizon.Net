@@ -150,7 +150,13 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
-                .With(req => req.Content is System.Net.Http.MultipartFormDataContent)
+                .With(req =>
+                {
+                    if (!(req.Content is System.Net.Http.MultipartFormDataContent))
+                        return false;
+                    var content = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                    return content.Contains("name=apiKey") && content.Contains("test-key");
+                })
                 .Respond("application/json", @"{""code"":100,""data"":555,""message"":""""}");
 
             var service = CreateService(mockHttp);

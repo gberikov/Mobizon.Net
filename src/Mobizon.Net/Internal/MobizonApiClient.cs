@@ -71,10 +71,11 @@ namespace Mobizon.Net.Internal
             CancellationToken cancellationToken = default,
             int[]? extraSuccessCodes = null)
         {
-            var form = new Dictionary<string, string> { ["apiKey"] = _options.ApiKey };
+            var form = new Dictionary<string, string>();
             if (parameters != null)
                 foreach (var kv in parameters)
                     form[kv.Key] = kv.Value;
+            form["apiKey"] = _options.ApiKey; // SDK's key always wins; never overridable by a caller parameter.
 
             var request = CreateRequest(module, apiMethod);
             request.Content = new FormUrlEncodedContent(form);

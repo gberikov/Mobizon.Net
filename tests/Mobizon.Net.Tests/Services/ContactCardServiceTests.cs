@@ -321,7 +321,9 @@ namespace Mobizon.Net.Tests.Services
                         && content.Contains("data[address][city]")
                         && content.Contains("Алматы")
                         && content.Contains("data[address][postalcode]")
-                        && content.Contains("050000");
+                        && content.Contains("050000")
+                        && content.Contains("apiKey")
+                        && content.Contains("test-key");
                 })
                 .Respond("application/json",
                     @"{""code"":0,""data"":""78045040"",""message"":""""}");
