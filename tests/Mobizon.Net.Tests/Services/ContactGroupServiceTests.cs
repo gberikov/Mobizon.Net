@@ -60,7 +60,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.ListAsync(new ContactGroupListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort = new SortRequest { Field = "name", Direction = SortDirection.ASC }
+                Sort = new SortRequest { Field = "name", Direction = SortDirection.Ascending }
             });
 
             Assert.Single(result.Items);

@@ -60,7 +60,7 @@ namespace Mobizon.Net.Tests.Services
             await service.ListAsync(new Mobizon.Contracts.StopListListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "createTs", Direction = SortDirection.Descending }
             });
 
             mockHttp.VerifyNoOutstandingExpectation();

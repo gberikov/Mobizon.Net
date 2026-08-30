@@ -124,7 +124,7 @@ namespace Mobizon.Net.Tests.Services
             await service.ListAsync(new ContactCardListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort = new SortRequest { Field = "fullName", Direction = SortDirection.ASC }
+                Sort = new SortRequest { Field = "fullName", Direction = SortDirection.Ascending }
             });
 
             mockHttp.VerifyNoOutstandingExpectation();

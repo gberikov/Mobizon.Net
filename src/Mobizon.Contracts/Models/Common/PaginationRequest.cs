@@ -13,8 +13,8 @@ namespace Mobizon.Contracts
         public int CurrentPage { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of items to return per page. Defaults to <c>20</c>.
+        /// Items per page. API default is 25; maximum 100.
         /// </summary>
-        public int PageSize { get; set; } = 20;
+        public int PageSize { get; set; } = 25;
     }
 }

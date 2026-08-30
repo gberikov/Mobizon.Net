@@ -32,9 +32,9 @@ namespace Mobizon.Net
         public IContactCardQuery Take(int count)
             => new ContactCardQuery(_service).Take(count);
 
-        /// <summary>Begins a query and skips the first <paramref name="count"/> items.</summary>
-        public IContactCardQuery Skip(int count)
-            => new ContactCardQuery(_service).Skip(count);
+        /// <summary>Begins a query positioned on the given zero-based page.</summary>
+        public IContactCardQuery Page(int pageIndex)
+            => new ContactCardQuery(_service).Page(pageIndex);
 
         /// <summary>Begins a query sorted by the specified field ascending.</summary>
         public IContactCardQuery OrderBy<TKey>(

@@ -14,7 +14,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.Campaigns.ListAsync(new CampaignListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
-                Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort       = new SortRequest { Field = "id", Direction = SortDirection.Descending }
             });
             foreach (var c in result.Items)
                 Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Status={c.CommonStatus}");

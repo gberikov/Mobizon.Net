@@ -201,7 +201,7 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task Skip_WithTake_SetsCurrentPage()
+        public async Task Page_WithTake_SetsCurrentPage()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
@@ -209,7 +209,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateSet(mockHttp).Take(25).Skip(50).ToListAsync();
+            await CreateSet(mockHttp).Take(25).Page(2).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -372,7 +372,7 @@ namespace Mobizon.Net.Tests.Services
             await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604)
                 .Take(25)
-                .Skip(0)
+                .Page(0)
                 .OrderBy(x => x.Surname)
                 .ToListAsync();
 
@@ -555,7 +555,7 @@ namespace Mobizon.Net.Tests.Services
         // ── ToPageAsync ───────────────────────────────────────────────────────
 
         [Fact]
-        public async Task ToPageAsync_WithTakeAndSkip_SendsPaginationParams()
+        public async Task ToPageAsync_WithTakeAndPage_SendsPaginationParams()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
@@ -563,7 +563,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateSet(mockHttp).Take(25).Skip(25).ToPageAsync();
+            await CreateSet(mockHttp).Take(25).Page(1).ToPageAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -713,6 +713,45 @@ namespace Mobizon.Net.Tests.Services
             {
                 System.Globalization.CultureInfo.CurrentCulture = original;
             }
+        }
+
+        // ── Immutability ──────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Builder_IsImmutable_BaseQueryCanBeReused()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "0")
+                .WithFormData("pagination[pageSize]", "10")
+                .Respond("application/json", EmptyListJson);
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "1")
+                .WithFormData("pagination[pageSize]", "10")
+                .Respond("application/json", EmptyListJson);
+
+            var baseQuery = CreateSet(mockHttp).Take(10);
+            var first = baseQuery.Page(0);
+            var second = baseQuery.Page(1);
+
+            Assert.NotSame(baseQuery, first);
+            Assert.NotSame(first, second);
+            await first.ToListAsync();
+            await second.ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public void Take_NonPositive_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CreateSet(new MockHttpMessageHandler()).Take(0));
+        }
+
+        [Fact]
+        public void Page_Negative_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CreateSet(new MockHttpMessageHandler()).Page(-1));
         }
     }
 }

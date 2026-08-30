@@ -24,6 +24,9 @@ namespace Mobizon.Net.Internal
 
         public static string Bool(bool value) => value ? "1" : "0";
 
+        public static string Sort(SortDirection direction) =>
+            direction == SortDirection.Descending ? "DESC" : "ASC";
+
         /// <summary>Wire form of a contact's gender. Empty string clears the field.</summary>
         public static string Gender(Gender? value)
         {

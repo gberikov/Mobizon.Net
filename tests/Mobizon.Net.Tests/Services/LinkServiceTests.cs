@@ -239,7 +239,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.ListAsync(new LinkListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 1, PageSize = 10 },
-                Sort = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "id", Direction = SortDirection.Descending }
             });
 
             Assert.Single(result.Items);

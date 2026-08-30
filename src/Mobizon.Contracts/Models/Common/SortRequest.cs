@@ -13,8 +13,8 @@ namespace Mobizon.Contracts
         public string Field { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the sort direction. Defaults to <see cref="SortDirection.ASC"/>.
+        /// Gets or sets the sort direction. Defaults to <see cref="SortDirection.Ascending"/>.
         /// </summary>
-        public SortDirection Direction { get; set; } = SortDirection.ASC;
+        public SortDirection Direction { get; set; } = SortDirection.Ascending;
     }
 }

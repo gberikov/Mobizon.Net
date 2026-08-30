@@ -14,7 +14,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.NumberStopList.ListAsync(new StopListListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort       = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }
+                Sort       = new SortRequest { Field = "createTs", Direction = SortDirection.Descending }
             });
             Console.WriteLine($"Total: {result.TotalItemCount}");
             foreach (var e in result.Items)

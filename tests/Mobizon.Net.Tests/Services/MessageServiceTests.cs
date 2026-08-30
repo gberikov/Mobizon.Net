@@ -210,7 +210,7 @@ namespace Mobizon.Net.Tests.Services
             {
                 Criteria = new MessageListCriteria { From = "Alpha", Status = SmsStatus.Delivered },
                 Pagination = new PaginationRequest { CurrentPage = 1, PageSize = 10 },
-                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.Descending }
             });
 
             Assert.Single(result.Items);

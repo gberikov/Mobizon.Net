@@ -34,7 +34,7 @@ namespace Mobizon.Net.Services
                 }
 
                 if (request.Sort != null)
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
             return (await _apiClient.SendAsync<StopListListResponse>(

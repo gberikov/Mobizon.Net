@@ -24,12 +24,10 @@ namespace Mobizon.Contracts
         IContactCardQuery Take(int count);
 
         /// <summary>
-        /// Begins a query and skips the first <paramref name="count"/> items.
-        /// This value is page-based: it is translated to <c>currentPage = Skip / pageSize</c>,
-        /// so skip is accurate only at exact multiples of the page size.
-        /// Always pair with <see cref="Take"/> to set the page size; otherwise a default of 25 is used.
+        /// Selects the zero-based page to return. Pair with <see cref="Take"/> to set the page size
+        /// (default 25). Unlike LINQ's <c>Skip</c>, this maps 1:1 onto the API's <c>pagination[currentPage]</c>.
         /// </summary>
-        IContactCardQuery Skip(int count);
+        IContactCardQuery Page(int pageIndex);
 
         /// <summary>Begins a query sorted by the specified field ascending.</summary>
         IContactCardQuery OrderBy<TKey>(Expression<Func<ContactCardFilterSpec, TKey>> keySelector);
