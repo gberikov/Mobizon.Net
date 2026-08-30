@@ -2411,7 +2411,16 @@ git commit -m "docs: README/CHANGELOG/XML docs for 0.1.0 surface"
 - Verify compile: `samples/Mobizon.Net.ConsoleSample/Samples/*.cs` (already fixed by earlier tasks' grep steps)
 
 **Interfaces:**
-- Consumes: the existing static `*Samples` methods (`UserSamples.GetBalanceAsync(client)`, `MessageSamples.QuickSendAsync(client, recipient, text)`, `MessageSamples.SendSmsMessageAsync(client, recipient, text)`, `MessageSamples.GetStatusAsync(client)`, `MessageSamples.ListAsync(client)`, `CampaignSamples.ListAsync/GetAsync/GetInfoAsync/CreateSendDeleteAsync/AddRecipientsAsync(client)`, `LinkSamples.ListAsync/CreateGetUpdateDeleteAsync/GetStatsAsync(client)`, `ContactGroupSamples.ListAsync/CreateUpdateDeleteAsync/GetCardsCountAsync(client)`, `ContactCardSamples.ListAsync/ListByGroupAsync/GetAsync/CreateAndSetGroupAsync/UpdateAsync/GetGroupsAsync(client)`, `NumberStopListSamples.ListAsync/AddNumberAsync/AddNumberRangeAsync/DeleteAsync(client)`, `TaskQueueSamples.GetStatusAsync(client, taskId)`, `WebhookSamples.ProcessDeliveryReport(body, secret)`). If a name differs in the file, use the file's name.
+- Consumes: the existing static `*Samples` methods, verified against the files on 2026-08-30 — use exactly these names:
+  - `UserSamples.GetBalanceAsync(MobizonClient)`
+  - `MessageSamples.QuickSendAsync(MobizonClient, string recipient, string text)`, `SendSmsMessageAsync(MobizonClient, string, string)`, `GetStatusAsync(MobizonClient)`, `ListAsync(MobizonClient)`
+  - `CampaignSamples.ListAsync/GetAsync/GetInfoAsync/CreateSendDeleteAsync/AddRecipientsAsync(MobizonClient)`
+  - `LinkSamples.ListAsync/CreateGetUpdateDeleteAsync/GetStatsAsync(MobizonClient)`
+  - `ContactGroupSamples.ListAsync/CreateUpdateDeleteAsync/GetCardsCountAsync(MobizonClient)`
+  - `ContactCardSamples.ListAsync/ListByGroupAsync/GetAsync/FirstAndSingleAsync/AddAndUpdateAsync/GroupsAsync/RemoveAsync/ToPageAsync(MobizonClient)` — note: there is **no** `CreateAndSetGroupAsync`, `UpdateAsync` or `GetGroupsAsync`; the current `Program.cs` comments name methods that do not exist
+  - `NumberStopListSamples.ListAsync/AddNumberAsync/AddNumberRangeAsync/DeleteAsync(MobizonClient)`
+  - `TaskQueueSamples.GetStatusAsync(MobizonClient, long taskId)`
+  - `WebhookSamples.ProcessDeliveryReport(string body, string secret)` (returns `void`)
 
 - [ ] **Step 1: Replace `Program.cs` with:**
 
@@ -2483,9 +2492,11 @@ namespace Mobizon.Net.ConsoleSample
                 ["card-list"]          = _ => ContactCardSamples.ListAsync(client),
                 ["card-by-group"]      = _ => ContactCardSamples.ListByGroupAsync(client),
                 ["card-get"]           = _ => ContactCardSamples.GetAsync(client),
-                ["card-create"]        = _ => ContactCardSamples.CreateAndSetGroupAsync(client),
-                ["card-update"]        = _ => ContactCardSamples.UpdateAsync(client),
-                ["card-groups"]        = _ => ContactCardSamples.GetGroupsAsync(client),
+                ["card-first"]         = _ => ContactCardSamples.FirstAndSingleAsync(client),
+                ["card-page"]          = _ => ContactCardSamples.ToPageAsync(client),
+                ["card-add-update"]    = _ => ContactCardSamples.AddAndUpdateAsync(client),
+                ["card-groups"]        = _ => ContactCardSamples.GroupsAsync(client),
+                ["card-remove"]        = _ => ContactCardSamples.RemoveAsync(client),
                 ["stoplist"]           = _ => NumberStopListSamples.ListAsync(client),
                 ["stoplist-add"]       = _ => NumberStopListSamples.AddNumberAsync(client),
                 ["stoplist-add-range"] = _ => NumberStopListSamples.AddNumberRangeAsync(client),
