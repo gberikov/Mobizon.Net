@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts.Models.Users;
@@ -20,7 +20,7 @@ namespace Mobizon.Net.Services
         public async Task<BalanceResult> GetOwnBalanceAsync(
             CancellationToken cancellationToken = default)
         {
-            return (await _apiClient.SendAsync<BalanceResult>(HttpMethod.Get, ModuleName, "getownbalance", null, cancellationToken).ConfigureAwait(false)).Data!;
+            return (await _apiClient.SendAsync<BalanceResult>(ModuleName, "getownbalance", null, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

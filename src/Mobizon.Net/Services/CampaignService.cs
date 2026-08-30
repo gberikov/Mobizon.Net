@@ -61,7 +61,7 @@ namespace Mobizon.Net.Services
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task DeleteAsync(
@@ -73,7 +73,7 @@ namespace Mobizon.Net.Services
             };
 
             await _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<CampaignData> GetAsync(
@@ -85,7 +85,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<CampaignData>(
-                HttpMethod.Post, ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<CampaignInfo> GetInfoAsync(
@@ -100,7 +100,7 @@ namespace Mobizon.Net.Services
                 parameters["getFilledTplCampaignText"] = getFilledTplCampaignText.Value.ToString();
 
             return (await _apiClient.SendAsync<CampaignInfo>(
-                HttpMethod.Post, ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<MobizonListResult<CampaignData>> ListAsync(
@@ -165,7 +165,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<CampaignData>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<CampaignSendResult> SendAsync(
@@ -174,7 +174,7 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string> { ["id"] = id.ToString() };
 
             var response = await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
 
             return new CampaignSendResult
             {
@@ -338,7 +338,7 @@ namespace Mobizon.Net.Services
             AppendParams(parameters, request.Parameters);
 
             return _apiClient.SendAsync<AddRecipientsResult>(
-                HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
+                ModuleName, "AddRecipients", parameters, cancellationToken,
                 extraSuccessCodes: new[] { (int)AddRecipientsOutcome.PartiallyAdded, (int)AddRecipientsOutcome.NoneAdded });
         }
 

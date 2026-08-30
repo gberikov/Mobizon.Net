@@ -38,7 +38,7 @@ namespace Mobizon.Net.Services
                 parameters["data[comment]"] = request.Comment;
 
             return (await _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task DeleteAsync(
@@ -51,19 +51,19 @@ namespace Mobizon.Net.Services
             }
 
             await _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<LinkData> GetByIdAsync(long id, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
                 new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<LinkData> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
                 new Dictionary<string, string> { ["code"] = code }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<LinkData> GetByShortLinkAsync(string shortLink, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
                 new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<IReadOnlyList<LinkData>> GetLinksAsync(
@@ -75,7 +75,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
-                HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<LinkStatsResult> GetStatsAsync(
@@ -97,7 +97,7 @@ namespace Mobizon.Net.Services
                 parameters["criteria[dateTo]"] = request.DateTo;
 
             var response = await _apiClient.SendAsync<LinkStatsResult>(
-                HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
 
             // The payload identifies links only by their position in the requested `ids` array;
             // resolve each series back to its actual link ID here.
@@ -149,7 +149,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<LinkData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
@@ -159,7 +159,7 @@ namespace Mobizon.Net.Services
             if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
             if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
-            await _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
+            await _apiClient.SendAsync<object>(ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

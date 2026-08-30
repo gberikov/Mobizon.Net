@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +47,9 @@ namespace Mobizon.Net.Internal
             }
         };
 
+        private static readonly ProductInfoHeaderValue UserAgent =
+            new ProductInfoHeaderValue("Mobizon.Net", GetSdkVersion());
+
         private readonly HttpClient _httpClient;
         private readonly MobizonClientOptions _options;
 
@@ -57,18 +60,24 @@ namespace Mobizon.Net.Internal
             options.Validate();
         }
 
+        /// <summary>
+        /// Sends a form-encoded POST. The API key is always a body field (never part of the URL), so it
+        /// does not leak into proxy / HttpClient request logs.
+        /// </summary>
         public async Task<MobizonResponse<T>> SendAsync<T>(
-            HttpMethod method,
             string module,
             string apiMethod,
             IDictionary<string, string>? parameters,
             CancellationToken cancellationToken = default,
             int[]? extraSuccessCodes = null)
         {
-            var request = new HttpRequestMessage(method, BuildUrl(module, apiMethod));
+            var form = new Dictionary<string, string> { ["apiKey"] = _options.ApiKey };
+            if (parameters != null)
+                foreach (var kv in parameters)
+                    form[kv.Key] = kv.Value;
 
-            if (method == HttpMethod.Post && parameters != null && parameters.Count > 0)
-                request.Content = new FormUrlEncodedContent(parameters);
+            var request = CreateRequest(module, apiMethod);
+            request.Content = new FormUrlEncodedContent(form);
 
             return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
@@ -83,9 +92,10 @@ namespace Mobizon.Net.Internal
             int[]? extraSuccessCodes = null,
             string fileFieldName = "data[photo]")
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
+            var request = CreateRequest(module, apiMethod);
 
             var multipart = new MultipartFormDataContent();
+            multipart.Add(new StringContent(_options.ApiKey), "apiKey");
 
             foreach (var kv in fields)
                 multipart.Add(new StringContent(kv.Value ?? string.Empty), kv.Key);
@@ -102,9 +112,30 @@ namespace Mobizon.Net.Internal
             return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
 
+        /// <summary>Read-only API methods are safe to retry. Every Mobizon read is <c>get*</c> or <c>list</c>.</summary>
+        internal static bool IsReadMethod(string apiMethod) =>
+            apiMethod.StartsWith("get", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(apiMethod, "list", StringComparison.OrdinalIgnoreCase);
+
+        private HttpRequestMessage CreateRequest(string module, string apiMethod)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
+            request.Headers.UserAgent.Add(UserAgent);
+            if (IsReadMethod(apiMethod))
+                RequestMarkers.MarkIdempotent(request);
+            return request;
+        }
+
         private string BuildUrl(string module, string apiMethod) =>
-            $"{_options.ApiUrl.TrimEnd('/')}/service/{module}/{apiMethod}" +
-            $"?output=json&api={_options.ApiVersion}&apiKey={_options.ApiKey}";
+            $"{_options.ApiUrl.TrimEnd('/')}/service/{module}/{apiMethod}?output=json&api={_options.ApiVersion}";
+
+        private static string GetSdkVersion()
+        {
+            var v = typeof(MobizonApiClient).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
+            var plus = v.IndexOf('+');
+            return plus > 0 ? v.Substring(0, plus) : v;
+        }
 
         private async Task<MobizonResponse<T>> SendCoreAsync<T>(
             HttpRequestMessage request,

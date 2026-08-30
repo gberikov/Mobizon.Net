@@ -64,7 +64,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<SendSmsResult>(
-                HttpMethod.Post, ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
@@ -85,7 +85,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
-                HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<MobizonListResult<MessageInfo>> ListAsync(
@@ -166,7 +166,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }
 }

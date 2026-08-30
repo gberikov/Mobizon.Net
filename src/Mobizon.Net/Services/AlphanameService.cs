@@ -26,7 +26,7 @@ namespace Mobizon.Net.Services
                     ["pagination[pageSize]"] = pagination.PageSize.ToString()
                 };
             return (await _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

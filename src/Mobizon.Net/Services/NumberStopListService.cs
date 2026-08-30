@@ -39,7 +39,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<StopListListResponse>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<long> AddNumberAsync(
@@ -55,7 +55,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task AddNumberRangeAsync(
@@ -80,7 +80,7 @@ namespace Mobizon.Net.Services
             };
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(
@@ -93,7 +93,7 @@ namespace Mobizon.Net.Services
             };
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

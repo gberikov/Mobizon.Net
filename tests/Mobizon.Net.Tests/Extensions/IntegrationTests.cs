@@ -43,11 +43,11 @@ namespace Mobizon.Net.Tests.Extensions
 
             // First call returns 503 (transient failure), second call returns 200 with success JSON.
             mockHttp
-                .Expect(HttpMethod.Get, "https://api.mobizon.kz/service/user/getownbalance")
+                .Expect(HttpMethod.Post, "https://api.mobizon.kz/service/user/getownbalance")
                 .Respond(HttpStatusCode.ServiceUnavailable);
 
             mockHttp
-                .Expect(HttpMethod.Get, "https://api.mobizon.kz/service/user/getownbalance")
+                .Expect(HttpMethod.Post, "https://api.mobizon.kz/service/user/getownbalance")
                 .Respond("application/json", successJson);
 
             var services = new ServiceCollection();

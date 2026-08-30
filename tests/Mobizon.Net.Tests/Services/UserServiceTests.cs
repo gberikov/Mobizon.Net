@@ -17,14 +17,12 @@ namespace Mobizon.Net.Tests.Services
         };
 
         [Fact]
-        public async Task GetOwnBalanceAsync_UsesGetMethod()
+        public async Task GetOwnBalanceAsync_PostsWithApiKeyInBody()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.Expect(HttpMethod.Get,
+            mockHttp.Expect(HttpMethod.Post,
                     "https://api.mobizon.kz/service/user/getownbalance")
-                .WithQueryString("output", "json")
-                .WithQueryString("api", "v1")
-                .WithQueryString("apiKey", "test-key")
+                .WithFormData("apiKey", "test-key")
                 .Respond("application/json",
                     @"{""code"":0,""data"":{""balance"":""4043.0656"",""currency"":""KZT""},""message"":""""}");
 

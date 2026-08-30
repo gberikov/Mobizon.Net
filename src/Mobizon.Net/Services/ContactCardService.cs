@@ -49,7 +49,7 @@ namespace Mobizon.Net.Services
             }
 
             return (await _apiClient.SendAsync<ContactCardListResult>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<ContactCardData> GetAsync(
@@ -62,7 +62,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<ContactCardData>(
-                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<string> CreateAsync(
@@ -113,7 +113,7 @@ namespace Mobizon.Net.Services
                 parameters[$"groupIds[{i}]"] = groupIds[i];
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
@@ -126,7 +126,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
-                HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "getgroups", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task RemoveAsync(
@@ -135,7 +135,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string> { ["id"] = id };
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         private static Dictionary<string, string> BuildCardFields(
