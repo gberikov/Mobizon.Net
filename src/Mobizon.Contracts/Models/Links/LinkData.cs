@@ -14,8 +14,8 @@ namespace Mobizon.Contracts
         [JsonPropertyName("moderatorStatus")] public LinkModeratorStatus ModeratorStatus { get; set; }
         [JsonPropertyName("clickCnt")] public int Clicks { get; set; }
         [JsonPropertyName("redirectCnt")] public int Redirects { get; set; }
-        public string? ExpirationDate { get; set; }
-        [JsonPropertyName("realExpirationDate")] public string? RealExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        [JsonPropertyName("realExpirationDate")] public DateTime? RealExpirationDate { get; set; }
         public string? Comment { get; set; }
         [JsonPropertyName("moderatorComment")] public string? ModeratorComment { get; set; }
         [JsonPropertyName("createTs")] public DateTime? Created { get; set; }

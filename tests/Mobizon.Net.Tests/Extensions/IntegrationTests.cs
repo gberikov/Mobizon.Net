@@ -77,7 +77,7 @@ namespace Mobizon.Net.Tests.Extensions
             var result = await client.User.GetOwnBalanceAsync();
 
             Assert.NotNull(result);
-            Assert.Equal("100.50", result.Balance);
+            Assert.Equal(100.50m, result.Balance);
             Assert.Equal("KZT", result.Currency);
 
             mockHttp.VerifyNoOutstandingExpectation();

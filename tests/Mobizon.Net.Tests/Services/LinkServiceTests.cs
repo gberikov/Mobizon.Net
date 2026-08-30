@@ -64,13 +64,14 @@ namespace Mobizon.Net.Tests.Services
             {
                 FullLink = "https://example.com",
                 Status = LinkStatus.Active,
-                ExpirationDate = "2025-12-31",
+                ExpirationDate = new DateTime(2025, 12, 31),
                 Comment = "Test link"
             });
 
             Assert.Equal(1, result.Id);
             Assert.Equal("abc123", result.Code);
             Assert.Equal("https://example.com", result.FullLink);
+            Assert.Equal(new DateTime(2025, 12, 31), result.ExpirationDate);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -349,6 +350,40 @@ namespace Mobizon.Net.Tests.Services
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""70000000005"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByIdAsync(70000000005L);
             Assert.Equal(70000000005L, result.Id);
+        }
+
+        // ── GetStatsAsync date range / id-count validation ──────────────────
+
+        [Fact]
+        public async Task GetStatsAsync_DateRange_IsSentAsDateTime()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getstats")
+                .WithFormData("criteria[dateFrom]", "2026-01-01 00:00:00")
+                .WithFormData("criteria[dateTo]", "2026-01-31 23:59:59")
+                .Respond("application/json", Fixtures.Load("link.getStats.json"));
+
+            await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest
+            {
+                Ids = new[] { 1L },
+                Type = LinkStatsType.Daily,
+                DateFrom = new DateTime(2026, 1, 1),
+                DateTo = new DateTime(2026, 1, 31, 23, 59, 59)
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(6)]
+        public async Task GetStatsAsync_RejectsInvalidIdCount(int count)
+        {
+            var ids = new long[count];
+            for (var i = 0; i < count; i++) ids[i] = i + 1;
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                CreateService(new MockHttpMessageHandler()).GetStatsAsync(new GetLinkStatsRequest { Ids = ids, Type = LinkStatsType.Daily }));
         }
     }
 }

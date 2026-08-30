@@ -48,7 +48,7 @@ namespace Mobizon.Contracts
         public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public string? Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         public string? CompanyName { get; set; }

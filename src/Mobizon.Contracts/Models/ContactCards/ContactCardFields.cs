@@ -45,7 +45,7 @@ namespace Mobizon.Contracts
         public string? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public string? Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         [JsonPropertyName("company_name")]

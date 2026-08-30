@@ -1,3 +1,5 @@
+using System;
+
 namespace Mobizon.Contracts
 {
     /// <summary>
@@ -17,10 +19,10 @@ namespace Mobizon.Contracts
         public LinkStatus? Status { get; set; }
 
         /// <summary>
-        /// Gets or sets the optional expiration date of the link as a string in the format expected by the API.
-        /// When <see langword="null"/>, the link does not expire.
+        /// Gets or sets the last day the link is valid, in the account's time zone.
+        /// <see langword="null"/> = never expires.
         /// </summary>
-        public string? ExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
 
         /// <summary>
         /// Gets or sets an optional comment or label for the link.

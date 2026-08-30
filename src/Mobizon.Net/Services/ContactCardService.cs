@@ -142,7 +142,7 @@ namespace Mobizon.Net.Services
             string? mobileValue, ContactType? mobileType,
             string? email, string? viber, string? whatsapp, string? landline,
             string? skype, string? telegram, AddressFieldInfo? address,
-            DateTime? birthDate, string? gender, string? companyName, string? companyUrl,
+            DateTime? birthDate, Gender? gender, string? companyName, string? companyUrl,
             string? info)
         {
             var fields = new Dictionary<string, string>
@@ -159,7 +159,7 @@ namespace Mobizon.Net.Services
                 ["data[skype]"]           = skype       ?? string.Empty,
                 ["data[telegram]"]        = telegram    ?? string.Empty,
                 ["data[birth_date]"]      = birthDate.HasValue ? ApiFormat.Date(birthDate.Value) : string.Empty,
-                ["data[gender]"]          = gender      ?? string.Empty,
+                ["data[gender]"]          = ApiFormat.Gender(gender),
                 ["data[company_name]"]    = companyName ?? string.Empty,
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,
                 ["data[info]"]            = info        ?? string.Empty,

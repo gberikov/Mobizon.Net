@@ -34,7 +34,8 @@ namespace Mobizon.Net.Internal
                 new StringToNumericEnumConverter<Mobizon.Contracts.LinkStatus>(),
                 new StringToNumericEnumConverter<Mobizon.Contracts.LinkModeratorStatus>(),
                 new MobizonDateTimeConverter(),
-                new ContactTypeConverter(),
+                new TolerantStringEnumConverter<ContactType>(),
+                new TolerantStringEnumConverter<Gender>(),
                 // Contact-card fields the PHP API may emit as `[]`/`""` when unset — tolerate that.
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.ContactFieldInfo>(),
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.MobileFieldInfo>(),

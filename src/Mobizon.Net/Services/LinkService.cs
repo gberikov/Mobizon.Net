@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
@@ -29,8 +30,8 @@ namespace Mobizon.Net.Services
             if (request.Status.HasValue)
                 parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
 
-            if (request.ExpirationDate != null)
-                parameters["data[expirationDate]"] = request.ExpirationDate;
+            if (request.ExpirationDate.HasValue)
+                parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);
 
             if (request.Comment != null)
                 parameters["data[comment]"] = request.Comment;
@@ -79,6 +80,9 @@ namespace Mobizon.Net.Services
         public async Task<LinkStatsResult> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
+            if (request.Ids == null || request.Ids.Length == 0 || request.Ids.Length > 5)
+                throw new ArgumentException("link/getStats accepts 1 to 5 link ids per request.", nameof(request));
+
             var parameters = new Dictionary<string, string>();
 
             for (var i = 0; i < request.Ids.Length; i++)
@@ -88,11 +92,11 @@ namespace Mobizon.Net.Services
 
             parameters["type"] = request.Type.ToString().ToLowerInvariant();
 
-            if (request.DateFrom != null)
-                parameters["criteria[dateFrom]"] = request.DateFrom;
+            if (request.DateFrom.HasValue)
+                parameters["criteria[dateFrom]"] = ApiFormat.DateTime(request.DateFrom.Value);
 
-            if (request.DateTo != null)
-                parameters["criteria[dateTo]"] = request.DateTo;
+            if (request.DateTo.HasValue)
+                parameters["criteria[dateTo]"] = ApiFormat.DateTime(request.DateTo.Value);
 
             var response = await _apiClient.SendAsync<LinkStatsResult>(
                 ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
@@ -155,7 +159,7 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
-            if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
+            if (request.ExpirationDate.HasValue) parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
             await _apiClient.SendAsync<object>(ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }

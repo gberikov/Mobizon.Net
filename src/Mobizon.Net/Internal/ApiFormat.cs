@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal
 {
@@ -22,5 +23,16 @@ namespace Mobizon.Net.Internal
             value.ToString(CultureInfo.InvariantCulture);
 
         public static string Bool(bool value) => value ? "1" : "0";
+
+        /// <summary>Wire form of a contact's gender. Empty string clears the field.</summary>
+        public static string Gender(Gender? value)
+        {
+            switch (value)
+            {
+                case Contracts.Gender.Male:   return "male";
+                case Contracts.Gender.Female: return "female";
+                default:                      return string.Empty;
+            }
+        }
     }
 }

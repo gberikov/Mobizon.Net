@@ -155,7 +155,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Equal("john@example.com", f.Email?.Value);
             Assert.Equal(ContactType.Additional, f.Email?.Type);
             Assert.Equal("1990-01-15", f.BirthDate);
-            Assert.Equal("male", f.Gender);
+            Assert.Equal(Gender.Male, f.Gender);
             Assert.Equal("Acme", f.CompanyName);
             Assert.Equal("https://acme.com", f.CompanyUrl);
             Assert.Equal("VIP", f.Info);
@@ -474,6 +474,44 @@ namespace Mobizon.Net.Tests.Services
             await CreateService(mockHttp).RemoveAsync("77885666");
 
             mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        // ── Gender ───────────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task CreateAsync_Gender_IsSentLowercase()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/contactcard/create")
+                .With(req =>
+                {
+                    // same style as the existing multipart assertions in this class
+                    var content = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                    return content.Contains("data[gender]") && content.Contains("female") && !content.Contains("Female");
+                })
+                .Respond("application/json", @"{""code"":0,""data"":""777"",""message"":""""}");
+
+            await CreateService(mockHttp).CreateAsync(new CreateContactCardRequest { Name = "A", Gender = Gender.Female });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData("\"male\"", true)]
+        [InlineData("\"MALE\"", true)]
+        [InlineData("\"\"", false)]
+        [InlineData("\"other\"", false)]
+        [InlineData("[]", false)]
+        public async Task GetAsync_Gender_IsParsedTolerantly(string genderJson, bool expectMale)
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/contactcard/get")
+                .Respond("application/json",
+                    "{\"code\":0,\"data\":{\"id\":\"1\",\"fields\":{\"name\":\"A\",\"gender\":" + genderJson + "}},\"message\":\"\"}");
+
+            var card = await CreateService(mockHttp).GetAsync("1");
+
+            Assert.Equal(expectMale ? Gender.Male : (Gender?)null, card.Fields!.Gender);
         }
     }
 }

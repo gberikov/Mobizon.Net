@@ -1,3 +1,5 @@
+using System;
+
 namespace Mobizon.Contracts
 {
     /// <summary>
@@ -17,15 +19,15 @@ namespace Mobizon.Contracts
         public LinkStatsType Type { get; set; }
 
         /// <summary>
-        /// Gets or sets the start of the date range for the statistics query,
-        /// as a string in the format expected by the API. When <see langword="null"/>, no lower bound is applied.
+        /// Gets or sets the start of the date range for the statistics query.
+        /// When <see langword="null"/>, no lower bound is applied.
         /// </summary>
-        public string? DateFrom { get; set; }
+        public DateTime? DateFrom { get; set; }
 
         /// <summary>
-        /// Gets or sets the end of the date range for the statistics query,
-        /// as a string in the format expected by the API. When <see langword="null"/>, no upper bound is applied.
+        /// Gets or sets the end of the date range for the statistics query.
+        /// When <see langword="null"/>, no upper bound is applied.
         /// </summary>
-        public string? DateTo { get; set; }
+        public DateTime? DateTo { get; set; }
     }
 }
