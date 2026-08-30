@@ -272,5 +272,20 @@ namespace Mobizon.Net.Tests.Services
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task GetLinksAsync_CallsLinkModule()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getlinks")
+                .WithFormData("campaignId", "42")
+                .Respond("application/json", @"{""code"":0,""data"":[{""id"":""7"",""code"":""abc"",""fullLink"":""https://e.com"",""shortLink"":""https://mbzn.co/abc"",""clickCnt"":""3"",""redirectCnt"":""1""}],""message"":""""}");
+
+            var links = await CreateService(mockHttp).GetLinksAsync(42);
+
+            Assert.Single(links);
+            Assert.Equal(7, links[0].Id);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }

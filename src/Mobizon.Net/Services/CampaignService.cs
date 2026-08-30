@@ -364,6 +364,14 @@ namespace Mobizon.Net.Services
                 parameters["params[recipientsFileEnclosure]"] = prm.RecipientsFileEnclosure;
         }
 
+        public async Task<IReadOnlyList<LinkData>> GetLinksAsync(
+            long campaignId, CancellationToken cancellationToken = default)
+        {
+            var parameters = new Dictionary<string, string> { ["campaignId"] = ApiFormat.Int(campaignId) };
+            return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
+                "link", "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
+        }
+
         private static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> source, int offset, int count)
         {
             var result = new List<T>(count);

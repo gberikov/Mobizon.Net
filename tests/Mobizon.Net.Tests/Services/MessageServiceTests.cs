@@ -313,5 +313,23 @@ namespace Mobizon.Net.Tests.Services
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task SendSmsMessageAsync_ShortenLinks_SendsParam()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("params[shortenLinks]", "1")
+                .Respond("application/json", Fixtures.Load("message.sendSmsMessage.json"));
+
+            await CreateService(mockHttp).SendSmsMessageAsync(new SendSmsMessageRequest
+            {
+                Recipient = "77001234567",
+                Text = "https://example.com/very/long",
+                Parameters = new SmsMessageParameters { ShortenLinks = true }
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }

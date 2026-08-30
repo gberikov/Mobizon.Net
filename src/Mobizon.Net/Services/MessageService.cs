@@ -58,6 +58,9 @@ namespace Mobizon.Net.Services
 
                 if (p.Validity.HasValue)
                     parameters["params[validity]"] = ((int)p.Validity.Value.TotalMinutes).ToString();
+
+                if (p.ShortenLinks.HasValue)
+                    parameters["params[shortenLinks]"] = ApiFormat.Bool(p.ShortenLinks.Value);
             }
 
             return (await _apiClient.SendAsync<SendSmsResult>(

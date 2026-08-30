@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -117,5 +118,15 @@ namespace Mobizon.Contracts
         /// </exception>
         Task<AddRecipientsResult> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Returns the short links used by a campaign, with their click counters.
+        /// Same endpoint as <see cref="ILinkService.GetLinksAsync"/> (<c>link/getLinks</c>), exposed here for discoverability.
+        /// </summary>
+        /// <param name="campaignId">The campaign ID.</param>
+        /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
+        /// <returns>The campaign's <see cref="LinkData"/> items (bare array — not a paged envelope).</returns>
+        /// <exception cref="MobizonApiException">Thrown when the API returns a non-success response code.</exception>
+        Task<IReadOnlyList<LinkData>> GetLinksAsync(long campaignId, CancellationToken cancellationToken = default);
     }
 }

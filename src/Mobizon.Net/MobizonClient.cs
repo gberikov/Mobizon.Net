@@ -17,7 +17,7 @@ namespace Mobizon.Net
     /// When constructed with <see cref="MobizonClient(HttpClient, MobizonClientOptions)"/>, the caller is
     /// responsible for the lifetime of the <see cref="HttpClient"/>.
     /// </remarks>
-    public class MobizonClient : IMobizonClient
+    public class MobizonClient : IMobizonClient, IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;

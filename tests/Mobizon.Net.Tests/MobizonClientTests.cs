@@ -75,5 +75,12 @@ namespace Mobizon.Net.Tests
             });
             Assert.Equal(original, http.Timeout); // injected client untouched
         }
+
+        [Fact]
+        public void IMobizonClient_IsNotDisposable_ButMobizonClientIs()
+        {
+            Assert.False(typeof(System.IDisposable).IsAssignableFrom(typeof(IMobizonClient)));
+            Assert.True(typeof(System.IDisposable).IsAssignableFrom(typeof(MobizonClient)));
+        }
     }
 }
