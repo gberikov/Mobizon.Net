@@ -56,7 +56,7 @@ namespace Mobizon.Net
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetAsync(id.ToString(), cancellationToken).ConfigureAwait(false);
+            var response = await _service.GetAsync(ApiFormat.Int(id), cancellationToken).ConfigureAwait(false);
             return response != null ? ContactCardMapper.ToEntity(response) : null;
         }
 
@@ -94,7 +94,7 @@ namespace Mobizon.Net
 
         /// <summary>Deletes the contact card with the specified ID.</summary>
         public Task RemoveAsync(long id, CancellationToken cancellationToken = default)
-            => _service.RemoveAsync(id.ToString(), cancellationToken);
+            => _service.RemoveAsync(ApiFormat.Int(id), cancellationToken);
 
         // ── Groups ────────────────────────────────────────────────────────────
 
@@ -105,14 +105,14 @@ namespace Mobizon.Net
             long id,
             IReadOnlyList<long> groupIds,
             CancellationToken cancellationToken = default)
-            => _service.SetGroupsAsync(id.ToString(), groupIds, cancellationToken);
+            => _service.SetGroupsAsync(ApiFormat.Int(id), groupIds, cancellationToken);
 
         /// <summary>Returns the groups the specified contact card belongs to.</summary>
         public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken).ConfigureAwait(false);
+            var response = await _service.GetGroupsAsync(ApiFormat.Int(id), cancellationToken).ConfigureAwait(false);
             return response ?? Array.Empty<ContactGroupRef>();
         }
     }

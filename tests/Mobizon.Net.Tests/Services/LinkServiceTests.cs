@@ -95,6 +95,51 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
+        public async Task DeleteAsync_WithEmptyDataObject_ReturnsEmptyNonNullLists()
+        {
+            // The API can reply with `"data":{}` — neither key present. Absent keys must not be
+            // mistaken for "nothing left unprocessed": both lists must come back empty, not null.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/link/delete")
+                .WithFormData("ids[0]", "10")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{},""message"":""""}");
+
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L });
+
+            Assert.NotNull(result.Processed);
+            Assert.NotNull(result.NotProcessed);
+            Assert.Empty(result.Processed);
+            Assert.Empty(result.NotProcessed);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WithExplicitNullLists_ReturnsEmptyNonNullLists()
+        {
+            // System.Text.Json overwrites a property with null when the JSON carries an explicit
+            // null (unlike an absent key, which leaves the property-initializer default alone).
+            // Without a null-safe setter this used to leave Processed/NotProcessed literally null,
+            // and AllProcessed would throw a NullReferenceException reading NotProcessed.Count.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/link/delete")
+                .WithFormData("ids[0]", "10")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""processed"":null,""notProcessed"":null},""message"":""""}");
+
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L });
+
+            Assert.NotNull(result.Processed);
+            Assert.NotNull(result.NotProcessed);
+            Assert.Empty(result.Processed);
+            Assert.Empty(result.NotProcessed);
+            Assert.True(result.AllProcessed);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
         public async Task GetByCodeAsync_SendsCode()
         {
             var mockHttp = new MockHttpMessageHandler();

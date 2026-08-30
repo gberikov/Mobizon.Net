@@ -20,8 +20,8 @@ namespace Mobizon.Net.Services
             if (pagination != null)
                 parameters = new Dictionary<string, string>
                 {
-                    ["pagination[currentPage]"] = pagination.CurrentPage.ToString(),
-                    ["pagination[pageSize]"] = pagination.PageSize.ToString()
+                    ["pagination[currentPage]"] = ApiFormat.Int(pagination.CurrentPage),
+                    ["pagination[pageSize]"] = ApiFormat.Int(pagination.PageSize)
                 };
             return (await _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
                 ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;

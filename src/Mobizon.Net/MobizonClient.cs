@@ -81,7 +81,13 @@ namespace Mobizon.Net
         /// The caller retains ownership of <paramref name="httpClient"/> and is responsible for disposing it.
         /// </summary>
         /// <param name="httpClient">The <see cref="HttpClient"/> instance to use for all API requests.</param>
-        /// <param name="options">The configuration options including API key, URL, version, and timeout.</param>
+        /// <param name="options">
+        /// The configuration options including API key, URL, and version. <see cref="MobizonClientOptions.Timeout"/>
+        /// is <em>not</em> applied by this overload — the caller owns <paramref name="httpClient"/>, so it is the
+        /// caller's responsibility to set <see cref="HttpClient.Timeout"/> directly (or to configure it on the
+        /// named client when registering via dependency injection). Only the overload that owns the
+        /// <see cref="HttpClient"/> (<see cref="MobizonClient(MobizonClientOptions)"/>) honors this option.
+        /// </param>
         public MobizonClient(HttpClient httpClient, MobizonClientOptions options)
             : this(httpClient, options, ownsHttpClient: false)
         {

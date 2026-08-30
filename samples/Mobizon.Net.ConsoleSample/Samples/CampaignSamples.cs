@@ -79,7 +79,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 CampaignId = 1,
                 Recipients = new[]
                 {
-                    new RecipientEntry { Recipient = "77017221502" },
+                    new RecipientEntry { Recipient = "77001234567" },
                     new RecipientEntry { Recipient = "77029932233" },
                 }
             });

@@ -29,8 +29,8 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
@@ -61,7 +61,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"]          = id.ToString(),
+                ["id"]          = ApiFormat.Int(id),
                 ["data[name]"]  = name
             };
 
@@ -75,7 +75,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             return (await _apiClient.SendAsync<DeleteResult>(
@@ -88,7 +88,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.HasValue ? id.Value.ToString() : "-1"
+                ["id"] = id.HasValue ? ApiFormat.Int(id.Value) : "-1"
             };
 
             return (await _apiClient.SendAsync<long>(

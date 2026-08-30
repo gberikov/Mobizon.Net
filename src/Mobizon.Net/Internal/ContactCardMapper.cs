@@ -56,7 +56,7 @@ namespace Mobizon.Net.Internal
         internal static UpdateContactCardRequest ToUpdateRequest(ContactCard e) =>
             new UpdateContactCardRequest
             {
-                Id          = e.Id!.Value.ToString(),
+                Id          = ApiFormat.Int(e.Id!.Value),
                 Title       = e.Title,
                 Name        = e.Name,
                 Surname     = e.Surname,

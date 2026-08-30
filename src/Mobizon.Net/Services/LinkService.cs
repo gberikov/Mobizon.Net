@@ -46,7 +46,7 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
             return (await _apiClient.SendAsync<DeleteResult>(
@@ -55,7 +55,7 @@ namespace Mobizon.Net.Services
 
         public async Task<LinkData> GetByIdAsync(long id, CancellationToken cancellationToken = default)
             => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
-                new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken).ConfigureAwait(false)).Data;
+                new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<LinkData> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
             => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
@@ -70,7 +70,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["campaignId"] = campaignId.ToString()
+                ["campaignId"] = ApiFormat.Int(campaignId)
             };
 
             return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
@@ -87,7 +87,7 @@ namespace Mobizon.Net.Services
 
             for (var i = 0; i < request.Ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = request.Ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(request.Ids[i]);
             }
 
             parameters["type"] = request.Type.ToString().ToLowerInvariant();
@@ -140,8 +140,8 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
@@ -156,7 +156,7 @@ namespace Mobizon.Net.Services
 
         public async Task UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
+            var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.Id) };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
             if (request.ExpirationDate.HasValue) parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);

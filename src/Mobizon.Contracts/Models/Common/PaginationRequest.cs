@@ -8,7 +8,8 @@ namespace Mobizon.Contracts
     public class PaginationRequest
     {
         /// <summary>
-        /// Gets or sets the one-based page number to retrieve.
+        /// Gets or sets the zero-based page number to retrieve. <c>0</c> is the first page,
+        /// matching the Mobizon API's own page numbering.
         /// </summary>
         public int CurrentPage { get; set; }
 

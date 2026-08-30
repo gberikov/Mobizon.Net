@@ -54,10 +54,10 @@ namespace Mobizon.Net.Services
                     parameters["params[deferredToTs]"] = ApiFormat.DateTime(p.DeferredTo.Value);
 
                 if (p.MessageClass.HasValue)
-                    parameters["params[mclass]"] = ((int)p.MessageClass.Value).ToString();
+                    parameters["params[mclass]"] = ApiFormat.Int((int)p.MessageClass.Value);
 
                 if (p.Validity.HasValue)
-                    parameters["params[validity]"] = ((int)p.Validity.Value.TotalMinutes).ToString();
+                    parameters["params[validity]"] = ApiFormat.Int((int)p.Validity.Value.TotalMinutes);
 
                 if (p.ShortenLinks.HasValue)
                     parameters["params[shortenLinks]"] = ApiFormat.Bool(p.ShortenLinks.Value);
@@ -81,7 +81,7 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
             return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
@@ -104,7 +104,7 @@ namespace Mobizon.Net.Services
 
                     if (c.CampaignIds != null)
                         for (var i = 0; i < c.CampaignIds.Count; i++)
-                            parameters[$"criteria[campaignIds][{i}]"] = c.CampaignIds[i].ToString();
+                            parameters[$"criteria[campaignIds][{i}]"] = ApiFormat.Int(c.CampaignIds[i]);
 
                     if (c.From != null)
                         parameters["criteria[from]"] = c.From;
@@ -120,7 +120,7 @@ namespace Mobizon.Net.Services
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)
-                            parameters[$"criteria[groups][{i}]"] = c.Groups[i].ToString();
+                            parameters[$"criteria[groups][{i}]"] = ApiFormat.Int(c.Groups[i]);
 
                     if (c.CampaignStatus.HasValue)
                         parameters["criteria[campaignStatus]"] = ApiStatusCodes.ToApiCode(c.CampaignStatus.Value);
@@ -155,8 +155,8 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)

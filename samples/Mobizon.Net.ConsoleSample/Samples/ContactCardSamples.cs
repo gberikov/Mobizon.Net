@@ -93,7 +93,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             {
                 Name    = "SDK",
                 Surname = "Test",
-                Mobile  = new MobileFieldInfo { Value = "77017221502" },
+                Mobile  = new MobileFieldInfo { Value = "77001234567" },
                 Email   = new ContactFieldInfo { Value = "sdk@example.com" },
                 Info    = "Created by Mobizon.Net SDK"
             };

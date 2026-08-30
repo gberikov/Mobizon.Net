@@ -101,6 +101,10 @@ namespace Mobizon.Net.Internal
                 // current culture (e.g. tr-TR would otherwise turn "Additional" into "ADDİTİONAL").
                 apiValue = e.ToString().ToUpperInvariant();   // ContactType.Main → "MAIN", Gender.Male → "MALE"
             }
+            else if (value is long l)
+                apiValue = ApiFormat.Int(l);
+            else if (value is int i)
+                apiValue = ApiFormat.Int(i);
             else
                 apiValue = value?.ToString() ?? string.Empty;
 

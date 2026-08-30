@@ -27,7 +27,7 @@ namespace Mobizon.Net.Services
 
             var parameters = new Dictionary<string, string>
             {
-                ["data[type]"] = ((int)request.Type).ToString(),
+                ["data[type]"] = ApiFormat.Int((int)request.Type),
                 ["data[text]"] = request.Text
             };
 
@@ -38,19 +38,19 @@ namespace Mobizon.Net.Services
                 parameters["data[from]"] = request.From;
 
             if (request.RateLimit.HasValue)
-                parameters["data[rateLimit]"] = request.RateLimit.Value.ToString();
+                parameters["data[rateLimit]"] = ApiFormat.Int(request.RateLimit.Value);
 
             if (request.RatePeriod.HasValue)
-                parameters["data[ratePeriod]"] = request.RatePeriod.Value.ToString();
+                parameters["data[ratePeriod]"] = ApiFormat.Int(request.RatePeriod.Value);
 
             if (request.DeferredTo.HasValue)
                 parameters["data[deferredToTs]"] = ApiFormat.DateTime(request.DeferredTo.Value);
 
             if (request.MessageClass.HasValue)
-                parameters["data[mclass]"] = ((int)request.MessageClass.Value).ToString();
+                parameters["data[mclass]"] = ApiFormat.Int((int)request.MessageClass.Value);
 
             if (request.Validity.HasValue)
-                parameters["data[validity]"] = ((int)request.Validity.Value.TotalMinutes).ToString();
+                parameters["data[validity]"] = ApiFormat.Int((int)request.Validity.Value.TotalMinutes);
 
             if (request.TrackShortLinkRecipients.HasValue)
                 parameters["data[trackShortLinkRecipients]"] = request.TrackShortLinkRecipients.Value ? "1" : "0";
@@ -67,7 +67,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             await _apiClient.SendAsync<object>(
@@ -79,7 +79,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             return (await _apiClient.SendAsync<CampaignData>(
@@ -91,7 +91,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             if (fillTemplateText.HasValue)
@@ -115,11 +115,11 @@ namespace Mobizon.Net.Services
                     var c = request.Criteria;
 
                     if (c.Id.HasValue)
-                        parameters["criteria[id]"] = c.Id.Value.ToString();
+                        parameters["criteria[id]"] = ApiFormat.Int(c.Id.Value);
 
                     if (c.Ids != null)
                         for (var i = 0; i < c.Ids.Count; i++)
-                            parameters[$"criteria[ids][{i}]"] = c.Ids[i].ToString();
+                            parameters[$"criteria[ids][{i}]"] = ApiFormat.Int(c.Ids[i]);
 
                     if (c.Recipient != null)
                         parameters["criteria[recipient]"] = c.Recipient;
@@ -152,8 +152,8 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
@@ -169,7 +169,7 @@ namespace Mobizon.Net.Services
         public async Task<CampaignSendResult> SendAsync(
             long id, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string> { ["id"] = id.ToString() };
+            var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) };
 
             var response = await _apiClient.SendAsync<long>(
                 ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
@@ -197,7 +197,7 @@ namespace Mobizon.Net.Services
 
             if (request.RecipientsFile != null)
             {
-                var fields = new Dictionary<string, string> { ["id"] = request.CampaignId.ToString() };
+                var fields = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.CampaignId) };
                 AppendParams(fields, request.Parameters);
                 return Finalize(await _apiClient.SendMultipartAsync<AddRecipientsResult>(
                     ModuleName, "AddRecipients", fields, request.RecipientsFile,
@@ -309,7 +309,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = request.CampaignId.ToString()
+                ["id"] = ApiFormat.Int(request.CampaignId)
             };
 
             if (request.Recipients != null)

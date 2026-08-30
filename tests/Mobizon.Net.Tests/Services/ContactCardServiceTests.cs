@@ -276,7 +276,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.CreateAsync(new CreateContactCardRequest
             {
                 Name = "Гани",
-                MobileValue = "77017221502"
+                MobileValue = "77001234567"
             });
 
             Assert.Equal("78045032", result);

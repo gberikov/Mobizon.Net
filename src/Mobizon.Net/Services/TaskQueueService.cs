@@ -22,7 +22,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             return (await _apiClient.SendAsync<TaskQueueStatus>(ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;

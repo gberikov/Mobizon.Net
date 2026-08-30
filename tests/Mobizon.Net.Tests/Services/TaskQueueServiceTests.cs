@@ -24,7 +24,7 @@ namespace Mobizon.Net.Tests.Services
                     "https://api.mobizon.kz/service/taskqueue/getstatus")
                 .WithFormData("id", "42")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""status"":2,""progress"":100},""message"":""""}");
+                    @"{""code"":0,""data"":{""status"":""2"",""progress"":100},""message"":""""}");
 
             var apiClient = new MobizonApiClient(mockHttp.ToHttpClient(), _options);
             var service = new TaskQueueService(apiClient);
