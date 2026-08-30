@@ -15,7 +15,7 @@
 - Work on branch `feature/release-readiness` off `develop`. Commit after every task with the message given in the task.
 - `TreatWarningsAsErrors=true` stays. Build must be **0 warnings** on every target framework. Run the full suite from the repo root: `dotnet build -c Release && dotnet test --no-build -c Release`.
 - C# 8.0 only (no records, no `init`, no target-typed `new`, no file-scoped namespaces). Nullable reference types enabled. No new third-party runtime dependencies (SourceLink is build-only).
-- Wire format for date-times is `yyyy-MM-dd HH:mm:ss`, dates `yyyy-MM-dd`, always `CultureInfo.InvariantCulture`, always via `ApiFormat` (after Task 5).
+- Wire format for date-times is `yyyy-MM-dd HH:mm:ss`, dates `yyyy-MM-dd`, always `CultureInfo.InvariantCulture`, always via `ApiFormat` (introduced in Task 4).
 - Errors = `MobizonApiException` (API envelope code ≠ 0/100) or `MobizonException` (transport/parse). Success = no exception.
 - Pre-release: breaking changes are allowed and expected. Do **not** keep obsolete shims/aliases.
 - First public version is **`0.1.0`** (tag `v0.1.0`). Do not create or push the tag unless the user explicitly says so — pushing it triggers the NuGet publish job.
