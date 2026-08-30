@@ -39,7 +39,7 @@ namespace Mobizon.Net.Services
                 ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public async Task DeleteAsync(
+        public async Task<DeleteResult> DeleteAsync(
             long[] ids, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
@@ -48,8 +48,8 @@ namespace Mobizon.Net.Services
                 parameters[$"ids[{i}]"] = ids[i].ToString();
             }
 
-            await _apiClient.SendAsync<object>(
-                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+            return (await _apiClient.SendAsync<DeleteResult>(
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<LinkData> GetByIdAsync(long id, CancellationToken cancellationToken = default)

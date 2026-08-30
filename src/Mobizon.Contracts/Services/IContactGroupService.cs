@@ -37,8 +37,8 @@ namespace Mobizon.Contracts
         /// <summary>
         /// Deletes a contact group. Returns the lists of processed and not-processed IDs.
         /// </summary>
-        /// <returns>A <see cref="DeleteContactGroupResult"/> containing the processed and not-processed ID lists.</returns>
-        Task<DeleteContactGroupResult> DeleteAsync(
+        /// <returns>A <see cref="DeleteResult"/> containing the processed and not-processed ID lists.</returns>
+        Task<DeleteResult> DeleteAsync(
             long id,
             CancellationToken cancellationToken = default);
 

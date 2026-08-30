@@ -148,6 +148,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Single(result.Processed);
             Assert.Equal(100820, result.Processed[0]);
             Assert.Empty(result.NotProcessed);
+            Assert.True(result.AllProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

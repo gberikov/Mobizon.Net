@@ -69,7 +69,7 @@ namespace Mobizon.Net.Services
                 ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<DeleteContactGroupResult> DeleteAsync(
+        public async Task<DeleteResult> DeleteAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
@@ -78,7 +78,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.ToString()
             };
 
-            return (await _apiClient.SendAsync<DeleteContactGroupResult>(
+            return (await _apiClient.SendAsync<DeleteResult>(
                 ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 

@@ -75,7 +75,7 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteAsync_SendsIdsArray()
+        public async Task DeleteAsync_SendsIdsArray_AndReturnsProcessedLists()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
@@ -83,11 +83,13 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("ids[0]", "10")
                 .WithFormData("ids[1]", "20")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{},""message"":""""}");
+                    @"{""code"":0,""data"":{""processed"":[""10""],""notProcessed"":[""20""]},""message"":""""}");
 
-            var service = CreateService(mockHttp);
-            await service.DeleteAsync(new[] { 10L, 20L });
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L, 20L });
 
+            Assert.Equal(new[] { 10L }, result.Processed);
+            Assert.Equal(new[] { 20L }, result.NotProcessed);
+            Assert.False(result.AllProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
