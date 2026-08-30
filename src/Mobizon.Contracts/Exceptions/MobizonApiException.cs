@@ -1,4 +1,5 @@
-﻿using Mobizon.Contracts.Models.Common;
+﻿using System.Net;
+using Mobizon.Contracts.Models.Common;
 
 namespace Mobizon.Contracts.Exceptions
 {
@@ -27,8 +28,9 @@ namespace Mobizon.Contracts.Exceptions
         /// </summary>
         /// <param name="rawCode">The raw integer response code returned by the API.</param>
         /// <param name="apiMessage">The human-readable error message returned by the API.</param>
-        public MobizonApiException(int rawCode, string apiMessage)
-            : base($"Mobizon API error {rawCode}: {apiMessage}")
+        /// <param name="statusCode">HTTP status of the response (usually 200 — Mobizon reports errors inside the JSON envelope).</param>
+        public MobizonApiException(int rawCode, string apiMessage, HttpStatusCode? statusCode = null)
+            : base($"Mobizon API error {rawCode}: {apiMessage}", statusCode)
         {
             RawCode = rawCode;
             Code = (MobizonResponseCode)rawCode;

@@ -146,47 +146,66 @@ namespace Mobizon.Net.Internal
             HttpResponseMessage response;
             try
             {
-                response = await _httpClient.SendAsync(request, cancellationToken)
-                    .ConfigureAwait(false);
+                response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                throw;
+                throw; // the caller asked for it
             }
-            catch (Exception ex)
+            catch (OperationCanceledException ex)
             {
+                // HttpClient.Timeout surfaces as TaskCanceledException while the caller's token is untouched.
                 throw new MobizonException(
-                    $"Failed to send request to Mobizon API: {ex.Message}", ex);
-            }
-
-            string json;
-            try
-            {
-                json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    $"Request to Mobizon API timed out after {_httpClient.Timeout}.", statusCode: null, ex);
             }
             catch (Exception ex)
             {
-                throw new MobizonException("Failed to read Mobizon API response", ex);
+                throw new MobizonException($"Failed to send request to Mobizon API: {ex.Message}", statusCode: null, ex);
             }
 
-            MobizonResponse<T> result;
-            try
+            using (response)
             {
-                result = JsonSerializer.Deserialize<MobizonResponse<T>>(json, JsonOptions)!;
-            }
-            catch (Exception ex)
-            {
-                throw new MobizonException("Failed to deserialize Mobizon API response", ex);
-            }
+                string json;
+                try
+                {
+                    json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    throw new MobizonException("Failed to read Mobizon API response", response.StatusCode, ex);
+                }
 
-            if (result.Code != MobizonResponseCode.Success &&
-                result.Code != MobizonResponseCode.BackgroundTask &&
-                (extraSuccessCodes == null || Array.IndexOf(extraSuccessCodes, result.RawCode) < 0))
-            {
-                throw new MobizonApiException(result.RawCode, result.Message);
-            }
+                MobizonResponse<T>? result;
+                try
+                {
+                    result = JsonSerializer.Deserialize<MobizonResponse<T>>(json, JsonOptions);
+                }
+                catch (JsonException ex)
+                {
+                    throw new MobizonException(DescribeUnexpectedBody(response, json), response.StatusCode, ex);
+                }
 
-            return result;
+                if (result == null)
+                    throw new MobizonException(DescribeUnexpectedBody(response, json), response.StatusCode);
+
+                if (result.Code != MobizonResponseCode.Success &&
+                    result.Code != MobizonResponseCode.BackgroundTask &&
+                    (extraSuccessCodes == null || Array.IndexOf(extraSuccessCodes, result.RawCode) < 0))
+                {
+                    throw new MobizonApiException(result.RawCode, result.Message, response.StatusCode);
+                }
+
+                return result;
+            }
+        }
+
+        private static string DescribeUnexpectedBody(HttpResponseMessage response, string body)
+        {
+            var status = (int)response.StatusCode;
+            var snippet = body.Length <= 200 ? body : body.Substring(0, 200) + "…";
+            return response.IsSuccessStatusCode
+                ? $"Failed to deserialize Mobizon API response (HTTP {status}): {snippet}"
+                : $"Mobizon API returned HTTP {status} ({response.StatusCode}) with a non-JSON body: {snippet}";
         }
     }
 }

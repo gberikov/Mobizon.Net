@@ -277,5 +277,85 @@ namespace Mobizon.Net.Tests.Internal
         {
             public int TaskId { get; set; }
         }
+
+        [Fact]
+        public async Task SendAsync_Non2xxWithHtmlBody_ThrowsMobizonExceptionWithStatusAndSnippet()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
+                .Respond(HttpStatusCode.BadGateway, "text/html", "<html><body>502 Bad Gateway</body></html>");
+
+            var ex = await Assert.ThrowsAsync<MobizonException>(() =>
+                CreateClient(mockHttp).SendAsync<object>("message", "sendsmsmessage", null));
+
+            Assert.IsNotType<MobizonApiException>(ex);
+            Assert.Equal(HttpStatusCode.BadGateway, ex.StatusCode);
+            Assert.Contains("HTTP 502", ex.Message);
+            Assert.Contains("502 Bad Gateway", ex.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_2xxWithGarbageBody_ThrowsMobizonExceptionWithStatus()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
+                .Respond("text/plain", "not json at all");
+
+            var ex = await Assert.ThrowsAsync<MobizonException>(() =>
+                CreateClient(mockHttp).SendAsync<object>("message", "sendsmsmessage", null));
+
+            Assert.Equal(HttpStatusCode.OK, ex.StatusCode);
+            Assert.Contains("Failed to deserialize", ex.Message);
+            Assert.Contains("not json at all", ex.Message);
+        }
+
+        [Fact]
+        public async Task SendAsync_ApiError_CarriesHttpStatus()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
+                .Respond(HttpStatusCode.OK, "application/json", @"{""code"":8,""data"":null,""message"":""Login error""}");
+
+            var ex = await Assert.ThrowsAsync<MobizonApiException>(() =>
+                CreateClient(mockHttp).SendAsync<object>("message", "sendsmsmessage", null));
+
+            Assert.Equal(HttpStatusCode.OK, ex.StatusCode);
+            Assert.Equal(MobizonResponseCode.LoginError, ex.Code);
+        }
+
+        [Fact]
+        public async Task SendAsync_HttpClientTimeout_ThrowsMobizonException()
+        {
+            var httpClient = new HttpClient(new HangingHandler()) { Timeout = TimeSpan.FromMilliseconds(200) };
+            var client = new MobizonApiClient(httpClient, _options);
+
+            var ex = await Assert.ThrowsAsync<MobizonException>(() =>
+                client.SendAsync<object>("message", "sendsmsmessage", null));
+
+            Assert.Contains("timed out", ex.Message);
+            Assert.Null(ex.StatusCode);
+            Assert.IsAssignableFrom<OperationCanceledException>(ex.InnerException);
+        }
+
+        [Fact]
+        public async Task SendAsync_CallerCancellation_IsNotWrapped()
+        {
+            var httpClient = new HttpClient(new HangingHandler());
+            var client = new MobizonApiClient(httpClient, _options);
+            using var cts = new CancellationTokenSource(50);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                client.SendAsync<object>("message", "sendsmsmessage", null, cts.Token));
+        }
+
+        /// <summary>Never answers; completes only when the request's token is cancelled.</summary>
+        private sealed class HangingHandler : HttpMessageHandler
+        {
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+        }
     }
 }
