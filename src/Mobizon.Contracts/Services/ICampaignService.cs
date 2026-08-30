@@ -49,10 +49,9 @@ namespace Mobizon.Contracts
         /// Retrieves the full data and delivery statistics for a campaign.
         /// </summary>
         /// <param name="id">The ID of the campaign to query.</param>
-        /// <param name="getFilledTplCampaignText">
-        /// Controls the format of the returned campaign text for template campaigns:
-        /// <c>0</c> — return the text with placeholders;
-        /// <c>1</c> — return the text filled with real recipient data (default).
+        /// <param name="fillTemplateText">
+        /// For template campaigns: <see langword="true"/> (API default) returns the text filled with
+        /// real recipient data; <see langword="false"/> returns the raw text with placeholders.
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A <see cref="CampaignInfo"/> with full data and statistics.</returns>
@@ -60,7 +59,7 @@ namespace Mobizon.Contracts
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<CampaignInfo> GetInfoAsync(
-            long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default);
+            long id, bool? fillTemplateText = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns a paginated, optionally filtered list of campaigns.

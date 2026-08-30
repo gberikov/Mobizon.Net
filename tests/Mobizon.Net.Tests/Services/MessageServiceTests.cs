@@ -300,5 +300,18 @@ namespace Mobizon.Net.Tests.Services
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
+
+        [Fact]
+        public async Task ListAsync_WithNumberInfo_SendsFlagAsOneOrZero()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/List")
+                .WithFormData("withNumberInfo", "1")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            await CreateService(mockHttp).ListAsync(new MessageListRequest { WithNumberInfo = true });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
     }
 }

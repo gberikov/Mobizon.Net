@@ -66,11 +66,8 @@ namespace Mobizon.Contracts
         /// <summary>Gets or sets the upper bound of the campaign send date range.</summary>
         public DateTime? SentTo { get; set; }
 
-        /// <summary>
-        /// Gets or sets the campaign type to filter by:
-        /// <c>1</c> — Single, <c>2</c> — Bulk (default), <c>3</c> — Template.
-        /// </summary>
-        public int? Type { get; set; }
+        /// <summary>Gets or sets the campaign type to filter by.</summary>
+        public CampaignType? Type { get; set; }
 
         /// <summary>
         /// Gets or sets the contact-group IDs to filter campaigns by.

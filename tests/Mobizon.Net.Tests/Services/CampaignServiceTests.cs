@@ -28,7 +28,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new CampaignListRequest
             {
-                Criteria = new CampaignCriteria { Type = 2 }
+                Criteria = new CampaignCriteria { Type = CampaignType.Bulk }
             });
 
             Assert.Single(result.Items);
@@ -240,6 +240,36 @@ namespace Mobizon.Net.Tests.Services
                 Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
                 Parameters = new AddRecipientsParameters {
                     Replace = true, PlaceholdersFlag = PlaceholderMissingMode.Remove, RecipientsFileSkipHeader = true } });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetInfoAsync_FillTemplateText_SendsFlag()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/GetInfo")
+                .WithFormData("id", "123")
+                .WithFormData("getFilledTplCampaignText", "0")
+                .Respond("application/json", Fixtures.Load("campaign.getInfo.json"));
+
+            await CreateService(mockHttp).GetInfoAsync(123, fillTemplateText: false);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_TypeCriteria_SendsNumericCampaignType()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/List")
+                .WithFormData("criteria[type]", "3")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            await CreateService(mockHttp).ListAsync(new CampaignListRequest
+            {
+                Criteria = new CampaignCriteria { Type = CampaignType.Template }
+            });
+
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

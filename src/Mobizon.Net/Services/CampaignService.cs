@@ -87,15 +87,15 @@ namespace Mobizon.Net.Services
         }
 
         public async Task<CampaignInfo> GetInfoAsync(
-            long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default)
+            long id, bool? fillTemplateText = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
                 ["id"] = id.ToString()
             };
 
-            if (getFilledTplCampaignText.HasValue)
-                parameters["getFilledTplCampaignText"] = getFilledTplCampaignText.Value.ToString();
+            if (fillTemplateText.HasValue)
+                parameters["getFilledTplCampaignText"] = ApiFormat.Bool(fillTemplateText.Value);
 
             return (await _apiClient.SendAsync<CampaignInfo>(
                 ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
@@ -143,7 +143,7 @@ namespace Mobizon.Net.Services
                         parameters["criteria[sentTsTo]"] = ApiFormat.DateTime(c.SentTo.Value);
 
                     if (c.Type.HasValue)
-                        parameters["criteria[type]"] = c.Type.Value.ToString();
+                        parameters["criteria[type]"] = ApiFormat.Int((int)c.Type.Value);
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)

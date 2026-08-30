@@ -148,7 +148,7 @@ namespace Mobizon.Net.Services
                 }
 
                 if (request.WithNumberInfo.HasValue)
-                    parameters["withNumberInfo"] = request.WithNumberInfo.Value.ToString();
+                    parameters["withNumberInfo"] = ApiFormat.Bool(request.WithNumberInfo.Value);
 
                 if (request.Pagination != null)
                 {

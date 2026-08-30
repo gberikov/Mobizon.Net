@@ -15,10 +15,8 @@ namespace Mobizon.Contracts
         /// </summary>
         public MessageListCriteria? Criteria { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether to include recipient country/operator info (0 or 1).
-        /// </summary>
-        public int? WithNumberInfo { get; set; }
+        /// <summary>Include recipient number info (<c>countryA2</c>, <c>operatorName</c>) in each item.</summary>
+        public bool? WithNumberInfo { get; set; }
 
         /// <summary>
         /// Gets or sets optional pagination settings.
