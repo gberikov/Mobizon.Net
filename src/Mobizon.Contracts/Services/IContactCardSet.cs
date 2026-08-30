@@ -48,7 +48,15 @@ namespace Mobizon.Contracts
         /// <summary>Creates a new contact card. Sets <see cref="ContactCard.Id"/> after creation.</summary>
         Task AddAsync(ContactCard entity, CancellationToken cancellationToken = default);
 
-        /// <summary>Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.</summary>
+        /// <summary>
+        /// Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.
+        /// <para>
+        /// This is a full replace: every editable field of <paramref name="entity"/> is sent, and a
+        /// <see langword="null"/> field clears the corresponding value on the server. Load the card with
+        /// <see cref="FindAsync"/>, change what you need, then call this method. The only exception is
+        /// <see cref="ContactCard.Address"/>, which is left untouched on the server when it is <see langword="null"/>.
+        /// </para>
+        /// </summary>
         Task UpdateAsync(ContactCard entity, CancellationToken cancellationToken = default);
 
         /// <summary>Deletes the contact card with the specified ID.</summary>

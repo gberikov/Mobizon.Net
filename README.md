@@ -1,6 +1,7 @@
 # Mobizon.Net
 
-A .NET SDK for the [Mobizon](https://mobizon.kz) SMS gateway REST API (v1). Provides a strongly-typed,
+An **unofficial** .NET SDK for the [Mobizon](https://mobizon.kz) SMS gateway REST API (v1). Not
+affiliated with or endorsed by Mobizon. Provides a strongly-typed,
 async-first client for sending SMS messages, managing bulk campaigns, tracking short links, checking
 account balance, monitoring background tasks, managing contact groups and cards, maintaining a
 number stop-list, and querying registered sender IDs — all from a single `IMobizonClient` interface.
@@ -21,7 +22,9 @@ number stop-list, and querying registered sender IDs — all from a single `IMob
 - **Strongly-typed requests and responses** — service methods return domain types directly; errors throw `MobizonApiException`
 - **ASP.NET Core DI integration** — register with a single `AddMobizon()` call
 - **Polly resilience** — retry and circuit breaker policies out of the box
-- **`netstandard2.0` target** — compatible with .NET Framework 4.6.1+, .NET Core 2.0+, and .NET 5+
+- **`netstandard2.0` + `net8.0` targets** — .NET Framework 4.6.1+, .NET Core 2.0+, .NET 5+ (ASP.NET Core webhooks: `net8.0` / `net10.0`)
+- **API key never in the URL** — sent in the POST body, so it stays out of proxy and `HttpClient` logs
+- **Actionable errors** — `MobizonApiException` (API code) vs `MobizonException` (transport/timeout/non-JSON) with the HTTP `StatusCode` attached
 - **`System.Text.Json` serialisation** — no other runtime dependencies in the core packages
 - **`CancellationToken` support** on every public async method
 
@@ -80,27 +83,19 @@ and DI helpers. See the [Webhooks](#webhooks) section below.
 
 ## Quick Start
 
-Send an SMS in five lines (excluding configuration):
+Send an SMS in three lines (excluding configuration):
 
 ```csharp
 using Mobizon.Contracts;
 using Mobizon.Net;
 
-var options = new MobizonClientOptions
+using var client = new MobizonClient(new MobizonClientOptions
 {
     ApiKey = "your-api-key-here",
     ApiUrl = "https://api.mobizon.kz"
-};
+});
 
-using var client = new MobizonClient(new HttpClient(), options);
-
-var result = await client.Messages.SendSmsMessageAsync(
-    new SendSmsMessageRequest
-    {
-        Recipient = "77001234567",
-        Text = "Hello from Mobizon.Net!"
-    });
-
+var result = await client.Messages.QuickSendAsync("77001234567", "Hello from Mobizon.Net!");
 Console.WriteLine($"Message ID: {result.MessageId}");
 ```
 
@@ -118,7 +113,7 @@ IMobizonClient
 ├── .User            — IUserService
 ├── .TaskQueue       — ITaskQueueService
 ├── .ContactGroups   — IContactGroupService
-├── .ContactCards    — IContactCardSet  (also implements IContactCardQuery)
+├── .ContactCards    — IContactCardSet  (query entry point; returns IContactCardQuery)
 ├── .NumberStopList  — INumberStopListService
 └── .Alphanames      — IAlphanameService
 ```
@@ -138,7 +133,8 @@ var result = await client.Messages.SendSmsMessageAsync(
         From       = "MyBrand",   // optional sender name / alphaname
         Parameters = new SmsMessageParameters
         {
-            Validity = TimeSpan.FromMinutes(60)   // optional delivery window
+            Validity     = TimeSpan.FromMinutes(60),   // optional delivery window
+            ShortenLinks = true,   // shorten URLs in Text via Mobizon's link shortener
         }
     });
 
@@ -165,7 +161,7 @@ var messages = await client.Messages.ListAsync(
     {
         Criteria   = new MessageListCriteria { Status = SmsStatus.Delivered },
         Pagination = new PaginationRequest   { CurrentPage = 0, PageSize = 50 },
-        Sort       = new SortRequest         { Field = "id", Direction = SortDirection.DESC }
+        Sort       = new SortRequest         { Field = "id", Direction = SortDirection.Descending }
     });
 
 Console.WriteLine($"Total: {messages.TotalItemCount}");
@@ -218,9 +214,12 @@ if (sendResult.IsQueued)
 // 5. Get delivery statistics
 var info = await client.Campaigns.GetInfoAsync(campaignId);
 Console.WriteLine($"Delivered: {info.Counters?.TotalDelivrdMsgNum}");
+
+// 6. Short links used by the campaign (same as client.Links.GetLinksAsync)
+var links = await client.Campaigns.GetLinksAsync(campaignId);
 ```
 
-Other available methods: `GetAsync`, `ListAsync`, `DeleteAsync`.
+Other available methods: `GetAsync`, `ListAsync`, `DeleteAsync`, `GetLinksAsync`.
 
 ---
 
@@ -236,7 +235,7 @@ var link = await client.Links.CreateAsync(
     {
         FullLink       = "https://example.com/promo",
         Comment        = "Summer sale campaign",
-        ExpirationDate = "2026-12-31"
+        ExpirationDate = new DateTime(2026, 12, 31)
     });
 
 Console.WriteLine($"Short code: {link.Code}");
@@ -259,9 +258,9 @@ var stats = await client.Links.GetStatsAsync(
     new GetLinkStatsRequest
     {
         Ids      = new[] { link.Id },
-        Type     = LinkStatsType.Daily,
-        DateFrom = "2026-01-01",
-        DateTo   = "2026-01-31"
+        Type     = LinkStatsType.Daily,   // up to 5 ids per request
+        DateFrom = new DateTime(2026, 1, 1),
+        DateTo   = new DateTime(2026, 1, 31, 23, 59, 59)
     });
 
 // GetStatsAsync returns a LinkStatsResult with Links (one entry per requested link ID)
@@ -287,7 +286,9 @@ await client.Links.UpdateAsync(
 **Delete links:**
 
 ```csharp
-await client.Links.DeleteAsync(new[] { link.Id });
+var deleted = await client.Links.DeleteAsync(new[] { link.Id });
+if (!deleted.AllProcessed)
+    Console.WriteLine($"Not deleted: {string.Join(", ", deleted.NotProcessed)}");
 ```
 
 Other available methods: `GetLinksAsync` (links by campaign ID), `ListAsync`.
@@ -300,11 +301,11 @@ Check your Mobizon account balance.
 
 ```csharp
 var balance = await client.User.GetOwnBalanceAsync();
-Console.WriteLine($"{balance.Balance} {balance.Currency}");
+Console.WriteLine($"{balance.Balance:0.0000} {balance.Currency}"); // decimal
 // Output: 4043.0656 KZT
 ```
 
-`GetOwnBalanceAsync` is the only SDK method that uses HTTP GET. All other methods use POST.
+All SDK calls are HTTP POST; the API key travels in the request body, never in the URL.
 
 ---
 
@@ -314,10 +315,42 @@ Poll the progress of a long-running background task (typically returned after `C
 
 ```csharp
 var taskStatus = await client.TaskQueue.GetStatusAsync(taskId);
-Console.WriteLine($"Task {taskStatus.Id}: {taskStatus.Progress}% complete");
+Console.WriteLine($"{taskStatus.Status}: {taskStatus.Progress}% complete");
 ```
 
-`TaskQueueStatus` fields: `Id`, `Status`, `Progress` (0–100).
+`TaskQueueStatus` fields: `Status` (`BackgroundTaskStatus`: Pending / InProgress / Completed / Rejected) and `Progress` (0–100).
+
+---
+
+### Contact cards & groups
+
+`client.ContactCards` is an immutable, LINQ-style query builder over `contactcard/list`; `client.ContactGroups` manages groups.
+
+```csharp
+long groupId = await client.ContactGroups.CreateAsync("VIP");
+
+var card = new ContactCard
+{
+    Name = "Ivan", Surname = "Petrov",
+    Mobile = new MobileFieldInfo { Value = "77001234567", Type = ContactType.Main },
+    Gender = Gender.Male
+};
+await client.ContactCards.AddAsync(card);                 // sets card.Id
+await client.ContactCards.SetGroupsAsync(card.Id!.Value, new[] { groupId });
+
+// Filter, sort and page on the server. Take = page size (default 25), Page = zero-based page index.
+var vip = client.ContactCards.Where(x => x.GroupId == groupId).OrderBy(x => x.Surname).Take(50);
+var firstPage  = await vip.Page(0).ToListAsync();
+var secondPage = await vip.Page(1).ToPageAsync();          // includes TotalCount
+int total      = await vip.CountAsync();
+
+// UpdateAsync is a full replace: load, modify, save. Null fields are cleared on the server.
+var existing = await client.ContactCards.FindAsync(card.Id.Value);
+existing!.Info = "Preferred customer";
+await client.ContactCards.UpdateAsync(existing);
+```
+
+Supported filter operators: `==` (including `== null` for "empty"), `!=`, `>=`, `<=`, `.Contains()`, combined with `&&`.
 
 ---
 
@@ -336,8 +369,9 @@ foreach (var a in alphanames.Items)
 ## Webhooks
 
 Mobizon can push events to your server in real time instead of you polling `GetSMSStatus`. Webhooks
-are created and configured in the Mobizon **control panel** (not via the API); this SDK provides the
-**receive** side: verifying the SHA1 signature and parsing the JSON body into a typed event.
+are created and configured in the Mobizon **control panel** (not via the API); choose the **JSON**
+data format when creating the webhook (this SDK does not parse the `raw`/`xml` formats); this SDK
+provides the **receive** side: verifying the SHA1 signature and parsing the JSON body into a typed event.
 
 Supported event types: `sms-delivery-report`, `form-submission`, `form-contact-confirmation`,
 `form-contact-unsubscribe`. Unrecognised types are surfaced as `UnknownWebhookEvent` (forward-compatible).
@@ -345,8 +379,8 @@ Supported event types: `sms-delivery-report`, `form-submission`, `form-contact-c
 ### Framework-agnostic core
 
 ```csharp
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks;
-using Mobizon.Contracts.Models.Webhooks;
 
 var processor = new WebhookProcessor(); // default parser + verifier
 
@@ -356,7 +390,7 @@ WebhookProcessResult result = processor.Process(body, secret);
 switch (result.Status)
 {
     case WebhookProcessStatus.Ok when result.Event is SmsDeliveryReportEvent sms:
-        // sms.Data.MessageId, sms.Data.Status (SmsStatus), sms.Data.To
+        // sms.Data.MessageId, sms.Data.Status (SmsStatus?), sms.Data.StatusRaw, sms.Data.To
         break;
     case WebhookProcessStatus.SignatureMismatch: /* respond 403 */ break;
     case WebhookProcessStatus.ParseError:        /* respond 400 */ break;
@@ -372,6 +406,7 @@ var result = processor.Process(body, evt => LookupSecret(evt.WebhookId));
 ### ASP.NET Core
 
 ```csharp
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks.AspNetCore;
 
 builder.Services.AddMobizonWebhooks(o =>
@@ -392,6 +427,11 @@ app.MapMobizonWebhook("/webhooks/mobizon", async (evt, ct) =>
 **Signature**: `SHA1(eventId|attempt|eventCreateTs|secretKey)`, compared in constant time and failing
 closed. The original `eventCreateTs` string is preserved verbatim for verification.
 
+**Webhooks without a secret key**: Mobizon allows creating a webhook without a secret; such requests
+carry no signature and `WebhookProcessor` (and `MapMobizonWebhook`) always rejects them with
+`SignatureMismatch` — it fails closed. If you deliberately run unsigned, parse with
+`new WebhookParser().Parse(body)` and protect the endpoint by other means (IP allow-list, private URL).
+
 **Acknowledge fast**: Mobizon treats a webhook as failed if no `2xx` arrives within 5 seconds and
 retries up to 10 times. Verify → persist/enqueue → return `200`, then process asynchronously.
 Deduplicate on `EventId` (stable across retries).
@@ -408,8 +448,8 @@ using Mobizon.Net.Extensions.DependencyInjection;
 
 services.AddMobizon(options =>
 {
-    options.ApiKey = configuration["Mobizon:ApiKey"];
-    options.ApiUrl = configuration["Mobizon:ApiUrl"];
+    options.ApiKey = configuration["Mobizon:ApiKey"]!;
+    options.ApiUrl = configuration["Mobizon:ApiUrl"]!;
 });
 ```
 
@@ -430,7 +470,8 @@ services.AddMobizon(configuration.GetSection("Mobizon"));
 ```
 
 Both overloads return `IHttpClientBuilder` for chaining additional HTTP client configuration.
-`IMobizonClient` is registered as a **transient** service backed by `IHttpClientFactory`.
+`IMobizonClient` is registered as a **transient** service backed by `IHttpClientFactory`. It is not
+`IDisposable` — never wrap an injected client in `using`; the factory owns the `HttpClient`.
 
 ### Inject and use in a service
 
@@ -460,9 +501,11 @@ public class NotificationService
 
 ## Polly Resilience
 
-Chain `AddMobizonResilience()` after `AddMobizon()` to apply retry and circuit breaker policies to
-all HTTP calls. Note: `AddMobizonResilience` adds retry and circuit breaker only — there is no
-separate timeout policy; use `MobizonClientOptions.Timeout` to configure the `HttpClient` timeout.
+Chain `AddMobizonResilience()` after `AddMobizon()`. By default the **retry** policy applies only to
+read-only calls (`get*` / `list`): retrying `message/sendSmsMessage` or `campaign/send` after a lost
+response could send an SMS twice. Set `RetryNonIdempotentRequests = true` to retry everything. The
+**circuit breaker** applies to every call. There is no separate timeout policy — use
+`MobizonClientOptions.Timeout`.
 
 ### Default policies
 
@@ -474,8 +517,8 @@ separate timeout policy; use `MobizonClientOptions.Timeout` to configure the `Ht
 ```csharp
 services.AddMobizon(options =>
 {
-    options.ApiKey = configuration["Mobizon:ApiKey"];
-    options.ApiUrl = configuration["Mobizon:ApiUrl"];
+    options.ApiKey = configuration["Mobizon:ApiKey"]!;
+    options.ApiUrl = configuration["Mobizon:ApiUrl"]!;
 })
 .AddMobizonResilience(); // apply default retry + circuit breaker
 ```
@@ -486,6 +529,7 @@ services.AddMobizon(options =>
 services.AddMobizon(configuration.GetSection("Mobizon"))
     .AddMobizonResilience(resilience =>
     {
+        resilience.RetryNonIdempotentRequests       = false; // default
         resilience.RetryCount                       = 5;
         resilience.RetryBaseDelay                   = TimeSpan.FromSeconds(1);
         resilience.CircuitBreakerFailureThreshold   = 10;
@@ -524,7 +568,7 @@ The SDK uses a two-level exception hierarchy:
 | Exception | When thrown |
 |-----------|-------------|
 | `MobizonApiException` | The API returned a non-success response code (auth failure, invalid data, not found, etc.). Exposes `Code` (`MobizonResponseCode`) and `ApiMessage`. |
-| `MobizonException` | Transport-level failure: network error, timeout, or serialization problem. `MobizonApiException` derives from this type. |
+| `MobizonException` | Transport-level failure: network error, `HttpClient.Timeout` expiry, non-JSON response (proxy/5xx HTML page), or a JSON parse problem. `StatusCode` (`HttpStatusCode?`) carries the HTTP status when a response was received; `null` when it was not (network error, timeout). `MobizonApiException` derives from this type. |
 
 ```csharp
 try
@@ -540,9 +584,12 @@ catch (MobizonApiException ex)
 catch (MobizonException ex)
 {
     // Transport error — network failure, timeout, response parse error
-    Console.WriteLine($"SDK Error: {ex.Message}");
+    Console.WriteLine($"SDK Error [{ex.StatusCode?.ToString() ?? "no response"}]: {ex.Message}");
 }
 ```
+
+Cancellation via your own `CancellationToken` still surfaces as `OperationCanceledException`; only the
+client's own timeout is wrapped.
 
 ### Response codes
 

@@ -44,7 +44,7 @@ namespace Mobizon.Contracts
 
         /// <summary>
         /// Returns the number of contact cards in the specified group.
-        /// Pass <c>"-1"</c> to count contacts that have no group.
+        /// Pass <see langword="null"/> to count cards that belong to no group.
         /// </summary>
         /// <returns>The number of contact cards in the group.</returns>
         Task<long> GetCardsCountAsync(
