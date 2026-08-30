@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Mobizon.Net</PackageId>
-    <Description>Official .NET SDK for the Mobizon SMS gateway REST API. Supports sending SMS, managing campaigns, short links, balance queries, and background task monitoring.</Description>
+    <Description>Unofficial .NET SDK for the Mobizon SMS gateway REST API v1: messages, campaigns, short links, balance, background tasks, contact groups and cards, number stop-list, sender IDs (alphanames).</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -14,16 +14,30 @@
 
   <!-- NuGet Package Metadata -->
   <PropertyGroup>
-    <Authors>Mobizon.Net Contributors</Authors>
-    <Company>Mobizon.Net</Company>
-    <Copyright>Copyright (c) 2026 Mobizon.Net Contributors</Copyright>
+    <Authors>Gany Berikov</Authors>
+    <Copyright>Copyright (c) 2026 Gany Berikov</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/mobizon/mobizon-dotnet</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mobizon/mobizon-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/gberikov/Mobizon.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gberikov/Mobizon.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>sms mobizon sdk dotnet messaging api</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <!-- Symbols + SourceLink (build-time only) -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
