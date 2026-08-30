@@ -6,7 +6,7 @@ namespace Mobizon.Contracts
     /// List result for <c>contactcard/list</c>. Extends <see cref="MobizonListResult{T}"/>
     /// with <see cref="FullListItemCount"/>, which is only returned by this endpoint.
     /// </summary>
-    public class ContactCardListResult : MobizonListResult<ContactCardData>
+    internal class ContactCardListResult : MobizonListResult<ContactCardData>
     {
         /// <summary>
         /// Total number of items in the unfiltered list (before any criteria are applied).

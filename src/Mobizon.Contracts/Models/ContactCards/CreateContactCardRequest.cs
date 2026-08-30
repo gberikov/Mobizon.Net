@@ -6,7 +6,7 @@ namespace Mobizon.Contracts
     /// <summary>
     /// Request parameters for creating a new contact card via <c>contactcard/create</c>.
     /// </summary>
-    public class CreateContactCardRequest
+    internal class CreateContactCardRequest
     {
         /// <summary>Gets or sets the title/salutation.</summary>
         public string? Title { get; set; }

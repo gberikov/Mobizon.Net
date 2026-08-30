@@ -6,7 +6,7 @@ namespace Mobizon.Contracts
     /// <summary>
     /// Request parameters for updating an existing contact card via <c>contactcard/update</c>.
     /// </summary>
-    public class UpdateContactCardRequest
+    internal class UpdateContactCardRequest
     {
         /// <summary>Gets or sets the ID of the contact card to update.</summary>
         public string Id { get; set; } = string.Empty;

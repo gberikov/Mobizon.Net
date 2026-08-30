@@ -5,7 +5,7 @@ namespace Mobizon.Contracts
     /// <summary>
     /// Represents a contact card as returned by <c>contactcard/list</c> and <c>contactcard/get</c>.
     /// </summary>
-    public class ContactCardData
+    internal class ContactCardData
     {
         /// <summary>Gets or sets the unique ID of the contact card.</summary>
         public long? Id { get; set; }

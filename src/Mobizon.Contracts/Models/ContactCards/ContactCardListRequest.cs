@@ -6,7 +6,7 @@ namespace Mobizon.Contracts
     /// <summary>
     /// Request parameters for <c>contactcard/list</c>.
     /// </summary>
-    public class ContactCardListRequest
+    internal class ContactCardListRequest
     {
         /// <summary>Gets or sets filter criteria applied to the contact list.</summary>
         public IReadOnlyList<ContactCardCriteria>? Criteria { get; set; }

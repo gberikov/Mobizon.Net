@@ -5,7 +5,7 @@ namespace Mobizon.Contracts
     /// <summary>
     /// Represents the field values of a contact card.
     /// </summary>
-    public class ContactCardFields
+    internal class ContactCardFields
     {
         /// <summary>Gets or sets the title/salutation.</summary>
         public string? Title { get; set; }
