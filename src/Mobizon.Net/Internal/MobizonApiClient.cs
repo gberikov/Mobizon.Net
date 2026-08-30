@@ -4,7 +4,6 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,12 +47,6 @@ namespace Mobizon.Net.Internal
             }
         };
 
-        private static readonly JsonSerializerOptions JsonWriteOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
         private readonly HttpClient _httpClient;
         private readonly MobizonClientOptions _options;
 
@@ -76,24 +69,6 @@ namespace Mobizon.Net.Internal
 
             if (method == HttpMethod.Post && parameters != null && parameters.Count > 0)
                 request.Content = new FormUrlEncodedContent(parameters);
-
-            return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
-        }
-
-        public async Task<MobizonResponse<T>> SendJsonAsync<T>(
-            string module,
-            string apiMethod,
-            object? body,
-            CancellationToken cancellationToken = default,
-            int[]? extraSuccessCodes = null)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, BuildUrl(module, apiMethod));
-
-            if (body != null)
-            {
-                var json = JsonSerializer.Serialize(body, JsonWriteOptions);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            }
 
             return await SendCoreAsync<T>(request, cancellationToken, extraSuccessCodes).ConfigureAwait(false);
         }
