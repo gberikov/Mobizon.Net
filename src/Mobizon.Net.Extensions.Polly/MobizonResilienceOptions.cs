@@ -30,5 +30,13 @@ namespace Mobizon.Net.Extensions.Polly
         /// Defaults to 30 seconds.
         /// </summary>
         public TimeSpan CircuitBreakerDuration { get; set; } = TimeSpan.FromSeconds(30);
+
+        /// <summary>
+        /// When <see langword="false"/> (default) the retry policy applies only to read-only API calls
+        /// (<c>get*</c> / <c>list</c>). Write calls such as <c>message/sendSmsMessage</c> or <c>campaign/send</c>
+        /// are not retried, because a retry after a lost response can duplicate an SMS.
+        /// Set to <see langword="true"/> to retry every call.
+        /// </summary>
+        public bool RetryNonIdempotentRequests { get; set; }
     }
 }
