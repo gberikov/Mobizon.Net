@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <PackageId>Mobizon.Net.Extensions.DependencyInjection</PackageId>
     <Description>Dependency injection integration for Mobizon.Net SDK. Provides AddMobizon() extension method for IServiceCollection with IHttpClientFactory support.</Description>
   </PropertyGroup>

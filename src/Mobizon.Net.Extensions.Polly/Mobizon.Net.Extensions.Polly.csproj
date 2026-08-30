@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <PackageId>Mobizon.Net.Extensions.Polly</PackageId>
     <Description>Polly resilience integration for Mobizon.Net SDK. Adds retry, circuit breaker, and timeout policies to HTTP calls via AddMobizonResilience() extension.</Description>
   </PropertyGroup>

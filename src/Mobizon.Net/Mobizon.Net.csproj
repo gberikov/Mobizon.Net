@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <PackageId>Mobizon.Net</PackageId>
     <Description>Unofficial .NET SDK for the Mobizon SMS gateway REST API v1: messages, campaigns, short links, balance, background tasks, contact groups and cards, number stop-list, sender IDs (alphanames).</Description>
   </PropertyGroup>
