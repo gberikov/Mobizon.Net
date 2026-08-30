@@ -11,7 +11,6 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== TaskQueue.GetStatus ===");
             var result = await client.TaskQueue.GetStatusAsync(taskId);
-            Console.WriteLine($"Id      : {result.Id}");
             Console.WriteLine($"Status  : {result.Status}");
             Console.WriteLine($"Progress: {result.Progress}%");
         }
