@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
-using Mobizon.Net.ContactCards;
+using Mobizon.Contracts;
+using Mobizon.Net;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;

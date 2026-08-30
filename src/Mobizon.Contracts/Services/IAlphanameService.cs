@@ -1,9 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Alphanames;
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>Operations for listing the account's registered sender IDs (alphanames).</summary>
     public interface IAlphanameService
@@ -14,7 +13,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A paged envelope of <see cref="AlphanameData"/> items.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonListResult<AlphanameData>> ListAsync(

@@ -1,9 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for creating and managing bulk SMS campaigns via the Mobizon API.
@@ -16,7 +15,7 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The campaign configuration, including type, sender name, and message text.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>The integer ID of the newly created campaign.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<long> CreateAsync(
@@ -28,7 +27,7 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="id">The ID of the campaign to delete.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task DeleteAsync(
@@ -40,7 +39,7 @@ namespace Mobizon.Contracts.Services
         /// <param name="id">The ID of the campaign to retrieve.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>The <see cref="CampaignData"/> for the specified campaign.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<CampaignData> GetAsync(
@@ -57,7 +56,7 @@ namespace Mobizon.Contracts.Services
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A <see cref="CampaignInfo"/> with full data and statistics.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<CampaignInfo> GetInfoAsync(
@@ -72,7 +71,7 @@ namespace Mobizon.Contracts.Services
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonListResult<CampaignData>> ListAsync(
@@ -87,7 +86,7 @@ namespace Mobizon.Contracts.Services
         /// A <see cref="CampaignSendResult"/>; when <c>IsQueued</c> is true, <c>Id</c> is the background task id
         /// trackable via <c>TaskQueue/GetStatus</c>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<CampaignSendResult> SendAsync(
@@ -114,7 +113,7 @@ namespace Mobizon.Contracts.Services
         /// or whose <see cref="AddRecipientsResult.TaskId"/> holds the background task ID (asynchronous loads).
         /// For multi-batch sends, <c>Outcome</c> reflects the worst-case outcome across all batches.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<AddRecipientsResult> AddRecipientsAsync(

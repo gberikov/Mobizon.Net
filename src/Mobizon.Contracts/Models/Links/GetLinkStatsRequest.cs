@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to retrieve click statistics for one or more short links.

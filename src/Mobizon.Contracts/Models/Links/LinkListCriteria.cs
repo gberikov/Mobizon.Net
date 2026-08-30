@@ -1,6 +1,6 @@
 using System;
 
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>Filter criteria for <c>link/list</c>.</summary>
     public class LinkListCriteria

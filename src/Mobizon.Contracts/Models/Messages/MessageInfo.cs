@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
-using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents summary information about an SMS message returned by a list query.

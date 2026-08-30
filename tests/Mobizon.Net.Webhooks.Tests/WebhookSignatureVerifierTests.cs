@@ -1,4 +1,4 @@
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks;
 using Xunit;
 

@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Alphanames
+namespace Mobizon.Contracts
 {
     /// <summary>A registered sender ID (alphanumeric signature) and its moderation status.</summary>
     public class AlphanameData

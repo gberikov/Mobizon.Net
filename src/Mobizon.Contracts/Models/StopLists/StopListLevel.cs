@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.StopLists
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the scope level of a number stop-list block.

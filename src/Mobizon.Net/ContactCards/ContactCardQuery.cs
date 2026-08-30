@@ -4,13 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 
-namespace Mobizon.Net.ContactCards
+namespace Mobizon.Net
 {
     /// <summary>
     /// A composable query builder for <c>contactcard/list</c>.

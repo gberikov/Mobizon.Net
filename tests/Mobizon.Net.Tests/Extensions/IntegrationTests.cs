@@ -1,12 +1,11 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Extensions.DependencyInjection;
 using Mobizon.Net.Extensions.Polly;
 using RichardSzalay.MockHttp;

@@ -1,5 +1,5 @@
-﻿using System;
-using Mobizon.Contracts.Models.Common;
+using System;
+using Mobizon.Contracts;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Models

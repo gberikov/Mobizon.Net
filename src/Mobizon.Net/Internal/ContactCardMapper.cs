@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal
 {

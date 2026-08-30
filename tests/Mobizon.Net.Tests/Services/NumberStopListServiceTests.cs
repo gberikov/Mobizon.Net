@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.StopLists;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -58,7 +57,7 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.ListAsync(new Mobizon.Contracts.Models.StopLists.StopListListRequest
+            await service.ListAsync(new Mobizon.Contracts.StopListListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
                 Sort = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }

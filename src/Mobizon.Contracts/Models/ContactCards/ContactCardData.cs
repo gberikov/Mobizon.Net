@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a contact card as returned by <c>contactcard/list</c> and <c>contactcard/get</c>.

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.StopLists
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the paginated response returned by <c>numberstoplist/list</c>.

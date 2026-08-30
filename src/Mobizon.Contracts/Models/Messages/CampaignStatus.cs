@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the campaign dispatch status returned after an SMS message is submitted.

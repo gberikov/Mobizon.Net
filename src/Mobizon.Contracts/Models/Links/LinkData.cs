@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>Represents a Mobizon short link.</summary>
     public class LinkData

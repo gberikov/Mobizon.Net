@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Net;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Exceptions

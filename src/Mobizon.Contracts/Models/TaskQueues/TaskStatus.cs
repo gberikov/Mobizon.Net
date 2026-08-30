@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.TaskQueues
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the execution status of a Mobizon background task.

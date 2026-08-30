@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Extensions.DependencyInjection;
 using Xunit;
 

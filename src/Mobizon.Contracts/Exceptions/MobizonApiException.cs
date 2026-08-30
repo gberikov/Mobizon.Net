@@ -1,7 +1,7 @@
-﻿using System.Net;
-using Mobizon.Contracts.Models.Common;
+using System.Net;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Exceptions
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Exception thrown when the Mobizon API returns a non-success response code.

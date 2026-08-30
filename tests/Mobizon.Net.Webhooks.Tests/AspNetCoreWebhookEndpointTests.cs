@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks.AspNetCore;
 using Xunit;
 

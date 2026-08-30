@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the delivery status of an SMS message as returned by the Mobizon API.

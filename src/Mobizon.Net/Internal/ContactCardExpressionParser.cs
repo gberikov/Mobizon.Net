@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal
 {

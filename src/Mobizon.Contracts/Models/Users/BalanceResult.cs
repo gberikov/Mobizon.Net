@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Users
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Contains the account balance information returned by the Mobizon API.

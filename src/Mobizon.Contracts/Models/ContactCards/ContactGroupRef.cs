@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// A lightweight reference to a contact group, embedded in contact card responses.

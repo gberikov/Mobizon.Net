@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Optional additional parameters for sending an SMS message (<c>params[…]</c> fields).

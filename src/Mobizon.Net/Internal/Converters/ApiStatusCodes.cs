@@ -1,6 +1,5 @@
 using System;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal.Converters
 {

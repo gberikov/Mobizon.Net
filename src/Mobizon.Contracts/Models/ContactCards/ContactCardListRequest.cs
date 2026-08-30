@@ -1,7 +1,7 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Request parameters for <c>contactcard/list</c>.

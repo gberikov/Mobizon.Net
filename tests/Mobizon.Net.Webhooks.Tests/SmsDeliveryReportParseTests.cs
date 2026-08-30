@@ -1,5 +1,5 @@
-using Mobizon.Contracts.Models.Messages;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks;
 using Xunit;
 

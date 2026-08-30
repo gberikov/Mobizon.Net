@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;

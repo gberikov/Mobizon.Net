@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples

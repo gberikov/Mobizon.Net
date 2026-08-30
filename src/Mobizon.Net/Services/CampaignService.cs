@@ -4,9 +4,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Internal.Converters;
 

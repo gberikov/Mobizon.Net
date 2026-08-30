@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to add recipients to an existing campaign.

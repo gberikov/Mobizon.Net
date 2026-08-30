@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>A single click-statistics data point for a short link within one time bucket.</summary>
     public class LinkStatPoint

@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// A composable, mockable query builder for <c>contactcard/list</c>.

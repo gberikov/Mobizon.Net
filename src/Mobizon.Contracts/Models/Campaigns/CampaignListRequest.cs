@@ -1,8 +1,8 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies optional search criteria, pagination and sort parameters for listing campaigns.

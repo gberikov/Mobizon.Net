@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the type of a phone number field in a contact card.

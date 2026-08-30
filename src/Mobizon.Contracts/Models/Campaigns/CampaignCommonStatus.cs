@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the overall (common) status of an SMS campaign as returned by the Mobizon API

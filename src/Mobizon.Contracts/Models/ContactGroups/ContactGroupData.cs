@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.ContactGroups
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a contact group as returned by <c>contactgroup/list</c>.

@@ -1,4 +1,4 @@
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System.Text.Json.Serialization;
 
 namespace Mobizon.Net.Internal

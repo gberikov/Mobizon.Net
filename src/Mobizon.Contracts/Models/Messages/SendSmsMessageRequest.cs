@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to send a single SMS message via the Mobizon API.

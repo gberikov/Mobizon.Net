@@ -1,6 +1,6 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -31,7 +31,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.GetStatusAsync(42);
 
             Assert.Equal(42, result.Id);
-            Assert.Equal(Mobizon.Contracts.Models.TaskQueues.TaskStatus.Completed, result.Status);
+            Assert.Equal(Mobizon.Contracts.TaskStatus.Completed, result.Status);
             Assert.Equal(100, result.Progress);
             mockHttp.VerifyNoOutstandingExpectation();
         }

@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Defines the message type used in an SMS campaign (<c>msgType</c>).

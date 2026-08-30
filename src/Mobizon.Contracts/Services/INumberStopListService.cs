@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.StopLists;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for managing the user's number stop-list via the Mobizon API.
@@ -31,7 +31,7 @@ namespace Mobizon.Contracts.Services
 
         /// <summary>
         /// Adds a range of consecutive phone numbers to the stop-list.
-        /// Throws <see cref="Mobizon.Contracts.Exceptions.MobizonApiException"/> on API error.
+        /// Throws <see cref="Mobizon.Contracts.MobizonApiException"/> on API error.
         /// </summary>
         /// <param name="numberFrom">First number of the range in international format.</param>
         /// <param name="numberTo">Last number of the range in international format.</param>
@@ -45,7 +45,7 @@ namespace Mobizon.Contracts.Services
 
         /// <summary>
         /// Removes a stop-list entry by its record ID.
-        /// Throws <see cref="Mobizon.Contracts.Exceptions.MobizonApiException"/> on API error.
+        /// Throws <see cref="Mobizon.Contracts.MobizonApiException"/> on API error.
         /// </summary>
         Task DeleteAsync(
             long id,

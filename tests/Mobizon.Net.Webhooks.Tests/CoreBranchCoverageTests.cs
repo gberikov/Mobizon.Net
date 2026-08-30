@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json;
-using Mobizon.Contracts.Models.Messages;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks;
 using Mobizon.Net.Webhooks.Internal.Converters;
 using Xunit;
@@ -123,19 +123,19 @@ namespace Mobizon.Net.Webhooks.Tests
         [Fact]
         public void Parse_NonObjectBody_Throws()
         {
-            Assert.Throws<Mobizon.Contracts.Exceptions.WebhookParseException>(() => _parser.Parse("[1,2,3]"));
+            Assert.Throws<Mobizon.Contracts.Webhooks.WebhookParseException>(() => _parser.Parse("[1,2,3]"));
         }
 
         [Fact]
         public void Parse_EmptyBody_Throws()
         {
-            Assert.Throws<Mobizon.Contracts.Exceptions.WebhookParseException>(() => _parser.Parse("   "));
+            Assert.Throws<Mobizon.Contracts.Webhooks.WebhookParseException>(() => _parser.Parse("   "));
         }
 
         [Fact]
         public void Parse_NonStringEventType_Throws()
         {
-            Assert.Throws<Mobizon.Contracts.Exceptions.WebhookParseException>(
+            Assert.Throws<Mobizon.Contracts.Webhooks.WebhookParseException>(
                 () => _parser.Parse(@"{ ""eventType"": 5, ""eventId"": 1, ""attempt"": 1, ""eventCreateTs"": ""2026-01-15 11:42:28"" }"));
         }
 

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the full data and delivery statistics for an SMS campaign

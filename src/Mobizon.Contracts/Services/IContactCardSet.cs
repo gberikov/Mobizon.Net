@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// EF Core-style set for managing contact cards via the Mobizon API.

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.ContactGroups
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Result returned by <c>contactgroup/delete</c>.

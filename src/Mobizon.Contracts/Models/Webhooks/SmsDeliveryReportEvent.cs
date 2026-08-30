@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>An <c>sms-delivery-report</c> webhook event.</summary>
     public sealed class SmsDeliveryReportEvent : MobizonWebhookEvent

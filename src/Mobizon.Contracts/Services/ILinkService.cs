@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for creating and managing Mobizon short links.
@@ -19,7 +18,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// The created <see cref="LinkData"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<LinkData> CreateAsync(
@@ -31,7 +30,7 @@ namespace Mobizon.Contracts.Services
         /// <param name="ids">An array of link IDs to delete.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A task that completes when the operation succeeds.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task DeleteAsync(
@@ -45,7 +44,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// The matching <see cref="LinkData"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<LinkData> GetByIdAsync(
@@ -59,7 +58,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// The matching <see cref="LinkData"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<LinkData> GetByCodeAsync(
@@ -73,7 +72,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// The matching <see cref="LinkData"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<LinkData> GetByShortLinkAsync(
@@ -89,7 +88,7 @@ namespace Mobizon.Contracts.Services
         /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
         /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<IReadOnlyList<LinkData>> GetLinksAsync(
@@ -105,7 +104,7 @@ namespace Mobizon.Contracts.Services
         /// each carrying its resolved <see cref="LinkStatSeries.LinkId"/>, aggregate totals, and per-period
         /// <see cref="LinkStatPoint"/> data points.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<LinkStatsResult> GetStatsAsync(
@@ -119,7 +118,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A paged envelope of <see cref="LinkData"/> items.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonListResult<LinkData>> ListAsync(
@@ -131,7 +130,7 @@ namespace Mobizon.Contracts.Services
         /// <param name="request">The updated link data, identified by numeric <see cref="UpdateLinkRequest.Id"/>.</param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>A task that completes when the operation succeeds.</returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task UpdateAsync(

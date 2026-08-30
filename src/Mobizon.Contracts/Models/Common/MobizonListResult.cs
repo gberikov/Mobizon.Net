@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Generic envelope for Mobizon list endpoints: <c>{ items, totalItemCount }</c>.

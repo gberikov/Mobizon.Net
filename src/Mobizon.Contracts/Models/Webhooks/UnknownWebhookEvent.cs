@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// A webhook whose <c>eventType</c> is not recognised by this SDK version. The common envelope

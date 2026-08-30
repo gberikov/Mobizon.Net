@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>A <c>form-contact-unsubscribe</c> webhook event.</summary>
     public sealed class FormContactUnsubscribeEvent : MobizonWebhookEvent

@@ -1,7 +1,7 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Configuration options for the Mobizon API client.

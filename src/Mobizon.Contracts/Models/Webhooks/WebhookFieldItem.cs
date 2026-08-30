@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// A single form field value carried by form webhook events.

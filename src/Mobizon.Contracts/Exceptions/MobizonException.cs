@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace Mobizon.Contracts.Exceptions
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Base exception for all errors raised by the Mobizon.Net SDK: transport failures, timeouts,

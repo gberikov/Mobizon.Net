@@ -2,8 +2,8 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Mobizon.Contracts.Models.Webhooks;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts.Webhooks;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Webhooks
 {

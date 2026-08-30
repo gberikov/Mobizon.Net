@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal.Converters
 {

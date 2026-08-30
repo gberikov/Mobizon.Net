@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>User-set status of a short link.</summary>
     public enum LinkStatus

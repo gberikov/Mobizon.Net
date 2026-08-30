@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the gender of a contact.

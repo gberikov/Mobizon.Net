@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies the sort order for list API requests.

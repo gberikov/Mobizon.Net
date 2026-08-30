@@ -1,8 +1,8 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Users;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for querying account information from the Mobizon API.
@@ -15,9 +15,9 @@ namespace Mobizon.Contracts.Services
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
         /// A <see cref="BalanceResult"/> with the account balance amount and currency code.
-        /// Throws <see cref="Exceptions.MobizonApiException"/> on failure; success is implied by no exception.
+        /// Throws <see cref="MobizonApiException"/> on failure; success is implied by no exception.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>

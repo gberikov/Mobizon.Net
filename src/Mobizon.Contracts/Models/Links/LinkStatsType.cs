@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies the aggregation period for short-link click statistics.

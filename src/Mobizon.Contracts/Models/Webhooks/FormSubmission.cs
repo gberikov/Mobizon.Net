@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>Payload of a <c>form-submission</c> webhook.</summary>
     public sealed class FormSubmission

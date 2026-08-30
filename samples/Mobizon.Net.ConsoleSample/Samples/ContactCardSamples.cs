@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples

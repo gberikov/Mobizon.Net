@@ -1,8 +1,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Users;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services

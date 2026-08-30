@@ -1,6 +1,6 @@
 using System;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Common envelope shared by every Mobizon webhook callback. Concrete subclasses

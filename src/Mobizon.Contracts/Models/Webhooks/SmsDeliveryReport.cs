@@ -1,7 +1,7 @@
 using System;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Payload of an <c>sms-delivery-report</c> webhook: the final delivery status of a single SMS

@@ -1,9 +1,8 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System;
 using System.Collections.Generic;
-using Mobizon.Contracts.Models.Campaigns;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies optional filter, pagination, and sort criteria for listing SMS messages.

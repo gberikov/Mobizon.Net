@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactGroups;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for managing contact groups via the Mobizon API.

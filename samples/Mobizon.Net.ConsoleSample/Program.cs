@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using Mobizon.Net;
 using Mobizon.Net.ConsoleSample.Samples;
 using Microsoft.Extensions.Configuration;

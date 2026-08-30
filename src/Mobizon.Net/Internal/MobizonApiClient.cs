@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -7,10 +7,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Models.StopLists;
+using Mobizon.Contracts;
 
 using Mobizon.Net.Internal.Converters;
 
@@ -34,14 +31,14 @@ namespace Mobizon.Net.Internal
                 new MessageTypeConverter(),
                 new StringToNumericEnumConverter<CampaignType>(),
                 new StringToNumericEnumConverter<StopListLevel>(),
-                new StringToNumericEnumConverter<Mobizon.Contracts.Models.Links.LinkStatus>(),
-                new StringToNumericEnumConverter<Mobizon.Contracts.Models.Links.LinkModeratorStatus>(),
+                new StringToNumericEnumConverter<Mobizon.Contracts.LinkStatus>(),
+                new StringToNumericEnumConverter<Mobizon.Contracts.LinkModeratorStatus>(),
                 new MobizonDateTimeConverter(),
                 new ContactTypeConverter(),
                 // Contact-card fields the PHP API may emit as `[]`/`""` when unset — tolerate that.
-                new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.ContactFieldInfo>(),
-                new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.MobileFieldInfo>(),
-                new EmptyTolerantObjectConverter<Mobizon.Contracts.Models.ContactCards.AddressFieldInfo>(),
+                new EmptyTolerantObjectConverter<Mobizon.Contracts.ContactFieldInfo>(),
+                new EmptyTolerantObjectConverter<Mobizon.Contracts.MobileFieldInfo>(),
+                new EmptyTolerantObjectConverter<Mobizon.Contracts.AddressFieldInfo>(),
                 new AddRecipientsResultConverter(),
                 new LinkStatsResultConverter()
             }

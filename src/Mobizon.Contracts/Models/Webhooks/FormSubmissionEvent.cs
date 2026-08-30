@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>A <c>form-submission</c> webhook event.</summary>
     public sealed class FormSubmissionEvent : MobizonWebhookEvent

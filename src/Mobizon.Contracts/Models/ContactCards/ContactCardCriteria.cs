@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Defines a single filter criterion for <c>contactcard/list</c>.

@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Mobizon.Contracts.Models.Webhooks;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts.Webhooks;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Webhooks.AspNetCore
 {

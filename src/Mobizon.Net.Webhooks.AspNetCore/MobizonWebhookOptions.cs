@@ -1,5 +1,5 @@
 using System;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 
 namespace Mobizon.Net.Webhooks.AspNetCore
 {

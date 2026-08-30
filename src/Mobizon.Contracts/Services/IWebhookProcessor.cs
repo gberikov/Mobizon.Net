@@ -1,7 +1,7 @@
 using System;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Combined verify-and-parse entry point for inbound Mobizon webhooks (recommended).

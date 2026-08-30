@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a contact card entity for use with the EF Core-style query API.

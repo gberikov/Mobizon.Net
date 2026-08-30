@@ -1,6 +1,6 @@
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// List result for <c>contactcard/list</c>. Extends <see cref="MobizonListResult{T}"/>

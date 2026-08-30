@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Net.Http;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 
-using Mobizon.Net.ContactCards;
+using Mobizon.Net;
 
 namespace Mobizon.Net
 {

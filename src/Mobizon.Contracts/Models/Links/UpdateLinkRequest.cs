@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to update an existing Mobizon short link.

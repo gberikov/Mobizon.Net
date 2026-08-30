@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Behaviour when a template campaign is missing values for some placeholders

@@ -1,6 +1,6 @@
 using System;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the top-level Mobizon API client that provides access to all service groups.
