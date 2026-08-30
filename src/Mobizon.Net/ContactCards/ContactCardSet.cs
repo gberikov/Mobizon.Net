@@ -57,7 +57,7 @@ namespace Mobizon.Net.ContactCards
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetAsync(id.ToString(), cancellationToken);
+            var response = await _service.GetAsync(id.ToString(), cancellationToken).ConfigureAwait(false);
             return response != null ? ContactCardMapper.ToEntity(response) : null;
         }
 
@@ -73,7 +73,7 @@ namespace Mobizon.Net.ContactCards
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             var response = await _service.CreateAsync(
-                ContactCardMapper.ToCreateRequest(entity), cancellationToken);
+                ContactCardMapper.ToCreateRequest(entity), cancellationToken).ConfigureAwait(false);
 
             entity.Id = long.TryParse(response, out var id) ? id : (long?)null;
         }
@@ -113,7 +113,7 @@ namespace Mobizon.Net.ContactCards
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken);
+            var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken).ConfigureAwait(false);
             return response ?? Array.Empty<ContactGroupRef>();
         }
     }

@@ -104,7 +104,7 @@ namespace Mobizon.Net.ContactCards
         public async Task<IReadOnlyList<ContactCard>> ToListAsync(
             CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(), ct);
+            var response = await _service.ListAsync(BuildRequest(), ct).ConfigureAwait(false);
             return Map(ItemsOf(response));
         }
 
@@ -113,7 +113,7 @@ namespace Mobizon.Net.ContactCards
             CancellationToken ct = default)
         {
             var request  = BuildRequest();
-            var response = await _service.ListAsync(request, ct);
+            var response = await _service.ListAsync(request, ct).ConfigureAwait(false);
             return new PaginatedResponse<ContactCard>
             {
                 Items       = Map(ItemsOf(response)),
@@ -126,7 +126,7 @@ namespace Mobizon.Net.ContactCards
         /// <summary>Returns the total number of matching items without fetching their data.</summary>
         public async Task<int> CountAsync(CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct);
+            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct).ConfigureAwait(false);
             return response?.TotalItemCount ?? 0;
         }
 
@@ -136,7 +136,7 @@ namespace Mobizon.Net.ContactCards
         public async Task<ContactCard?> FirstOrDefaultAsync(
             CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct);
+            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct).ConfigureAwait(false);
             var items = ItemsOf(response);
             return items.Count > 0
                 ? ContactCardMapper.ToEntity(items[0])
@@ -147,7 +147,7 @@ namespace Mobizon.Net.ContactCards
         /// <exception cref="InvalidOperationException">No elements found.</exception>
         public async Task<ContactCard> FirstAsync(CancellationToken ct = default)
         {
-            var result = await FirstOrDefaultAsync(ct);
+            var result = await FirstOrDefaultAsync(ct).ConfigureAwait(false);
             return result ?? throw new InvalidOperationException("Sequence contains no elements.");
         }
 
@@ -158,7 +158,7 @@ namespace Mobizon.Net.ContactCards
         public async Task<ContactCard?> SingleOrDefaultAsync(
             CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 2), ct);
+            var response = await _service.ListAsync(BuildRequest(takeOverride: 2), ct).ConfigureAwait(false);
             var items = ItemsOf(response);
             if (items.Count > 1)
                 throw new InvalidOperationException("Sequence contains more than one element.");
@@ -171,7 +171,7 @@ namespace Mobizon.Net.ContactCards
         /// <exception cref="InvalidOperationException">No elements or more than one element found.</exception>
         public async Task<ContactCard> SingleAsync(CancellationToken ct = default)
         {
-            var result = await SingleOrDefaultAsync(ct);
+            var result = await SingleOrDefaultAsync(ct).ConfigureAwait(false);
             return result ?? throw new InvalidOperationException("Sequence contains no elements.");
         }
 
