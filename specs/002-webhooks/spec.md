@@ -3,7 +3,7 @@
 **Feature Branch**: `002-webhooks`  
 **Created**: 2026-06-24  
 **Status**: Draft  
-**Input**: User description: "Реализуй недавно появившийся функционал вебхуков. Детали возьми из документации"
+**Input**: User description (translated from Russian): "Implement the recently added webhooks functionality. Take the details from the documentation."
 
 ## Overview
 

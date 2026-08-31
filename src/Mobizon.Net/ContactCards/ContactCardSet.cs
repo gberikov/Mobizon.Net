@@ -13,7 +13,7 @@ namespace Mobizon.Net
     /// Provides EF Core-style CRUD and query operations for contact cards.
     /// Accessible via <c>client.ContactCards</c>.
     /// </summary>
-    public sealed class ContactCardSet : IContactCardSet
+    internal sealed class ContactCardSet : IContactCardSet
     {
         private readonly ContactCardService _service;
 
@@ -71,15 +71,14 @@ namespace Mobizon.Net
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            var response = await _service.CreateAsync(
+            entity.Id = await _service.CreateAsync(
                 ContactCardMapper.ToCreateRequest(entity), cancellationToken).ConfigureAwait(false);
-
-            entity.Id = long.TryParse(response, out var id) ? id : (long?)null;
+            ForgetPhoto(entity);
         }
 
         /// <summary>Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.</summary>
         /// <exception cref="InvalidOperationException"><see cref="ContactCard.Id"/> is not set.</exception>
-        public Task UpdateAsync(
+        public async Task UpdateAsync(
             ContactCard entity,
             CancellationToken cancellationToken = default)
         {
@@ -88,8 +87,17 @@ namespace Mobizon.Net
                 throw new InvalidOperationException(
                     "ContactCard.Id must be set before calling UpdateAsync.");
 
-            return _service.UpdateAsync(
-                ContactCardMapper.ToUpdateRequest(entity), cancellationToken);
+            await _service.UpdateAsync(
+                ContactCardMapper.ToUpdateRequest(entity), cancellationToken).ConfigureAwait(false);
+            ForgetPhoto(entity);
+        }
+
+        // The photo stream is consumed by the send (and disposed by HttpClient on .NET Framework),
+        // so a later UpdateAsync on the same entity must not try to re-send it.
+        private static void ForgetPhoto(ContactCard entity)
+        {
+            entity.Photo = null;
+            entity.PhotoFileName = null;
         }
 
         /// <summary>Deletes the contact card with the specified ID.</summary>

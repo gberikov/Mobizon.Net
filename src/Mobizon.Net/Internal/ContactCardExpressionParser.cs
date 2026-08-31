@@ -30,7 +30,7 @@ namespace Mobizon.Net.Internal
 
         private static ContactCardCriteria ParseSingle(Expression expr)
         {
-            // contain:  x.Surname.Contains("Петр")
+            // contain:  x.Surname.Contains("Smith")
             if (expr is MethodCallExpression call
                 && call.Method.Name == "Contains"
                 && call.Object is MemberExpression containMember)
@@ -58,6 +58,11 @@ namespace Mobizon.Net.Internal
 
                     case ExpressionType.NotEqual:
                         var neValue = Evaluate(bin.Right);
+                        // The API has no "not empty" operator, so `!= null` cannot be expressed.
+                        if (neValue is null)
+                            throw new NotSupportedException(
+                                $"Unsupported expression '{expr}': the API has no \"not empty\" " +
+                                "operator. Use '== null' for the \"empty\" operator.");
                         // not_equal:  x.GroupId != 33
                         return Build(bin.Left, "not_equal", neValue);
                 }
@@ -74,7 +79,12 @@ namespace Mobizon.Net.Internal
             if (memberExpr is UnaryExpression { NodeType: ExpressionType.Convert } u)
                 memberExpr = u.Operand;
 
-            var path  = GetMemberPath((MemberExpression)memberExpr);
+            if (!(memberExpr is MemberExpression member))
+                throw new NotSupportedException(
+                    $"Unsupported expression '{memberExpr}': the left-hand side of a filter must be " +
+                    "a ContactCardFilterSpec member, e.g. x.Surname == \"Smith\".");
+
+            var path  = GetMemberPath(member);
             var field = GetApiFieldName(path);
 
             // The C# compiler sometimes folds enum constants to their underlying integer in
@@ -82,7 +92,7 @@ namespace Mobizon.Net.Internal
             // that the serialisation below produces "MAIN" instead of "0".
             if (!(value is Enum) && value != null)
             {
-                var memberType     = ((MemberExpression)memberExpr).Type;
+                var memberType     = member.Type;
                 var underlyingType = Nullable.GetUnderlyingType(memberType) ?? memberType;
                 if (underlyingType.IsEnum)
                     value = Enum.ToObject(underlyingType, value);
@@ -90,16 +100,30 @@ namespace Mobizon.Net.Internal
 
             string apiValue;
             if (value is DateTime dt)
-                apiValue = ApiFormat.DateTime(dt);
+                // birth_date is a date-only field; every other date field carries a time component.
+                apiValue = field == "birth_date" ? ApiFormat.Date(dt) : ApiFormat.DateTime(dt);
             else if (value is Enum e)
             {
-                // Gender.Undefined (and any future "Undefined" enum value) → empty operator
+                // (1) Gender.Undefined (and any future "Undefined" enum value) → empty operator.
+                // Only `== Undefined` can be expressed: the API has no "not empty" operator, and
+                // silently sending "empty" for `!=` would invert the caller's intent.
                 if (e.ToString() == nameof(Gender.Undefined))
-                    return new ContactCardCriteria { Field = field, Operator = "empty", Value = string.Empty };
+                {
+                    if (op != "equal")
+                        throw new NotSupportedException(
+                            $"Unsupported expression: operator '{op}' against an undefined enum value. " +
+                            "Only '== Gender.Undefined' is supported (the \"empty\" operator).");
 
-                // Invariant casing so the wire value matches the API's literals regardless of the
-                // current culture (e.g. tr-TR would otherwise turn "Additional" into "ADDİTİONAL").
-                apiValue = e.ToString().ToUpperInvariant();   // ContactType.Main → "MAIN", Gender.Male → "MALE"
+                    return new ContactCardCriteria { Field = field, Operator = "empty", Value = string.Empty };
+                }
+
+                // Gender is lowercase on the wire everywhere else (ApiFormat.Gender on the write path
+                // and the API's own responses), unlike ContactType which the API spells uppercase.
+                // Invariant casing so the wire value matches regardless of the current culture
+                // (e.g. tr-TR would otherwise turn "Additional" into "ADDİTİONAL").
+                apiValue = e is Gender g
+                    ? ApiFormat.Gender(g)                     // Gender.Male → "male"
+                    : e.ToString().ToUpperInvariant();        // ContactType.Main → "MAIN"
             }
             else if (value is long l)
                 apiValue = ApiFormat.Int(l);
@@ -132,8 +156,24 @@ namespace Mobizon.Net.Internal
         }
 
         // Evaluates any constant or closed-over variable expression
-        private static object? Evaluate(Expression expr) =>
-            Expression.Lambda(expr).Compile().DynamicInvoke();
+        private static object? Evaluate(Expression expr)
+        {
+            try
+            {
+                return Expression.Lambda(expr).Compile().DynamicInvoke();
+            }
+            catch (InvalidOperationException ex)
+            {
+                // The expression references the lambda parameter, so it is not a value at all:
+                // `100604 == x.GroupId` (member on the right) or `ids.Contains(x.GroupId)`.
+                // Kept as the inner exception: a caller's own IOE (e.g. `ids.Single()` on an
+                // empty list) lands here too and must stay diagnosable.
+                throw new NotSupportedException(
+                    $"Unsupported expression '{expr}': a filter value must be a constant or a " +
+                    "captured variable, and the contact-card member must be on the left-hand side. " +
+                    "Supported: == (equal/empty), != (not_equal), >=, <=, .Contains(), &&.", ex);
+            }
+        }
 
         internal static string GetApiFieldName(string[] path) =>
             string.Join(".", path) switch
@@ -176,7 +216,7 @@ namespace Mobizon.Net.Internal
                 "Address.Region"       => "address.region",
                 "Address.CityId"       => "address.cityId",
                 "Address.City"         => "address.city",
-                "Address.PostalCode"   => "address.postalCode",
+                "Address.PostalCode"   => "address.postalcode",
                 "Address.Street"       => "address.street",
                 "Address.Building"     => "address.building",
                 "Address.Other"        => "address.other",

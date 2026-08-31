@@ -1,16 +1,14 @@
 using System;
 using System.IO;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts
+namespace Mobizon.Net.Internal
 {
     /// <summary>
-    /// Request parameters for updating an existing contact card via <c>contactcard/update</c>.
+    /// Request parameters for creating a new contact card via <c>contactcard/create</c>.
     /// </summary>
-    internal class UpdateContactCardRequest
+    internal class CreateContactCardRequest
     {
-        /// <summary>Gets or sets the ID of the contact card to update.</summary>
-        public string Id { get; set; } = string.Empty;
-
         /// <summary>Gets or sets the title/salutation.</summary>
         public string? Title { get; set; }
 
@@ -44,7 +42,7 @@ namespace Mobizon.Contracts
         /// <summary>Gets or sets the Telegram handle.</summary>
         public string? Telegram { get; set; }
 
-        /// <summary>Gets or sets the postal address. When <see langword="null"/>, the existing address is left unchanged.</summary>
+        /// <summary>Gets or sets the postal address. When <see langword="null"/>, no address is sent.</summary>
         public AddressFieldInfo? Address { get; set; }
 
         /// <summary>Gets or sets the date of birth.</summary>
@@ -64,7 +62,7 @@ namespace Mobizon.Contracts
 
         /// <summary>
         /// Gets or sets the photo stream to upload.
-        /// When <see langword="null"/>, the existing photo is left unchanged.
+        /// When <see langword="null"/>, no photo is attached.
         /// </summary>
         public Stream? Photo { get; set; }
 

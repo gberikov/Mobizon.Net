@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Mobizon.Contracts
 {
@@ -74,5 +75,20 @@ namespace Mobizon.Contracts
 
         /// <summary>Gets or sets free-form notes about the contact.</summary>
         public string? Info { get; set; }
+
+        /// <summary>
+        /// Gets or sets the photo to upload with the next <c>AddAsync</c>/<c>UpdateAsync</c> call.
+        /// One-shot: the call consumes the stream and resets this property (and
+        /// <see cref="PhotoFileName"/>) to <see langword="null"/>; the caller still owns and disposes
+        /// the stream. Write-only: the API does not return the photo, so this is always
+        /// <see langword="null"/> on a card read back from the server.
+        /// </summary>
+        public Stream? Photo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the file name sent with <see cref="Photo"/> (e.g. <c>"photo.jpg"</c>).
+        /// Used only when <see cref="Photo"/> is set.
+        /// </summary>
+        public string? PhotoFileName { get; set; }
     }
 }

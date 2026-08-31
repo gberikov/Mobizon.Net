@@ -351,6 +351,9 @@ await client.ContactCards.UpdateAsync(existing);
 ```
 
 Supported filter operators: `==` (including `== null` for "empty"), `!=`, `>=`, `<=`, `.Contains()`, combined with `&&`.
+The filtered member must be on the left-hand side (`x.GroupId == 33`, not `33 == x.GroupId`), and the value must be a
+constant or a captured variable. The API has no "not empty" operator, so `!= null` and `!= Gender.Undefined` are
+rejected with `NotSupportedException` rather than sent as something that means the opposite.
 
 ---
 

@@ -18,7 +18,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public async Task<ContactCardListResult> ListAsync(
+        public async Task<MobizonListResult<ContactCardData>> ListAsync(
             ContactCardListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -47,7 +47,7 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
-            return (await _apiClient.SendAsync<ContactCardListResult>(
+            return (await _apiClient.SendAsync<MobizonListResult<ContactCardData>>(
                 ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -64,7 +64,7 @@ namespace Mobizon.Net.Services
                 ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public async Task<string> CreateAsync(
+        public async Task<long> CreateAsync(
             CreateContactCardRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -74,10 +74,10 @@ namespace Mobizon.Net.Services
                 request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
-            return (await _apiClient.SendMultipartAsync<string>(
+            return (await _apiClient.SendMultipartAsync<long>(
                 ModuleName, "create", fields,
                 request.Photo, request.PhotoFileName,
-                cancellationToken).ConfigureAwait(false)).Data!;
+                cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task UpdateAsync(

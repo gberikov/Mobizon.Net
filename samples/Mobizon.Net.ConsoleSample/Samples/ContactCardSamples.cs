@@ -72,7 +72,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             try
             {
                 var single = await client.ContactCards
-                    .Where(x => x.GroupId == 100604 && x.Surname == "Петров")
+                    .Where(x => x.GroupId == 100604 && x.Surname == "Smith")
                     .SingleOrDefaultAsync();
                 Console.WriteLine(single != null
                     ? $"SingleOrDefault: Id={single.Id}  Name={single.Name}"

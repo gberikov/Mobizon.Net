@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Represents the field values of a contact card.

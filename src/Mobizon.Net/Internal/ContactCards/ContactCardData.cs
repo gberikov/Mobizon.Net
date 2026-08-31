@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Represents a contact card as returned by <c>contactcard/list</c> and <c>contactcard/get</c>.

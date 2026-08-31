@@ -19,7 +19,7 @@ namespace Mobizon.Net
     /// var page1 = await kz.Page(1).ToListAsync();
     /// </code>
     /// </summary>
-    public sealed class ContactCardQuery : IContactCardQuery
+    internal sealed class ContactCardQuery : IContactCardQuery
     {
         private const int DefaultPageSize = 25;
 
@@ -186,7 +186,7 @@ namespace Mobizon.Net
             => items.Select(ContactCardMapper.ToEntity).ToArray();
 
         // contactcard/list may return success with a null data payload; treat it as an empty page.
-        private static IReadOnlyList<ContactCardData> ItemsOf(ContactCardListResult response)
+        private static IReadOnlyList<ContactCardData> ItemsOf(MobizonListResult<ContactCardData> response)
             => response?.Items ?? Array.Empty<ContactCardData>();
 
         private static string ExtractFieldName<TKey>(Expression<Func<ContactCardFilterSpec, TKey>> expr)

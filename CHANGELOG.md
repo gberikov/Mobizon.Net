@@ -30,6 +30,14 @@ First public release.
 
 ### Behaviour worth knowing
 
+- Contact-card filters spell fields and values exactly as the write path and the API's responses do: `gender` is
+  lowercase (`male`), `birth_date` is date-only, and the address postal code is `address.postalcode`.
+- A contact-card filter expression that cannot be expressed on the wire throws `NotSupportedException` instead of
+  being silently mis-sent or crashing: the member must be on the left-hand side, `!= null` and `!= Gender.Undefined`
+  have no "not empty" operator to map to, and a closed-over `ids.Contains(x.GroupId)` is not a `contain` filter.
+- `ContactCard.Photo`/`PhotoFileName` make the (already implemented) multipart photo upload reachable from
+  `AddAsync`/`UpdateAsync`. One-shot and write-only: the call consumes the stream and resets both properties to
+  `null`; the API never returns a photo.
 - The API key is sent in the POST body, never in the URL; every request is a POST and carries `User-Agent: Mobizon.Net/<version>`.
 - All wire formatting is culture-invariant.
 - `MobizonApiException` for API error codes; `MobizonException` (with `StatusCode`) for transport errors, `HttpClient` timeouts and non-JSON responses. Caller cancellation is never wrapped.

@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Defines a single filter criterion for <c>contactcard/list</c>.

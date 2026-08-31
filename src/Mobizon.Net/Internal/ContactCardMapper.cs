@@ -50,7 +50,9 @@ namespace Mobizon.Net.Internal
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
-                Info        = e.Info
+                Info        = e.Info,
+                Photo         = e.Photo,
+                PhotoFileName = e.PhotoFileName
             };
 
         internal static UpdateContactCardRequest ToUpdateRequest(ContactCard e) =>
@@ -73,7 +75,9 @@ namespace Mobizon.Net.Internal
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
-                Info        = e.Info
+                Info        = e.Info,
+                Photo         = e.Photo,
+                PhotoFileName = e.PhotoFileName
             };
 
         // Mobizon documents birth_date as YYYY-MM-DD, but the PHP API has been observed to return
