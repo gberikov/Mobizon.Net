@@ -1,6 +1,6 @@
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Verifies the authenticity of an inbound Mobizon webhook via its SHA1 signature.

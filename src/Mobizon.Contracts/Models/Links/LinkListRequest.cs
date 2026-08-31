@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies optional pagination and sort criteria for listing short links.

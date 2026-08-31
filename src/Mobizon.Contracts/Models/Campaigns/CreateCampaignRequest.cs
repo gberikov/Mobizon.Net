@@ -1,7 +1,7 @@
-﻿using System;
-using Mobizon.Contracts.Models.Messages;
+using System;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to create a new SMS campaign.

@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies pagination parameters for list API requests.
@@ -8,13 +8,14 @@ namespace Mobizon.Contracts.Models.Common
     public class PaginationRequest
     {
         /// <summary>
-        /// Gets or sets the one-based page number to retrieve.
+        /// Gets or sets the zero-based page number to retrieve. <c>0</c> is the first page,
+        /// matching the Mobizon API's own page numbering.
         /// </summary>
         public int CurrentPage { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of items to return per page. Defaults to <c>20</c>.
+        /// Items per page. API default is 25; maximum 100.
         /// </summary>
-        public int PageSize { get; set; } = 20;
+        public int PageSize { get; set; } = 25;
     }
 }

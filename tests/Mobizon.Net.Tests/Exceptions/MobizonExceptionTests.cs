@@ -1,6 +1,6 @@
-﻿using System;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Common;
+using System;
+using System.Net;
+using Mobizon.Contracts;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Exceptions
@@ -50,6 +50,25 @@ namespace Mobizon.Net.Tests.Exceptions
         {
             var ex = new MobizonApiException(1, "test");
             Assert.IsAssignableFrom<MobizonException>(ex);
+        }
+
+        [Fact]
+        public void MobizonException_StatusCode_IsExposed()
+        {
+            var ex = new MobizonException("boom", HttpStatusCode.BadGateway);
+            Assert.Equal(HttpStatusCode.BadGateway, ex.StatusCode);
+            Assert.Null(ex.InnerException);
+
+            var plain = new MobizonException("boom");
+            Assert.Null(plain.StatusCode);
+        }
+
+        [Fact]
+        public void MobizonApiException_StatusCode_FlowsToBase()
+        {
+            var ex = new MobizonApiException(2, "not found", HttpStatusCode.OK);
+            Assert.Equal(HttpStatusCode.OK, ex.StatusCode);
+            Assert.Equal(2, ex.RawCode);
         }
     }
 }

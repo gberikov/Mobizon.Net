@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.StopLists;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -58,10 +57,10 @@ namespace Mobizon.Net.Tests.Services
                     @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.ListAsync(new Mobizon.Contracts.Models.StopLists.StopListListRequest
+            await service.ListAsync(new Mobizon.Contracts.StopListListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort = new SortRequest { Field = "createTs", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "createTs", Direction = SortDirection.Descending }
             });
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -74,7 +73,7 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post,
                     $"{BaseUrl}/service/numberstoplist/list")
                 .Respond("application/json",
-                    @"{""code"":0,""data"":{""items"":[{""id"":""83486"",""userId"":""88296"",""partnerId"":""2"",""number"":""77007782006"",""ignoreSingle"":""1"",""level"":""0"",""createdByUserId"":""88296"",""createdByUserName"":null,""createdByUserSurname"":null,""createTs"":""2026-02-24 16:19:33"",""comment"":""Проверка"",""isSystem"":""0"",""countryA2"":""KZ"",""operatorName"":""Altel""}],""totalItemCount"":""1""},""message"":""""}");
+                    @"{""code"":0,""data"":{""items"":[{""id"":""83486"",""userId"":""88296"",""partnerId"":""2"",""number"":""77007782006"",""ignoreSingle"":""1"",""level"":""0"",""createdByUserId"":""88296"",""createdByUserName"":null,""createdByUserSurname"":null,""createTs"":""2026-02-24 16:19:33"",""comment"":""Manual check"",""isSystem"":""0"",""countryA2"":""KZ"",""operatorName"":""Altel""}],""totalItemCount"":""1""},""message"":""""}");
 
             var service = CreateService(mockHttp);
             var result = await service.ListAsync();
@@ -104,12 +103,12 @@ namespace Mobizon.Net.Tests.Services
                     $"{BaseUrl}/service/numberstoplist/create")
                 .WithFormData("id", "")
                 .WithFormData("number", "77007782006")
-                .WithFormData("comment", "Проверка")
+                .WithFormData("comment", "Manual check")
                 .Respond("application/json",
                     @"{""code"":0,""data"":""83486"",""message"":""""}");
 
             var service = CreateService(mockHttp);
-            var result = await service.AddNumberAsync("77007782006", "Проверка");
+            var result = await service.AddNumberAsync("77007782006", "Manual check");
 
             Assert.Equal(83486, result);
             mockHttp.VerifyNoOutstandingExpectation();
@@ -145,12 +144,12 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("id", "")
                 .WithFormData("numberFrom", "77470944000")
                 .WithFormData("numberTo", "77470944099")
-                .WithFormData("comment", "Тест диапазона")
+                .WithFormData("comment", "Range test")
                 .Respond("application/json",
                     @"{""code"":0,""data"":true,""message"":""""}");
 
             var service = CreateService(mockHttp);
-            await service.AddNumberRangeAsync("77470944000", "77470944099", "Тест диапазона");
+            await service.AddNumberRangeAsync("77470944000", "77470944099", "Range test");
 
             mockHttp.VerifyNoOutstandingExpectation();
         }

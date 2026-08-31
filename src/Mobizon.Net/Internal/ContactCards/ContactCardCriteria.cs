@@ -1,9 +1,9 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Defines a single filter criterion for <c>contactcard/list</c>.
     /// </summary>
-    public class ContactCardCriteria
+    internal class ContactCardCriteria
     {
         /// <summary>
         /// Gets or sets the field name to filter by (e.g. <c>"groupId"</c>).

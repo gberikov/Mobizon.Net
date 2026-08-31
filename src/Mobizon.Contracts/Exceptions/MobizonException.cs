@@ -1,30 +1,37 @@
 using System;
+using System.Net;
 
-namespace Mobizon.Contracts.Exceptions
+namespace Mobizon.Contracts
 {
     /// <summary>
-    /// Base exception for all errors raised by the Mobizon.Net SDK.
+    /// Base exception for all errors raised by the Mobizon.Net SDK: transport failures, timeouts,
+    /// unexpected (non-JSON) responses and — via <see cref="MobizonApiException"/> — API-level errors.
     /// </summary>
     public class MobizonException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="MobizonException"/> with a specified error message.
+        /// HTTP status code of the response that caused this exception, or <see langword="null"/>
+        /// when no response was received (network error, timeout).
         /// </summary>
-        /// <param name="message">A message that describes the error.</param>
+        public HttpStatusCode? StatusCode { get; }
+
+        /// <summary>Initializes a new instance with a message.</summary>
         public MobizonException(string message)
             : base(message)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="MobizonException"/> with a specified error message
-        /// and a reference to the inner exception that caused this exception.
-        /// </summary>
-        /// <param name="message">A message that describes the error.</param>
-        /// <param name="innerException">The exception that is the cause of this exception.</param>
+        /// <summary>Initializes a new instance with a message and the causing exception.</summary>
         public MobizonException(string message, Exception innerException)
             : base(message, innerException)
         {
+        }
+
+        /// <summary>Initializes a new instance with a message, the HTTP status of the offending response and an optional cause.</summary>
+        public MobizonException(string message, HttpStatusCode? statusCode, Exception? innerException = null)
+            : base(message, innerException)
+        {
+            StatusCode = statusCode;
         }
     }
 }

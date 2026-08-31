@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the address field of a contact card as returned by the API.

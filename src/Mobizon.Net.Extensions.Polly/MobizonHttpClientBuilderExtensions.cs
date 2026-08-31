@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Mobizon.Net.Internal;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -14,6 +15,8 @@ namespace Mobizon.Net.Extensions.Polly
     {
         /// <summary>
         /// Adds the default Mobizon resilience policies (exponential retry and circuit breaker) to the HTTP client.
+        /// By default, retry covers read-only calls only (<c>get*</c> / <c>list</c>); see
+        /// <see cref="MobizonResilienceOptions.RetryNonIdempotentRequests"/> to retry every call.
         /// </summary>
         /// <param name="builder">The <see cref="IHttpClientBuilder"/> returned by <c>AddMobizon</c>.</param>
         /// <returns>The same <see cref="IHttpClientBuilder"/> for further chaining.</returns>
@@ -28,14 +31,12 @@ namespace Mobizon.Net.Extensions.Polly
         /// </code>
         /// </example>
         public static IHttpClientBuilder AddMobizonResilience(this IHttpClientBuilder builder)
-        {
-            return builder
-                .AddPolicyHandler(GetRetryPolicy())
-                .AddPolicyHandler(GetCircuitBreakerPolicy());
-        }
+            => builder.AddMobizonResilience(_ => { });
 
         /// <summary>
         /// Adds customised Mobizon resilience policies (exponential retry and circuit breaker) to the HTTP client.
+        /// By default, retry covers read-only calls only (<c>get*</c> / <c>list</c>); see
+        /// <see cref="MobizonResilienceOptions.RetryNonIdempotentRequests"/> to retry every call.
         /// </summary>
         /// <param name="builder">The <see cref="IHttpClientBuilder"/> returned by <c>AddMobizon</c>.</param>
         /// <param name="configure">A delegate that configures the <see cref="MobizonResilienceOptions"/>.</param>
@@ -60,11 +61,18 @@ namespace Mobizon.Net.Extensions.Polly
             this IHttpClientBuilder builder,
             Action<MobizonResilienceOptions> configure)
         {
+            if (builder is null) throw new ArgumentNullException(nameof(builder));
+            if (configure is null) throw new ArgumentNullException(nameof(configure));
+
             var options = new MobizonResilienceOptions();
             configure(options);
 
+            var retry = GetRetryPolicy(options.RetryCount, options.RetryBaseDelay);
+            var noRetry = Policy.NoOpAsync<HttpResponseMessage>();
+            var retryAll = options.RetryNonIdempotentRequests;
+
             return builder
-                .AddPolicyHandler(GetRetryPolicy(options.RetryCount, options.RetryBaseDelay))
+                .AddPolicyHandler(request => retryAll || RequestMarkers.IsIdempotent(request) ? retry : noRetry)
                 .AddPolicyHandler(GetCircuitBreakerPolicy(
                     options.CircuitBreakerFailureThreshold,
                     options.CircuitBreakerDuration));

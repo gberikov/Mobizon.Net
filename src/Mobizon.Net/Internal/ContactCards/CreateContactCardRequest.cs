@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.IO;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Request parameters for creating a new contact card via <c>contactcard/create</c>.
     /// </summary>
-    public class CreateContactCardRequest
+    internal class CreateContactCardRequest
     {
         /// <summary>Gets or sets the title/salutation.</summary>
         public string? Title { get; set; }
@@ -48,7 +49,7 @@ namespace Mobizon.Contracts.Models.ContactCards
         public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public string? Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         public string? CompanyName { get; set; }

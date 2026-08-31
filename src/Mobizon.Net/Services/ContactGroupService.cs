@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactGroups;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -30,16 +29,16 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
             return (await _apiClient.SendAsync<ContactGroupListResponse>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<long> CreateAsync(
@@ -52,7 +51,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task UpdateAsync(
@@ -62,25 +61,25 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"]          = id.ToString(),
+                ["id"]          = ApiFormat.Int(id),
                 ["data[name]"]  = name
             };
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<DeleteContactGroupResult> DeleteAsync(
+        public async Task<DeleteResult> DeleteAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
-            return (await _apiClient.SendAsync<DeleteContactGroupResult>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+            return (await _apiClient.SendAsync<DeleteResult>(
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<long> GetCardsCountAsync(
@@ -89,11 +88,11 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.HasValue ? id.Value.ToString() : "-1"
+                ["id"] = id.HasValue ? ApiFormat.Int(id.Value) : "-1"
             };
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "getcardscount", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "getcardscount", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }
 }

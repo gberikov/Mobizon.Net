@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.TaskQueues;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -23,10 +22,10 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
-            return (await _apiClient.SendAsync<TaskQueueStatus>(HttpMethod.Post, ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+            return (await _apiClient.SendAsync<TaskQueueStatus>(ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

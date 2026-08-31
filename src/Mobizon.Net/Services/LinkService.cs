@@ -1,11 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -31,39 +30,39 @@ namespace Mobizon.Net.Services
             if (request.Status.HasValue)
                 parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
 
-            if (request.ExpirationDate != null)
-                parameters["data[expirationDate]"] = request.ExpirationDate;
+            if (request.ExpirationDate.HasValue)
+                parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);
 
             if (request.Comment != null)
                 parameters["data[comment]"] = request.Comment;
 
             return (await _apiClient.SendAsync<LinkData>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
-        public async Task DeleteAsync(
+        public async Task<DeleteResult> DeleteAsync(
             long[] ids, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
-            await _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+            return (await _apiClient.SendAsync<DeleteResult>(
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<LinkData> GetByIdAsync(long id, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
-                new Dictionary<string, string> { ["id"] = id.ToString() }, cancellationToken).ConfigureAwait(false)).Data;
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
+                new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<LinkData> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
                 new Dictionary<string, string> { ["code"] = code }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<LinkData> GetByShortLinkAsync(string shortLink, CancellationToken cancellationToken = default)
-            => (await _apiClient.SendAsync<LinkData>(HttpMethod.Post, ModuleName, "get",
+            => (await _apiClient.SendAsync<LinkData>(ModuleName, "get",
                 new Dictionary<string, string> { ["shortLink"] = shortLink }, cancellationToken).ConfigureAwait(false)).Data;
 
         public async Task<IReadOnlyList<LinkData>> GetLinksAsync(
@@ -71,33 +70,36 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["campaignId"] = campaignId.ToString()
+                ["campaignId"] = ApiFormat.Int(campaignId)
             };
 
             return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
-                HttpMethod.Post, ModuleName, "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<LinkStatsResult> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
+            if (request.Ids == null || request.Ids.Length == 0 || request.Ids.Length > 5)
+                throw new ArgumentException("link/getStats accepts 1 to 5 link ids per request.", nameof(request));
+
             var parameters = new Dictionary<string, string>();
 
             for (var i = 0; i < request.Ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = request.Ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(request.Ids[i]);
             }
 
             parameters["type"] = request.Type.ToString().ToLowerInvariant();
 
-            if (request.DateFrom != null)
-                parameters["criteria[dateFrom]"] = request.DateFrom;
+            if (request.DateFrom.HasValue)
+                parameters["criteria[dateFrom]"] = ApiFormat.DateTime(request.DateFrom.Value);
 
-            if (request.DateTo != null)
-                parameters["criteria[dateTo]"] = request.DateTo;
+            if (request.DateTo.HasValue)
+                parameters["criteria[dateTo]"] = ApiFormat.DateTime(request.DateTo.Value);
 
             var response = await _apiClient.SendAsync<LinkStatsResult>(
-                HttpMethod.Post, ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "getstats", parameters, cancellationToken).ConfigureAwait(false);
 
             // The payload identifies links only by their position in the requested `ids` array;
             // resolve each series back to its actual link ID here.
@@ -130,36 +132,36 @@ namespace Mobizon.Net.Services
                     if (c.Code != null) parameters["criteria[code]"] = c.Code;
                     if (c.FullLink != null) parameters["criteria[fullLink]"] = c.FullLink;
                     if (c.Comment != null) parameters["criteria[comment]"] = c.Comment;
-                    if (c.CreatedFrom.HasValue) parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                    if (c.CreatedTo.HasValue) parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    if (c.CreatedFrom.HasValue) parameters["criteria[createTsFrom]"] = ApiFormat.DateTime(c.CreatedFrom.Value);
+                    if (c.CreatedTo.HasValue) parameters["criteria[createTsTo]"] = ApiFormat.DateTime(c.CreatedTo.Value);
                     if (c.ClicksFrom.HasValue) parameters["criteria[clickCntFrom]"] = c.ClicksFrom.Value.ToString(CultureInfo.InvariantCulture);
                     if (c.ClicksTo.HasValue) parameters["criteria[clickCntTo]"] = c.ClicksTo.Value.ToString(CultureInfo.InvariantCulture);
                 }
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
                 {
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
                 }
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<LinkData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string> { ["id"] = request.Id.ToString() };
+            var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.Id) };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
-            if (request.ExpirationDate != null) parameters["data[expirationDate]"] = request.ExpirationDate;
+            if (request.ExpirationDate.HasValue) parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
-            await _apiClient.SendAsync<object>(HttpMethod.Post, ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
+            await _apiClient.SendAsync<object>(ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

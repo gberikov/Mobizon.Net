@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Contains the result data returned after successfully submitting an SMS message.

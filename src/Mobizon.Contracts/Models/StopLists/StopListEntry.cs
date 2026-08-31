@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.StopLists
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a single entry in the user's number stop-list,

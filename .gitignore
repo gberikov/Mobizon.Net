@@ -62,3 +62,6 @@ samples/Mobizon.Net.Playground/
 
 ## API capture (raw, may contain PII)
 artifacts/api-captures/
+
+## Claude Code local permissions (machine-specific)
+.claude/settings.local.json

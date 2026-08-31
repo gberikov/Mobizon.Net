@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// A composable, mockable query builder for <c>contactcard/list</c>.
+    /// Every builder method returns a new query and leaves the receiver untouched.
     /// </summary>
     public interface IContactCardQuery
     {
@@ -19,16 +19,14 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         IContactCardQuery Where(Expression<Func<ContactCardFilterSpec, bool>> predicate);
 
-        /// <summary>Sets the maximum number of items to return (page size).</summary>
+        /// <summary>Sets the page size (items per request). Must be positive; default 25.</summary>
         IContactCardQuery Take(int count);
 
         /// <summary>
-        /// Skips the first <paramref name="count"/> items.
-        /// This value is page-based: it is translated to <c>currentPage = Skip / pageSize</c>,
-        /// so skip is accurate only at exact multiples of the page size.
-        /// Always pair with <see cref="Take"/> to set the page size; otherwise a default of 25 is used.
+        /// Selects the zero-based page to return. Pair with <see cref="Take"/> to set the page size
+        /// (default 25). Unlike LINQ's <c>Skip</c>, this maps 1:1 onto the API's <c>pagination[currentPage]</c>.
         /// </summary>
-        IContactCardQuery Skip(int count);
+        IContactCardQuery Page(int pageIndex);
 
         /// <summary>Sorts results by the specified field ascending.</summary>
         IContactCardQuery OrderBy<TKey>(Expression<Func<ContactCardFilterSpec, TKey>> keySelector);

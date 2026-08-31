@@ -4,9 +4,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Internal.Converters;
 
@@ -29,7 +27,7 @@ namespace Mobizon.Net.Services
 
             var parameters = new Dictionary<string, string>
             {
-                ["data[type]"] = ((int)request.Type).ToString(),
+                ["data[type]"] = ApiFormat.Int((int)request.Type),
                 ["data[text]"] = request.Text
             };
 
@@ -40,19 +38,19 @@ namespace Mobizon.Net.Services
                 parameters["data[from]"] = request.From;
 
             if (request.RateLimit.HasValue)
-                parameters["data[rateLimit]"] = request.RateLimit.Value.ToString();
+                parameters["data[rateLimit]"] = ApiFormat.Int(request.RateLimit.Value);
 
             if (request.RatePeriod.HasValue)
-                parameters["data[ratePeriod]"] = request.RatePeriod.Value.ToString();
+                parameters["data[ratePeriod]"] = ApiFormat.Int(request.RatePeriod.Value);
 
             if (request.DeferredTo.HasValue)
-                parameters["data[deferredToTs]"] = request.DeferredTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                parameters["data[deferredToTs]"] = ApiFormat.DateTime(request.DeferredTo.Value);
 
             if (request.MessageClass.HasValue)
-                parameters["data[mclass]"] = ((int)request.MessageClass.Value).ToString();
+                parameters["data[mclass]"] = ApiFormat.Int((int)request.MessageClass.Value);
 
             if (request.Validity.HasValue)
-                parameters["data[validity]"] = ((int)request.Validity.Value.TotalMinutes).ToString();
+                parameters["data[validity]"] = ApiFormat.Int((int)request.Validity.Value.TotalMinutes);
 
             if (request.TrackShortLinkRecipients.HasValue)
                 parameters["data[trackShortLinkRecipients]"] = request.TrackShortLinkRecipients.Value ? "1" : "0";
@@ -61,7 +59,7 @@ namespace Mobizon.Net.Services
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task DeleteAsync(
@@ -69,11 +67,11 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             await _apiClient.SendAsync<object>(
-                HttpMethod.Post, ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<CampaignData> GetAsync(
@@ -81,26 +79,26 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             return (await _apiClient.SendAsync<CampaignData>(
-                HttpMethod.Post, ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<CampaignInfo> GetInfoAsync(
-            long id, int? getFilledTplCampaignText = null, CancellationToken cancellationToken = default)
+            long id, bool? fillTemplateText = null, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
-            if (getFilledTplCampaignText.HasValue)
-                parameters["getFilledTplCampaignText"] = getFilledTplCampaignText.Value.ToString();
+            if (fillTemplateText.HasValue)
+                parameters["getFilledTplCampaignText"] = ApiFormat.Bool(fillTemplateText.Value);
 
             return (await _apiClient.SendAsync<CampaignInfo>(
-                HttpMethod.Post, ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<MobizonListResult<CampaignData>> ListAsync(
@@ -117,11 +115,11 @@ namespace Mobizon.Net.Services
                     var c = request.Criteria;
 
                     if (c.Id.HasValue)
-                        parameters["criteria[id]"] = c.Id.Value.ToString();
+                        parameters["criteria[id]"] = ApiFormat.Int(c.Id.Value);
 
                     if (c.Ids != null)
                         for (var i = 0; i < c.Ids.Count; i++)
-                            parameters[$"criteria[ids][{i}]"] = c.Ids[i].ToString();
+                            parameters[$"criteria[ids][{i}]"] = ApiFormat.Int(c.Ids[i]);
 
                     if (c.Recipient != null)
                         parameters["criteria[recipient]"] = c.Recipient;
@@ -136,45 +134,45 @@ namespace Mobizon.Net.Services
                         parameters["criteria[status]"] = ApiStatusCodes.ToApiCode(c.Status.Value);
 
                     if (c.CreatedFrom.HasValue)
-                        parameters["criteria[createTsFrom]"] = c.CreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[createTsFrom]"] = ApiFormat.DateTime(c.CreatedFrom.Value);
                     if (c.CreatedTo.HasValue)
-                        parameters["criteria[createTsTo]"] = c.CreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[createTsTo]"] = ApiFormat.DateTime(c.CreatedTo.Value);
                     if (c.SentFrom.HasValue)
-                        parameters["criteria[sentTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[sentTsFrom]"] = ApiFormat.DateTime(c.SentFrom.Value);
                     if (c.SentTo.HasValue)
-                        parameters["criteria[sentTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                        parameters["criteria[sentTsTo]"] = ApiFormat.DateTime(c.SentTo.Value);
 
                     if (c.Type.HasValue)
-                        parameters["criteria[type]"] = c.Type.Value.ToString();
+                        parameters["criteria[type]"] = ApiFormat.Int((int)c.Type.Value);
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)
-                            parameters[$"criteria[groups][{i}]"] = c.Groups[i];
+                            parameters[$"criteria[groups][{i}]"] = ApiFormat.Int(c.Groups[i]);
                 }
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
                 {
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
                 }
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<CampaignData>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<CampaignSendResult> SendAsync(
             long id, CancellationToken cancellationToken = default)
         {
-            var parameters = new Dictionary<string, string> { ["id"] = id.ToString() };
+            var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) };
 
             var response = await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
 
             return new CampaignSendResult
             {
@@ -199,7 +197,7 @@ namespace Mobizon.Net.Services
 
             if (request.RecipientsFile != null)
             {
-                var fields = new Dictionary<string, string> { ["id"] = request.CampaignId.ToString() };
+                var fields = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.CampaignId) };
                 AppendParams(fields, request.Parameters);
                 return Finalize(await _apiClient.SendMultipartAsync<AddRecipientsResult>(
                     ModuleName, "AddRecipients", fields, request.RecipientsFile,
@@ -311,7 +309,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = request.CampaignId.ToString()
+                ["id"] = ApiFormat.Int(request.CampaignId)
             };
 
             if (request.Recipients != null)
@@ -333,12 +331,12 @@ namespace Mobizon.Net.Services
 
             if (request.RecipientGroups != null)
                 for (var i = 0; i < request.RecipientGroups.Count; i++)
-                    parameters[$"recipientGroups[{i}]"] = request.RecipientGroups[i];
+                    parameters[$"recipientGroups[{i}]"] = ApiFormat.Int(request.RecipientGroups[i]);
 
             AppendParams(parameters, request.Parameters);
 
             return _apiClient.SendAsync<AddRecipientsResult>(
-                HttpMethod.Post, ModuleName, "AddRecipients", parameters, cancellationToken,
+                ModuleName, "AddRecipients", parameters, cancellationToken,
                 extraSuccessCodes: new[] { (int)AddRecipientsOutcome.PartiallyAdded, (int)AddRecipientsOutcome.NoneAdded });
         }
 
@@ -364,6 +362,14 @@ namespace Mobizon.Net.Services
 
             if (prm.RecipientsFileEnclosure != null)
                 parameters["params[recipientsFileEnclosure]"] = prm.RecipientsFileEnclosure;
+        }
+
+        public async Task<IReadOnlyList<LinkData>> GetLinksAsync(
+            long campaignId, CancellationToken cancellationToken = default)
+        {
+            var parameters = new Dictionary<string, string> { ["campaignId"] = ApiFormat.Int(campaignId) };
+            return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
+                "link", "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         private static IReadOnlyList<T> Slice<T>(IReadOnlyList<T> source, int offset, int count)

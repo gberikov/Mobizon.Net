@@ -1,16 +1,9 @@
-﻿using Mobizon.Contracts.Models.Common;
-
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
-    /// <summary>
-    /// Specifies the sort order for list API requests.
-    /// </summary>
+    /// <summary>Sort order for list requests.</summary>
     public enum SortDirection
     {
-        /// <summary>Sort results in ascending order.</summary>
-        ASC,
-
-        /// <summary>Sort results in descending order.</summary>
-        DESC
+        Ascending,
+        Descending
     }
 }

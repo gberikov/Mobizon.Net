@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>Payload of a <c>form-contact-unsubscribe</c> webhook.</summary>
     public sealed class FormContactUnsubscribe

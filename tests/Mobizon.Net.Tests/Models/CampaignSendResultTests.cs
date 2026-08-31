@@ -1,4 +1,4 @@
-using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts;
 using Xunit;
 
 namespace Mobizon.Net.Tests.Models

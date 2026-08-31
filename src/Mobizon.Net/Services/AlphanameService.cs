@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Alphanames;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -22,11 +20,11 @@ namespace Mobizon.Net.Services
             if (pagination != null)
                 parameters = new Dictionary<string, string>
                 {
-                    ["pagination[currentPage]"] = pagination.CurrentPage.ToString(),
-                    ["pagination[pageSize]"] = pagination.PageSize.ToString()
+                    ["pagination[currentPage]"] = ApiFormat.Int(pagination.CurrentPage),
+                    ["pagination[pageSize]"] = ApiFormat.Int(pagination.PageSize)
                 };
             return (await _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

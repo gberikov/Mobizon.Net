@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.Links
+namespace Mobizon.Contracts
 {
     /// <summary>Click/redirect statistics for a single short link over the requested period range.</summary>
     public class LinkStatSeries

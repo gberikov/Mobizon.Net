@@ -1,12 +1,12 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Request parameters for <c>contactcard/list</c>.
     /// </summary>
-    public class ContactCardListRequest
+    internal class ContactCardListRequest
     {
         /// <summary>Gets or sets filter criteria applied to the contact list.</summary>
         public IReadOnlyList<ContactCardCriteria>? Criteria { get; set; }

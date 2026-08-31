@@ -1,9 +1,10 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
-using Mobizon.Net.ContactCards;
+using Mobizon.Contracts;
+using Mobizon.Net;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -111,10 +112,10 @@ namespace Mobizon.Net.Tests.Services
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("criteria[0][field]",    "surname")
                 .WithFormData("criteria[0][operator]", "contain")
-                .WithFormData("criteria[0][value]",    "Петр")
+                .WithFormData("criteria[0][value]",    "Smith")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateSet(mockHttp).Where(x => x.Surname.Contains("Петр")).ToListAsync();
+            await CreateSet(mockHttp).Where(x => x.Surname.Contains("Smith")).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -156,11 +157,11 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("criteria[0][value]",    "33")
                 .WithFormData("criteria[1][field]",    "surname")
                 .WithFormData("criteria[1][operator]", "contain")
-                .WithFormData("criteria[1][value]",    "Петр")
+                .WithFormData("criteria[1][value]",    "Smith")
                 .Respond("application/json", EmptyListJson);
 
             await CreateSet(mockHttp)
-                .Where(x => x.GroupId == 33 && x.Surname.Contains("Петр"))
+                .Where(x => x.GroupId == 33 && x.Surname.Contains("Smith"))
                 .ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
@@ -202,7 +203,7 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task Skip_WithTake_SetsCurrentPage()
+        public async Task Page_WithTake_SetsCurrentPage()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
@@ -210,7 +211,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateSet(mockHttp).Take(25).Skip(50).ToListAsync();
+            await CreateSet(mockHttp).Take(25).Page(2).ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -373,7 +374,7 @@ namespace Mobizon.Net.Tests.Services
             await CreateSet(mockHttp)
                 .Where(x => x.GroupId == 100604)
                 .Take(25)
-                .Skip(0)
+                .Page(0)
                 .OrderBy(x => x.Surname)
                 .ToListAsync();
 
@@ -556,7 +557,7 @@ namespace Mobizon.Net.Tests.Services
         // ── ToPageAsync ───────────────────────────────────────────────────────
 
         [Fact]
-        public async Task ToPageAsync_WithTakeAndSkip_SendsPaginationParams()
+        public async Task ToPageAsync_WithTakeAndPage_SendsPaginationParams()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
@@ -564,7 +565,7 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
-            await CreateSet(mockHttp).Take(25).Skip(25).ToPageAsync();
+            await CreateSet(mockHttp).Take(25).Page(1).ToPageAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
         }
@@ -714,6 +715,195 @@ namespace Mobizon.Net.Tests.Services
             {
                 System.Globalization.CultureInfo.CurrentCulture = original;
             }
+        }
+
+        // ── Immutability ──────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task Builder_IsImmutable_BaseQueryCanBeReused()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "0")
+                .WithFormData("pagination[pageSize]", "10")
+                .Respond("application/json", EmptyListJson);
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("pagination[currentPage]", "1")
+                .WithFormData("pagination[pageSize]", "10")
+                .Respond("application/json", EmptyListJson);
+
+            var baseQuery = CreateSet(mockHttp).Take(10);
+            var first = baseQuery.Page(0);
+            var second = baseQuery.Page(1);
+
+            Assert.NotSame(baseQuery, first);
+            Assert.NotSame(first, second);
+            await first.ToListAsync();
+            await second.ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public void Take_NonPositive_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CreateSet(new MockHttpMessageHandler()).Take(0));
+        }
+
+        [Fact]
+        public void Page_Negative_Throws()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CreateSet(new MockHttpMessageHandler()).Page(-1));
+        }
+
+        // -- Wire format: the filter path must spell fields and values the same way the
+        //    write path and the API's own responses do -----------------------------------
+
+        [Fact]
+        public async Task Where_GenderEqualsMale_SendsLowercaseValue()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "gender")
+                .WithFormData("criteria[0][operator]", "equal")
+                .WithFormData("criteria[0][value]",    "male")   // ApiFormat.Gender, not "MALE"
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.Gender == Gender.Male).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task Where_BirthDateFrom_SendsDateOnlyValue()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "birth_date")
+                .WithFormData("criteria[0][operator]", "from")
+                .WithFormData("criteria[0][value]",    "1990-01-01")   // date-only, as on the write path
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.BirthDate >= new DateTime(1990, 1, 1)).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task Where_PostalCode_SendsWireFieldName()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "address.postalcode")   // not "postalCode"
+                .WithFormData("criteria[0][operator]", "equal")
+                .WithFormData("criteria[0][value]",    "050000")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.Address.PostalCode == "050000").ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task Where_NonAsciiValue_IsUtf8EncodedInFormBody()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "surname")
+                .WithFormData("criteria[0][operator]", "equal")
+                .WithFormData("criteria[0][value]",    "Müller")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.Surname == "Müller").ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        // -- Expressions the parser must reject instead of mis-sending ---------------------
+
+        [Fact]
+        public async Task Where_GenderEqualsUndefined_SendsEmptyCriteria()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl)
+                .WithFormData("criteria[0][field]",    "gender")
+                .WithFormData("criteria[0][operator]", "empty")
+                .Respond("application/json", EmptyListJson);
+
+            await CreateSet(mockHttp).Where(x => x.Gender == Gender.Undefined).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task Where_GenderNotUndefined_ThrowsNotSupportedException()
+        {
+            // Must not silently become operator=empty, which asks for the exact opposite set.
+            var set = CreateSet(new MockHttpMessageHandler());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                set.Where(x => x.Gender != Gender.Undefined).ToListAsync());
+        }
+
+        [Fact]
+        public async Task Where_NotNull_ThrowsNotSupportedException()
+        {
+            // The API has no "not empty" operator; not_equal with an empty value is not the same.
+            var set = CreateSet(new MockHttpMessageHandler());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                set.Where(x => x.Surname != null).ToListAsync());
+        }
+
+        [Fact]
+        public async Task Where_MemberOnRightHandSide_ThrowsNotSupportedException()
+        {
+            var set = CreateSet(new MockHttpMessageHandler());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                set.Where(x => 100604 == x.GroupId).ToListAsync());
+        }
+
+        [Fact]
+        public async Task Where_ClosedOverCollectionContains_ThrowsNotSupportedException()
+        {
+            // ids.Contains(x.GroupId) reaches the "contain" branch because the receiver is a
+            // closure member; it must be reported as unsupported, not crash inside Evaluate.
+            var ids = new List<long> { 1, 2 };
+            var set = CreateSet(new MockHttpMessageHandler());
+
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                set.Where(x => ids.Contains(x.GroupId!.Value)).ToListAsync());
+        }
+
+        // -- Photo is one-shot: the stream is consumed by the send, so the entity must forget it ---
+
+        [Fact]
+        public async Task AddAsync_ThenUpdateAsync_SendsPhotoOnlyOnce()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, BaseUrl + "/service/contactcard/create")
+                .With(req => req.Content!.ReadAsStringAsync().GetAwaiter().GetResult().Contains("data[photo]"))
+                .Respond("application/json", @"{""code"":0,""data"":""78045032"",""message"":""""}");
+            mockHttp.Expect(HttpMethod.Post, BaseUrl + "/service/contactcard/update")
+                .With(req => !req.Content!.ReadAsStringAsync().GetAwaiter().GetResult().Contains("data[photo]"))
+                .Respond("application/json", @"{""code"":0,""data"":true,""message"":""""}");
+
+            var set  = CreateSet(mockHttp);
+            var card = new ContactCard
+            {
+                Name          = "John",
+                Photo         = new MemoryStream(new byte[] { 1, 2, 3 }),
+                PhotoFileName = "photo.jpg"
+            };
+
+            await set.AddAsync(card);
+            Assert.Null(card.Photo);
+            Assert.Null(card.PhotoFileName);
+
+            await set.UpdateAsync(card);   // would re-send an exhausted stream otherwise
+
+            mockHttp.VerifyNoOutstandingExpectation();
         }
     }
 }

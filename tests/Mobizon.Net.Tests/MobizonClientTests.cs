@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Net.Http;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net;
 using Xunit;
 
@@ -75,6 +74,13 @@ namespace Mobizon.Net.Tests
                 Timeout = TimeSpan.FromSeconds(5)
             });
             Assert.Equal(original, http.Timeout); // injected client untouched
+        }
+
+        [Fact]
+        public void IMobizonClient_IsNotDisposable_ButMobizonClientIs()
+        {
+            Assert.False(typeof(System.IDisposable).IsAssignableFrom(typeof(IMobizonClient)));
+            Assert.True(typeof(System.IDisposable).IsAssignableFrom(typeof(MobizonClient)));
         }
     }
 }

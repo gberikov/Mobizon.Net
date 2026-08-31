@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -72,7 +72,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             try
             {
                 var single = await client.ContactCards
-                    .Where(x => x.GroupId == 100604 && x.Surname == "Петров")
+                    .Where(x => x.GroupId == 100604 && x.Surname == "Smith")
                     .SingleOrDefaultAsync();
                 Console.WriteLine(single != null
                     ? $"SingleOrDefault: Id={single.Id}  Name={single.Name}"
@@ -93,7 +93,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             {
                 Name    = "SDK",
                 Surname = "Test",
-                Mobile  = new MobileFieldInfo { Value = "77017221502" },
+                Mobile  = new MobileFieldInfo { Value = "77001234567" },
                 Email   = new ContactFieldInfo { Value = "sdk@example.com" },
                 Info    = "Created by Mobizon.Net SDK"
             };
@@ -119,7 +119,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 Console.WriteLine($"  Id={g.Id}  Name={g.Name}");
 
             // Replace with real group IDs
-            await client.ContactCards.SetGroupsAsync(cardId, new List<string> { "100604" });
+            await client.ContactCards.SetGroupsAsync(cardId, new List<long> { 100604L });
             Console.WriteLine("Groups updated.");
         }
 

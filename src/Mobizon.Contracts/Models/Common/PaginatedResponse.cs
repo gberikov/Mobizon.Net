@@ -1,7 +1,7 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Wraps a page of results returned by a paginated Mobizon API list endpoint.

@@ -1,9 +1,8 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Webhooks;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks.Internal.Converters;
 
 namespace Mobizon.Net.Webhooks

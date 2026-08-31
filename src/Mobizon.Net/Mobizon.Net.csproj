@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <PackageId>Mobizon.Net</PackageId>
-    <Description>Official .NET SDK for the Mobizon SMS gateway REST API. Supports sending SMS, managing campaigns, short links, balance queries, and background task monitoring.</Description>
+    <Description>Unofficial .NET SDK for the Mobizon SMS gateway REST API v1: messages, campaigns, short links, balance, background tasks, contact groups and cards, number stop-list, sender IDs (alphanames).</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +12,9 @@
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>Mobizon.Net.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Mobizon.Net.Extensions.Polly</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

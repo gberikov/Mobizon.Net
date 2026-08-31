@@ -11,7 +11,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
         {
             Console.WriteLine("=== User.GetOwnBalance ===");
             var result = await client.User.GetOwnBalanceAsync();
-            Console.WriteLine($"Balance : {result.Balance} {result.Currency}");
+            Console.WriteLine($"Balance : {result.Balance:0.0000} {result.Currency}");
         }
     }
 }

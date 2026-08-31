@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the parameters required to add recipients to an existing campaign.
@@ -34,7 +34,7 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// Gets or sets the list of contact-book group IDs whose members will be added
         /// to the campaign (asynchronous background task).
         /// </summary>
-        public IReadOnlyList<string>? RecipientGroups { get; set; }
+        public IReadOnlyList<long>? RecipientGroups { get; set; }
 
         /// <summary>
         /// Gets or sets additional processing options for this add-recipients request.

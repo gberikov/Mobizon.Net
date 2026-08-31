@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactGroups;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -15,7 +14,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.ContactGroups.ListAsync(new ContactGroupListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort       = new SortRequest { Field = "name", Direction = SortDirection.ASC }
+                Sort       = new SortRequest { Field = "name", Direction = SortDirection.Ascending }
             });
             Console.WriteLine($"Total: {result.TotalItemCount}");
             foreach (var g in result.Items)

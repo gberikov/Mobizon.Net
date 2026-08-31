@@ -1,7 +1,8 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
+using Mobizon.Contracts.Webhooks;
 
 namespace Mobizon.Net.Webhooks.AspNetCore
 {

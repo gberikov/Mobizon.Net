@@ -1,6 +1,6 @@
 using System;
 
-namespace Mobizon.Contracts.Exceptions
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Thrown when a webhook request body cannot be parsed — malformed JSON or a missing/invalid

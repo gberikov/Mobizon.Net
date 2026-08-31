@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>Payload of a <c>form-contact-confirmation</c> webhook.</summary>
     public sealed class FormContactConfirmation

@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactCards;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 
-namespace Mobizon.Net.ContactCards
+namespace Mobizon.Net
 {
     /// <summary>
     /// Provides EF Core-style CRUD and query operations for contact cards.
     /// Accessible via <c>client.ContactCards</c>.
     /// </summary>
-    public sealed class ContactCardSet : IContactCardSet
+    internal sealed class ContactCardSet : IContactCardSet
     {
         private readonly ContactCardService _service;
 
@@ -33,9 +32,9 @@ namespace Mobizon.Net.ContactCards
         public IContactCardQuery Take(int count)
             => new ContactCardQuery(_service).Take(count);
 
-        /// <summary>Begins a query and skips the first <paramref name="count"/> items.</summary>
-        public IContactCardQuery Skip(int count)
-            => new ContactCardQuery(_service).Skip(count);
+        /// <summary>Begins a query positioned on the given zero-based page.</summary>
+        public IContactCardQuery Page(int pageIndex)
+            => new ContactCardQuery(_service).Page(pageIndex);
 
         /// <summary>Begins a query sorted by the specified field ascending.</summary>
         public IContactCardQuery OrderBy<TKey>(
@@ -57,7 +56,7 @@ namespace Mobizon.Net.ContactCards
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetAsync(id.ToString(), cancellationToken);
+            var response = await _service.GetAsync(ApiFormat.Int(id), cancellationToken).ConfigureAwait(false);
             return response != null ? ContactCardMapper.ToEntity(response) : null;
         }
 
@@ -72,15 +71,14 @@ namespace Mobizon.Net.ContactCards
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            var response = await _service.CreateAsync(
-                ContactCardMapper.ToCreateRequest(entity), cancellationToken);
-
-            entity.Id = long.TryParse(response, out var id) ? id : (long?)null;
+            entity.Id = await _service.CreateAsync(
+                ContactCardMapper.ToCreateRequest(entity), cancellationToken).ConfigureAwait(false);
+            ForgetPhoto(entity);
         }
 
         /// <summary>Updates an existing contact card. <see cref="ContactCard.Id"/> must be set.</summary>
         /// <exception cref="InvalidOperationException"><see cref="ContactCard.Id"/> is not set.</exception>
-        public Task UpdateAsync(
+        public async Task UpdateAsync(
             ContactCard entity,
             CancellationToken cancellationToken = default)
         {
@@ -89,13 +87,22 @@ namespace Mobizon.Net.ContactCards
                 throw new InvalidOperationException(
                     "ContactCard.Id must be set before calling UpdateAsync.");
 
-            return _service.UpdateAsync(
-                ContactCardMapper.ToUpdateRequest(entity), cancellationToken);
+            await _service.UpdateAsync(
+                ContactCardMapper.ToUpdateRequest(entity), cancellationToken).ConfigureAwait(false);
+            ForgetPhoto(entity);
+        }
+
+        // The photo stream is consumed by the send (and disposed by HttpClient on .NET Framework),
+        // so a later UpdateAsync on the same entity must not try to re-send it.
+        private static void ForgetPhoto(ContactCard entity)
+        {
+            entity.Photo = null;
+            entity.PhotoFileName = null;
         }
 
         /// <summary>Deletes the contact card with the specified ID.</summary>
         public Task RemoveAsync(long id, CancellationToken cancellationToken = default)
-            => _service.RemoveAsync(id.ToString(), cancellationToken);
+            => _service.RemoveAsync(ApiFormat.Int(id), cancellationToken);
 
         // ── Groups ────────────────────────────────────────────────────────────
 
@@ -104,16 +111,16 @@ namespace Mobizon.Net.ContactCards
         /// </summary>
         public Task SetGroupsAsync(
             long id,
-            IReadOnlyList<string> groupIds,
+            IReadOnlyList<long> groupIds,
             CancellationToken cancellationToken = default)
-            => _service.SetGroupsAsync(id.ToString(), groupIds, cancellationToken);
+            => _service.SetGroupsAsync(ApiFormat.Int(id), groupIds, cancellationToken);
 
         /// <summary>Returns the groups the specified contact card belongs to.</summary>
         public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
             long id,
             CancellationToken cancellationToken = default)
         {
-            var response = await _service.GetGroupsAsync(id.ToString(), cancellationToken);
+            var response = await _service.GetGroupsAsync(ApiFormat.Int(id), cancellationToken).ConfigureAwait(false);
             return response ?? Array.Empty<ContactGroupRef>();
         }
     }

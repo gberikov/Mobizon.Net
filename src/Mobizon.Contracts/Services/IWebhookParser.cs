@@ -1,6 +1,6 @@
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// Parses a raw Mobizon webhook JSON body into a typed <see cref="MobizonWebhookEvent"/>.
@@ -12,7 +12,7 @@ namespace Mobizon.Contracts.Services
         /// </summary>
         /// <param name="jsonBody">The raw request body (JSON).</param>
         /// <returns>The parsed event; an <see cref="UnknownWebhookEvent"/> for unrecognised types.</returns>
-        /// <exception cref="Mobizon.Contracts.Exceptions.WebhookParseException">
+        /// <exception cref="Mobizon.Contracts.Webhooks.WebhookParseException">
         /// Thrown on malformed JSON or a missing/invalid required envelope field.
         /// </exception>
         MobizonWebhookEvent Parse(string jsonBody);

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -210,7 +210,7 @@ namespace Mobizon.Net.Tests.Services
             {
                 Criteria = new MessageListCriteria { From = "Alpha", Status = SmsStatus.Delivered },
                 Pagination = new PaginationRequest { CurrentPage = 1, PageSize = 10 },
-                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.Descending }
             });
 
             Assert.Single(result.Items);
@@ -271,6 +271,64 @@ namespace Mobizon.Net.Tests.Services
 
             Assert.Empty(result.Items);
             Assert.Equal(0, result.TotalItemCount);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_DateCriteria_AreGregorianRegardlessOfCurrentCulture()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/List")
+                .WithFormData("criteria[startSendTsFrom]", "2026-03-01 10:20:30")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            var thai = new CultureInfo("th-TH");
+            thai.DateTimeFormat.Calendar = new ThaiBuddhistCalendar(); // year 2026 renders as 2569 under this calendar
+            var original = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = thai;
+            try
+            {
+                await CreateService(mockHttp).ListAsync(new MessageListRequest
+                {
+                    Criteria = new MessageListCriteria { SentFrom = new DateTime(2026, 3, 1, 10, 20, 30) }
+                });
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = original;
+            }
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_WithNumberInfo_SendsFlagAsOneOrZero()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/List")
+                .WithFormData("withNumberInfo", "1")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            await CreateService(mockHttp).ListAsync(new MessageListRequest { WithNumberInfo = true });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task SendSmsMessageAsync_ShortenLinks_SendsParam()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Message/SendSmsMessage")
+                .WithFormData("params[shortenLinks]", "1")
+                .Respond("application/json", Fixtures.Load("message.sendSmsMessage.json"));
+
+            await CreateService(mockHttp).SendSmsMessageAsync(new SendSmsMessageRequest
+            {
+                Recipient = "77001234567",
+                Text = "https://example.com/very/long",
+                Parameters = new SmsMessageParameters { ShortenLinks = true }
+            });
+
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

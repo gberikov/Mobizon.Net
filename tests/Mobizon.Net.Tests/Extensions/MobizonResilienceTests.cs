@@ -62,5 +62,11 @@ namespace Mobizon.Net.Tests.Extensions
             Assert.Equal(3, options.CircuitBreakerFailureThreshold);
             Assert.Equal(TimeSpan.FromMinutes(2), options.CircuitBreakerDuration);
         }
+
+        [Fact]
+        public void MobizonResilienceOptions_RetryNonIdempotentRequests_DefaultsToFalse()
+        {
+            Assert.False(new MobizonResilienceOptions().RetryNonIdempotentRequests);
+        }
     }
 }

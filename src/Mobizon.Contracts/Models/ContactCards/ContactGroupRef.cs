@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// A lightweight reference to a contact group, embedded in contact card responses.
@@ -6,7 +6,7 @@
     public class ContactGroupRef
     {
         /// <summary>Gets or sets the group ID.</summary>
-        public string? Id { get; set; }
+        public long? Id { get; set; }
 
         /// <summary>Gets or sets the group name.</summary>
         public string? Name { get; set; }

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -19,7 +18,7 @@ namespace Mobizon.Net.Services
             _apiClient = apiClient;
         }
 
-        public async Task<ContactCardListResult> ListAsync(
+        public async Task<MobizonListResult<ContactCardData>> ListAsync(
             ContactCardListRequest? request = null,
             CancellationToken cancellationToken = default)
         {
@@ -40,16 +39,16 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
-            return (await _apiClient.SendAsync<ContactCardListResult>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+            return (await _apiClient.SendAsync<MobizonListResult<ContactCardData>>(
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<ContactCardData> GetAsync(
@@ -62,10 +61,10 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<ContactCardData>(
-                HttpMethod.Post, ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "get", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
-        public async Task<string> CreateAsync(
+        public async Task<long> CreateAsync(
             CreateContactCardRequest request,
             CancellationToken cancellationToken = default)
         {
@@ -75,10 +74,10 @@ namespace Mobizon.Net.Services
                 request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
-            return (await _apiClient.SendMultipartAsync<string>(
+            return (await _apiClient.SendMultipartAsync<long>(
                 ModuleName, "create", fields,
                 request.Photo, request.PhotoFileName,
-                cancellationToken).ConfigureAwait(false)).Data!;
+                cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task UpdateAsync(
@@ -101,7 +100,7 @@ namespace Mobizon.Net.Services
 
         public async Task SetGroupsAsync(
             string id,
-            IReadOnlyList<string> groupIds,
+            IReadOnlyList<long> groupIds,
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string>
@@ -110,10 +109,10 @@ namespace Mobizon.Net.Services
             };
 
             for (var i = 0; i < groupIds.Count; i++)
-                parameters[$"groupIds[{i}]"] = groupIds[i];
+                parameters[$"groupIds[{i}]"] = ApiFormat.Int(groupIds[i]);
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyList<ContactGroupRef>> GetGroupsAsync(
@@ -126,7 +125,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
-                HttpMethod.Post, ModuleName, "getgroups", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "getgroups", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task RemoveAsync(
@@ -135,7 +134,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string> { ["id"] = id };
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         private static Dictionary<string, string> BuildCardFields(
@@ -143,7 +142,7 @@ namespace Mobizon.Net.Services
             string? mobileValue, ContactType? mobileType,
             string? email, string? viber, string? whatsapp, string? landline,
             string? skype, string? telegram, AddressFieldInfo? address,
-            DateTime? birthDate, string? gender, string? companyName, string? companyUrl,
+            DateTime? birthDate, Gender? gender, string? companyName, string? companyUrl,
             string? info)
         {
             var fields = new Dictionary<string, string>
@@ -159,8 +158,8 @@ namespace Mobizon.Net.Services
                 ["data[landline]"]        = landline    ?? string.Empty,
                 ["data[skype]"]           = skype       ?? string.Empty,
                 ["data[telegram]"]        = telegram    ?? string.Empty,
-                ["data[birth_date]"]      = birthDate?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty,
-                ["data[gender]"]          = gender      ?? string.Empty,
+                ["data[birth_date]"]      = birthDate.HasValue ? ApiFormat.Date(birthDate.Value) : string.Empty,
+                ["data[gender]"]          = ApiFormat.Gender(gender),
                 ["data[company_name]"]    = companyName ?? string.Empty,
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,
                 ["data[info]"]            = info        ?? string.Empty,

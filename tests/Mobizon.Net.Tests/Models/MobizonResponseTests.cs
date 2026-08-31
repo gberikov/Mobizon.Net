@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using Mobizon.Contracts.Models.Common;
+using System.Text.Json;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Xunit;
 

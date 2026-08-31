@@ -1,9 +1,9 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the result returned by the <c>campaign/addRecipients</c> API method.

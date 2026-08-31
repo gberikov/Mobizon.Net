@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the response codes returned by the Mobizon API.

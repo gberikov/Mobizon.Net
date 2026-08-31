@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.ContactGroups;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -61,7 +60,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.ListAsync(new ContactGroupListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 25 },
-                Sort = new SortRequest { Field = "name", Direction = SortDirection.ASC }
+                Sort = new SortRequest { Field = "name", Direction = SortDirection.Ascending }
             });
 
             Assert.Single(result.Items);
@@ -149,6 +148,7 @@ namespace Mobizon.Net.Tests.Services
             Assert.Single(result.Processed);
             Assert.Equal(100820, result.Processed[0]);
             Assert.Empty(result.NotProcessed);
+            Assert.True(result.AllProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 

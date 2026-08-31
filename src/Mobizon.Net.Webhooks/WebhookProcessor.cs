@@ -1,7 +1,6 @@
 using System;
-using Mobizon.Contracts.Exceptions;
-using Mobizon.Contracts.Models.Webhooks;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
+using Mobizon.Contracts.Webhooks;
 
 namespace Mobizon.Net.Webhooks
 {

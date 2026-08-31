@@ -2,10 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Models.Messages;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Internal.Converters;
 
@@ -54,17 +51,20 @@ namespace Mobizon.Net.Services
                     parameters["params[name]"] = p.Name;
 
                 if (p.DeferredTo.HasValue)
-                    parameters["params[deferredToTs]"] = p.DeferredTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                    parameters["params[deferredToTs]"] = ApiFormat.DateTime(p.DeferredTo.Value);
 
                 if (p.MessageClass.HasValue)
-                    parameters["params[mclass]"] = ((int)p.MessageClass.Value).ToString();
+                    parameters["params[mclass]"] = ApiFormat.Int((int)p.MessageClass.Value);
 
                 if (p.Validity.HasValue)
-                    parameters["params[validity]"] = ((int)p.Validity.Value.TotalMinutes).ToString();
+                    parameters["params[validity]"] = ApiFormat.Int((int)p.Validity.Value.TotalMinutes);
+
+                if (p.ShortenLinks.HasValue)
+                    parameters["params[shortenLinks]"] = ApiFormat.Bool(p.ShortenLinks.Value);
             }
 
             return (await _apiClient.SendAsync<SendSmsResult>(
-                HttpMethod.Post, ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
@@ -81,11 +81,11 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
-                parameters[$"ids[{i}]"] = ids[i].ToString();
+                parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
             return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
-                HttpMethod.Post, ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<MobizonListResult<MessageInfo>> ListAsync(
@@ -104,7 +104,7 @@ namespace Mobizon.Net.Services
 
                     if (c.CampaignIds != null)
                         for (var i = 0; i < c.CampaignIds.Count; i++)
-                            parameters[$"criteria[campaignIds][{i}]"] = c.CampaignIds[i].ToString();
+                            parameters[$"criteria[campaignIds][{i}]"] = ApiFormat.Int(c.CampaignIds[i]);
 
                     if (c.From != null)
                         parameters["criteria[from]"] = c.From;
@@ -120,53 +120,53 @@ namespace Mobizon.Net.Services
 
                     if (c.Groups != null)
                         for (var i = 0; i < c.Groups.Count; i++)
-                            parameters[$"criteria[groups][{i}]"] = c.Groups[i].ToString();
+                            parameters[$"criteria[groups][{i}]"] = ApiFormat.Int(c.Groups[i]);
 
                     if (c.CampaignStatus.HasValue)
                         parameters["criteria[campaignStatus]"] = ApiStatusCodes.ToApiCode(c.CampaignStatus.Value);
 
                     if (c.CampaignCreatedFrom.HasValue)
-                        parameters["criteria[campaignCreateTsFrom]"] = c.CampaignCreatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignCreateTsFrom]"] = ApiFormat.DateTime(c.CampaignCreatedFrom.Value);
 
                     if (c.CampaignCreatedTo.HasValue)
-                        parameters["criteria[campaignCreateTsTo]"] = c.CampaignCreatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignCreateTsTo]"] = ApiFormat.DateTime(c.CampaignCreatedTo.Value);
 
                     if (c.CampaignSentFrom.HasValue)
-                        parameters["criteria[campaignSentTsFrom]"] = c.CampaignSentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignSentTsFrom]"] = ApiFormat.DateTime(c.CampaignSentFrom.Value);
 
                     if (c.CampaignSentTo.HasValue)
-                        parameters["criteria[campaignSentTsTo]"] = c.CampaignSentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[campaignSentTsTo]"] = ApiFormat.DateTime(c.CampaignSentTo.Value);
 
                     if (c.SentFrom.HasValue)
-                        parameters["criteria[startSendTsFrom]"] = c.SentFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[startSendTsFrom]"] = ApiFormat.DateTime(c.SentFrom.Value);
 
                     if (c.SentTo.HasValue)
-                        parameters["criteria[startSendTsTo]"] = c.SentTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[startSendTsTo]"] = ApiFormat.DateTime(c.SentTo.Value);
 
                     if (c.StatusUpdatedFrom.HasValue)
-                        parameters["criteria[statusUpdateTsFrom]"] = c.StatusUpdatedFrom.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[statusUpdateTsFrom]"] = ApiFormat.DateTime(c.StatusUpdatedFrom.Value);
 
                     if (c.StatusUpdatedTo.HasValue)
-                        parameters["criteria[statusUpdateTsTo]"] = c.StatusUpdatedTo.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                        parameters["criteria[statusUpdateTsTo]"] = ApiFormat.DateTime(c.StatusUpdatedTo.Value);
                 }
 
                 if (request.WithNumberInfo.HasValue)
-                    parameters["withNumberInfo"] = request.WithNumberInfo.Value.ToString();
+                    parameters["withNumberInfo"] = ApiFormat.Bool(request.WithNumberInfo.Value);
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
                 {
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
                 }
             }
 
             return (await _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
-                HttpMethod.Post, ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }
 }

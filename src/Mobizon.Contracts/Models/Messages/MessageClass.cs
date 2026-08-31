@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Defines the class of an outgoing SMS message (<c>params[mclass]</c>).

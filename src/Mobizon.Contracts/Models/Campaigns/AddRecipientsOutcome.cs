@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Top-level outcome of <c>campaign/addRecipients</c>, derived from the API response code

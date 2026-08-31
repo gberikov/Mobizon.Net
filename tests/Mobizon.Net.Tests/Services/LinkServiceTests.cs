@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -65,18 +64,19 @@ namespace Mobizon.Net.Tests.Services
             {
                 FullLink = "https://example.com",
                 Status = LinkStatus.Active,
-                ExpirationDate = "2025-12-31",
+                ExpirationDate = new DateTime(2025, 12, 31),
                 Comment = "Test link"
             });
 
             Assert.Equal(1, result.Id);
             Assert.Equal("abc123", result.Code);
             Assert.Equal("https://example.com", result.FullLink);
+            Assert.Equal(new DateTime(2025, 12, 31), result.ExpirationDate);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
         [Fact]
-        public async Task DeleteAsync_SendsIdsArray()
+        public async Task DeleteAsync_SendsIdsArray_AndReturnsProcessedLists()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post,
@@ -84,11 +84,58 @@ namespace Mobizon.Net.Tests.Services
                 .WithFormData("ids[0]", "10")
                 .WithFormData("ids[1]", "20")
                 .Respond("application/json",
+                    @"{""code"":0,""data"":{""processed"":[""10""],""notProcessed"":[""20""]},""message"":""""}");
+
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L, 20L });
+
+            Assert.Equal(new[] { 10L }, result.Processed);
+            Assert.Equal(new[] { 20L }, result.NotProcessed);
+            Assert.False(result.AllProcessed);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WithEmptyDataObject_ReturnsEmptyNonNullLists()
+        {
+            // The API can reply with `"data":{}` — neither key present. Absent keys must not be
+            // mistaken for "nothing left unprocessed": both lists must come back empty, not null.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/link/delete")
+                .WithFormData("ids[0]", "10")
+                .Respond("application/json",
                     @"{""code"":0,""data"":{},""message"":""""}");
 
-            var service = CreateService(mockHttp);
-            await service.DeleteAsync(new[] { 10L, 20L });
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L });
 
+            Assert.NotNull(result.Processed);
+            Assert.NotNull(result.NotProcessed);
+            Assert.Empty(result.Processed);
+            Assert.Empty(result.NotProcessed);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WithExplicitNullLists_ReturnsEmptyNonNullLists()
+        {
+            // System.Text.Json overwrites a property with null when the JSON carries an explicit
+            // null (unlike an absent key, which leaves the property-initializer default alone).
+            // Without a null-safe setter this used to leave Processed/NotProcessed literally null,
+            // and AllProcessed would throw a NullReferenceException reading NotProcessed.Count.
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post,
+                    "https://api.mobizon.kz/service/link/delete")
+                .WithFormData("ids[0]", "10")
+                .Respond("application/json",
+                    @"{""code"":0,""data"":{""processed"":null,""notProcessed"":null},""message"":""""}");
+
+            var result = await CreateService(mockHttp).DeleteAsync(new[] { 10L });
+
+            Assert.NotNull(result.Processed);
+            Assert.NotNull(result.NotProcessed);
+            Assert.Empty(result.Processed);
+            Assert.Empty(result.NotProcessed);
+            Assert.True(result.AllProcessed);
             mockHttp.VerifyNoOutstandingExpectation();
         }
 
@@ -237,7 +284,7 @@ namespace Mobizon.Net.Tests.Services
             var result = await service.ListAsync(new LinkListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 1, PageSize = 10 },
-                Sort = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "id", Direction = SortDirection.Descending }
             });
 
             Assert.Single(result.Items);
@@ -348,6 +395,40 @@ namespace Mobizon.Net.Tests.Services
                 .Respond("application/json", @"{""code"":0,""data"":{""id"":""70000000005"",""code"":""x"",""fullLink"":""https://e.com"",""status"":""1"",""clickCnt"":""0""},""message"":""""}");
             var result = await CreateService(mockHttp).GetByIdAsync(70000000005L);
             Assert.Equal(70000000005L, result.Id);
+        }
+
+        // ── GetStatsAsync date range / id-count validation ──────────────────
+
+        [Fact]
+        public async Task GetStatsAsync_DateRange_IsSentAsDateTime()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getstats")
+                .WithFormData("criteria[dateFrom]", "2026-01-01 00:00:00")
+                .WithFormData("criteria[dateTo]", "2026-01-31 23:59:59")
+                .Respond("application/json", Fixtures.Load("link.getStats.json"));
+
+            await CreateService(mockHttp).GetStatsAsync(new GetLinkStatsRequest
+            {
+                Ids = new[] { 1L },
+                Type = LinkStatsType.Daily,
+                DateFrom = new DateTime(2026, 1, 1),
+                DateTo = new DateTime(2026, 1, 31, 23, 59, 59)
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(6)]
+        public async Task GetStatsAsync_RejectsInvalidIdCount(int count)
+        {
+            var ids = new long[count];
+            for (var i = 0; i < count; i++) ids[i] = i + 1;
+
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                CreateService(new MockHttpMessageHandler()).GetStatsAsync(new GetLinkStatsRequest { Ids = ids, Type = LinkStatsType.Daily }));
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Mobizon.Contracts.Models.Messages
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Optional additional parameters for sending an SMS message (<c>params[…]</c> fields).
@@ -32,6 +32,9 @@ namespace Mobizon.Contracts.Models.Messages
         /// When <see langword="null"/>, the platform default is used.
         /// </summary>
         public TimeSpan? Validity { get; set; }
+
+        /// <summary>Shorten every URL in <see cref="SendSmsMessageRequest.Text"/> with the Mobizon link shortener (<c>params[shortenLinks]</c>).</summary>
+        public bool? ShortenLinks { get; set; }
     }
 }
 

@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Net.Internal
 {
     /// <summary>
     /// Represents the field values of a contact card.
     /// </summary>
-    public class ContactCardFields
+    internal class ContactCardFields
     {
         /// <summary>Gets or sets the title/salutation.</summary>
         public string? Title { get; set; }
@@ -45,7 +46,7 @@ namespace Mobizon.Contracts.Models.ContactCards
         public string? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public string? Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         [JsonPropertyName("company_name")]

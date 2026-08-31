@@ -12,6 +12,7 @@ namespace Mobizon.Net.Internal.Converters
     internal class MobizonDateTimeConverter : JsonConverter<DateTime?>
     {
         private const string Format = "yyyy-MM-dd HH:mm:ss";
+        private static readonly string[] Formats = { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd" };
 
         public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -23,10 +24,10 @@ namespace Mobizon.Net.Internal.Converters
             if (string.IsNullOrWhiteSpace(s))
                 return null;
 
-            if (DateTime.TryParseExact(s, Format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+            if (DateTime.TryParseExact(s, Formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
                 return dt;
 
-            throw new JsonException($"Cannot parse \"{s}\" as DateTime with format \"{Format}\".");
+            throw new JsonException($"Cannot parse \"{s}\" as DateTime (expected \"yyyy-MM-dd HH:mm:ss\" or \"yyyy-MM-dd\").");
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)

@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// The type of a received Mobizon webhook event, mapped from the raw <c>eventType</c> string.

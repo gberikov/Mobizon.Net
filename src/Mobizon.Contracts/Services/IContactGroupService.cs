@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.ContactGroups;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for managing contact groups via the Mobizon API.
@@ -37,14 +37,14 @@ namespace Mobizon.Contracts.Services
         /// <summary>
         /// Deletes a contact group. Returns the lists of processed and not-processed IDs.
         /// </summary>
-        /// <returns>A <see cref="DeleteContactGroupResult"/> containing the processed and not-processed ID lists.</returns>
-        Task<DeleteContactGroupResult> DeleteAsync(
+        /// <returns>A <see cref="DeleteResult"/> containing the processed and not-processed ID lists.</returns>
+        Task<DeleteResult> DeleteAsync(
             long id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns the number of contact cards in the specified group.
-        /// Pass <c>"-1"</c> to count contacts that have no group.
+        /// Pass <see langword="null"/> to count cards that belong to no group.
         /// </summary>
         /// <returns>The number of contact cards in the group.</returns>
         Task<long> GetCardsCountAsync(

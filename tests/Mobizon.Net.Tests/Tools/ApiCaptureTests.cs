@@ -33,6 +33,28 @@ namespace Mobizon.Net.Tests.Tools
         }
 
         [Fact]
+        public void Scrub_Replaces_Cyrillic_Free_Text()
+        {
+            // Captured payloads carry real account free text; fixtures are committed to a public
+            // repo and kept Latin-only, so the generator must scrub it rather than a human after
+            // each capture.
+            var outp = Sanitizer.Scrub(
+                "{\"details\":{\"description\":\"\u0412\u0441\u0435 \u043e\u0431 \u0418\u0422\"},\"name\":\"Profit\"}");
+
+            Assert.DoesNotContain("\u0412\u0441\u0435", outp);
+            Assert.Contains("REDACTED", outp);
+            Assert.Contains("\"name\":\"Profit\"", outp);
+        }
+
+        [Fact]
+        public void Scrub_Keeps_Separator_After_Cyrillic_Run()
+        {
+            // "\u0418\u0432\u0430\u043d\u043e\u0432 Smith" / "\u0422\u0435\u0441\u0442 123": the trailing space belongs to the Latin neighbour.
+            Assert.Equal("{\"a\":\"REDACTED Smith\",\"b\":\"REDACTED 123\"}",
+                Sanitizer.Scrub("{\"a\":\"\u0418\u0432\u0430\u043d\u043e\u0432 Smith\",\"b\":\"\u0422\u0435\u0441\u0442 123\"}"));
+        }
+
+        [Fact]
         public void SanitizeRunner_Scrubs_Files_From_In_To_Out()
         {
             var baseDir = Path.Combine(Path.GetTempPath(), "mbz-sanitize-" + Guid.NewGuid().ToString("N"));

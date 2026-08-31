@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using Mobizon.Contracts.Models.ContactCards;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Internal
 {
@@ -50,13 +50,15 @@ namespace Mobizon.Net.Internal
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
-                Info        = e.Info
+                Info        = e.Info,
+                Photo         = e.Photo,
+                PhotoFileName = e.PhotoFileName
             };
 
         internal static UpdateContactCardRequest ToUpdateRequest(ContactCard e) =>
             new UpdateContactCardRequest
             {
-                Id          = e.Id!.Value.ToString(),
+                Id          = ApiFormat.Int(e.Id!.Value),
                 Title       = e.Title,
                 Name        = e.Name,
                 Surname     = e.Surname,
@@ -73,7 +75,9 @@ namespace Mobizon.Net.Internal
                 Gender      = e.Gender,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
-                Info        = e.Info
+                Info        = e.Info,
+                Photo         = e.Photo,
+                PhotoFileName = e.PhotoFileName
             };
 
         // Mobizon documents birth_date as YYYY-MM-DD, but the PHP API has been observed to return

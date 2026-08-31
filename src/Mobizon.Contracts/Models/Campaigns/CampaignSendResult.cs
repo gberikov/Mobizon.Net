@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Result of scheduling a campaign for sending via <c>campaign/send</c>.

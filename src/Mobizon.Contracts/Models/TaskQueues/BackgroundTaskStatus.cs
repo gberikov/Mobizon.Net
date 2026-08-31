@@ -1,9 +1,7 @@
-﻿namespace Mobizon.Contracts.Models.TaskQueues
+namespace Mobizon.Contracts
 {
-    /// <summary>
-    /// Represents the execution status of a Mobizon background task.
-    /// </summary>
-    public enum TaskStatus
+    /// <summary>Status of a background task in the Mobizon task queue (<c>taskqueue/getStatus</c>).</summary>
+    public enum BackgroundTaskStatus
     {
         /// <summary>Task is waiting to start.</summary>
         Pending = 0,

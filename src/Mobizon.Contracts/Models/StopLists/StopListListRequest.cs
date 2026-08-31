@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.StopLists
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Request parameters for <c>numberstoplist/list</c>.

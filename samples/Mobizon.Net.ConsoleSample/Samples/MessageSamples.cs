@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -57,7 +56,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             {
                 // Criteria = new MessageListCriteria { CampaignSentFrom = new DateTime(2025, 12,1), CampaignSentTo =  new DateTime(2025, 12,31) },
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
-                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.DESC }
+                Sort = new SortRequest { Field = "campaignId", Direction = SortDirection.Descending }
             });
             Console.WriteLine($"Total: {result.TotalItemCount}");
             foreach (var m in result.Items)

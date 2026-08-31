@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a simple contact field (email, viber, whatsapp, landline, skype, telegram)

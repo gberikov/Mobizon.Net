@@ -1,4 +1,4 @@
-﻿namespace Mobizon.Contracts.Models.Users
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Contains the account balance information returned by the Mobizon API.
@@ -6,9 +6,9 @@
     public class BalanceResult
     {
         /// <summary>
-        /// Gets or sets the current account balance as a string (e.g. <c>"12.50"</c>).
+        /// Gets or sets the current balance with 4 decimal places, in <see cref="Currency"/>.
         /// </summary>
-        public string Balance { get; set; } = string.Empty;
+        public decimal Balance { get; set; }
 
         /// <summary>
         /// Gets or sets the ISO 4217 currency code for the balance (e.g. <c>"USD"</c>).

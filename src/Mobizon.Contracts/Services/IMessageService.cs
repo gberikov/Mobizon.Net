@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Provides operations for sending and querying SMS messages via the Mobizon API.
@@ -24,7 +23,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A <see cref="SendSmsResult"/> with the campaign ID, message ID, and initial delivery status.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>
@@ -46,7 +45,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A <see cref="SendSmsResult"/> with the campaign ID, message ID, and initial delivery status.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         /// <example>
@@ -74,7 +73,7 @@ namespace Mobizon.Contracts.Services
         /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
         /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
@@ -91,7 +90,7 @@ namespace Mobizon.Contracts.Services
         /// Note: The API returns a bare array here (not a paged <see cref="MobizonListResult{T}"/> envelope),
         /// so the return type is intentionally <see cref="IReadOnlyList{T}"/>.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
@@ -106,7 +105,7 @@ namespace Mobizon.Contracts.Services
         /// <returns>
         /// A <see cref="MobizonListResult{T}"/> of <see cref="MessageInfo"/> with items and total count.
         /// </returns>
-        /// <exception cref="Exceptions.MobizonApiException">
+        /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
         Task<MobizonListResult<MessageInfo>> ListAsync(

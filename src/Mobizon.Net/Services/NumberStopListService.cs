@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.StopLists;
-using Mobizon.Contracts.Services;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
@@ -30,16 +29,16 @@ namespace Mobizon.Net.Services
 
                 if (request.Pagination != null)
                 {
-                    parameters["pagination[currentPage]"] = request.Pagination.CurrentPage.ToString();
-                    parameters["pagination[pageSize]"] = request.Pagination.PageSize.ToString();
+                    parameters["pagination[currentPage]"] = ApiFormat.Int(request.Pagination.CurrentPage);
+                    parameters["pagination[pageSize]"] = ApiFormat.Int(request.Pagination.PageSize);
                 }
 
                 if (request.Sort != null)
-                    parameters[$"sort[{request.Sort.Field}]"] = request.Sort.Direction.ToString();
+                    parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
             return (await _apiClient.SendAsync<StopListListResponse>(
-                HttpMethod.Post, ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+                ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
         public async Task<long> AddNumberAsync(
@@ -55,7 +54,7 @@ namespace Mobizon.Net.Services
             };
 
             return (await _apiClient.SendAsync<long>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
         public async Task AddNumberRangeAsync(
@@ -80,7 +79,7 @@ namespace Mobizon.Net.Services
             };
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(
@@ -89,11 +88,11 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string>
             {
-                ["id"] = id.ToString()
+                ["id"] = ApiFormat.Int(id)
             };
 
             await _apiClient.SendAsync<bool>(
-                HttpMethod.Post, ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

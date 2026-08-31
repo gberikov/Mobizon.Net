@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Describes the filterable and sortable fields of a contact card.

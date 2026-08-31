@@ -1,8 +1,8 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using System;
 using System.Collections.Generic;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies optional search criteria, pagination and sort parameters for listing campaigns.
@@ -66,15 +66,12 @@ namespace Mobizon.Contracts.Models.Campaigns
         /// <summary>Gets or sets the upper bound of the campaign send date range.</summary>
         public DateTime? SentTo { get; set; }
 
-        /// <summary>
-        /// Gets or sets the campaign type to filter by:
-        /// <c>1</c> — Single, <c>2</c> — Bulk (default), <c>3</c> — Template.
-        /// </summary>
-        public int? Type { get; set; }
+        /// <summary>Gets or sets the campaign type to filter by.</summary>
+        public CampaignType? Type { get; set; }
 
         /// <summary>
         /// Gets or sets the contact-group IDs to filter campaigns by.
         /// </summary>
-        public IReadOnlyList<string>? Groups { get; set; }
+        public IReadOnlyList<long>? Groups { get; set; }
     }
 }

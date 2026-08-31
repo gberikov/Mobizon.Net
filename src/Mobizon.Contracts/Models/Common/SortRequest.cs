@@ -1,6 +1,6 @@
-﻿using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Common
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Specifies sorting parameters for list API requests.
@@ -13,8 +13,8 @@ namespace Mobizon.Contracts.Models.Common
         public string Field { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the sort direction. Defaults to <see cref="SortDirection.ASC"/>.
+        /// Gets or sets the sort direction. Defaults to <see cref="SortDirection.Ascending"/>.
         /// </summary>
-        public SortDirection Direction { get; set; } = SortDirection.ASC;
+        public SortDirection Direction { get; set; } = SortDirection.Ascending;
     }
 }

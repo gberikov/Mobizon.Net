@@ -1,5 +1,5 @@
 using System;
-using Mobizon.Contracts.Models.Webhooks;
+using Mobizon.Contracts.Webhooks;
 using Mobizon.Net.Webhooks;
 
 namespace Mobizon.Net.ConsoleSample.Samples

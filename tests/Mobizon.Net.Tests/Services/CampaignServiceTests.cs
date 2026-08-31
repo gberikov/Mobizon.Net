@@ -1,7 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Campaigns;
-using Mobizon.Contracts.Models.Common;
+using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 using RichardSzalay.MockHttp;
@@ -29,7 +28,7 @@ namespace Mobizon.Net.Tests.Services
             var service = CreateService(mockHttp);
             var result = await service.ListAsync(new CampaignListRequest
             {
-                Criteria = new CampaignCriteria { Type = 2 }
+                Criteria = new CampaignCriteria { Type = CampaignType.Bulk }
             });
 
             Assert.Single(result.Items);
@@ -141,7 +140,7 @@ namespace Mobizon.Net.Tests.Services
                 {
                     CampaignId = 1,
                     Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
-                    RecipientGroups = new[] { "9" }
+                    RecipientGroups = new[] { 9L }
                 }));
         }
 
@@ -150,7 +149,13 @@ namespace Mobizon.Net.Tests.Services
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/AddRecipients")
-                .With(req => req.Content is System.Net.Http.MultipartFormDataContent)
+                .With(req =>
+                {
+                    if (!(req.Content is System.Net.Http.MultipartFormDataContent))
+                        return false;
+                    var content = req.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                    return content.Contains("name=apiKey") && content.Contains("test-key");
+                })
                 .Respond("application/json", @"{""code"":100,""data"":555,""message"":""""}");
 
             var service = CreateService(mockHttp);
@@ -235,6 +240,51 @@ namespace Mobizon.Net.Tests.Services
                 Recipients = new[] { new RecipientEntry { Recipient = "77001112233" } },
                 Parameters = new AddRecipientsParameters {
                     Replace = true, PlaceholdersFlag = PlaceholderMissingMode.Remove, RecipientsFileSkipHeader = true } });
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetInfoAsync_FillTemplateText_SendsFlag()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/GetInfo")
+                .WithFormData("id", "123")
+                .WithFormData("getFilledTplCampaignText", "0")
+                .Respond("application/json", Fixtures.Load("campaign.getInfo.json"));
+
+            await CreateService(mockHttp).GetInfoAsync(123, fillTemplateText: false);
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task ListAsync_TypeCriteria_SendsNumericCampaignType()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/Campaign/List")
+                .WithFormData("criteria[type]", "3")
+                .Respond("application/json", @"{""code"":0,""data"":{""items"":[],""totalItemCount"":""0""},""message"":""""}");
+
+            await CreateService(mockHttp).ListAsync(new CampaignListRequest
+            {
+                Criteria = new CampaignCriteria { Type = CampaignType.Template }
+            });
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task GetLinksAsync_CallsLinkModule()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, "https://api.mobizon.kz/service/link/getlinks")
+                .WithFormData("campaignId", "42")
+                .Respond("application/json", @"{""code"":0,""data"":[{""id"":""7"",""code"":""abc"",""fullLink"":""https://e.com"",""shortLink"":""https://mbzn.co/abc"",""clickCnt"":""3"",""redirectCnt"":""1""}],""message"":""""}");
+
+            var links = await CreateService(mockHttp).GetLinksAsync(42);
+
+            Assert.Single(links);
+            Assert.Equal(7, links[0].Id);
             mockHttp.VerifyNoOutstandingExpectation();
         }
     }

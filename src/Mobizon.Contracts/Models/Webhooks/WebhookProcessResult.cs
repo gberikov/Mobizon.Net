@@ -1,4 +1,4 @@
-namespace Mobizon.Contracts.Models.Webhooks
+namespace Mobizon.Contracts.Webhooks
 {
     /// <summary>
     /// The outcome of processing (verifying + parsing) a webhook request.
@@ -16,7 +16,7 @@ namespace Mobizon.Contracts.Models.Webhooks
     }
 
     /// <summary>
-    /// The result of <see cref="Mobizon.Contracts.Services.IWebhookProcessor"/> processing.
+    /// The result of <see cref="Mobizon.Contracts.Webhooks.IWebhookProcessor"/> processing.
     /// </summary>
     public sealed class WebhookProcessResult
     {

@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Campaigns;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -15,7 +14,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.Campaigns.ListAsync(new CampaignListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
-                Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort       = new SortRequest { Field = "id", Direction = SortDirection.Descending }
             });
             foreach (var c in result.Items)
                 Console.WriteLine($"  Id={c.Id}  Name={c.Name}  Status={c.CommonStatus}");
@@ -80,7 +79,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
                 CampaignId = 1,
                 Recipients = new[]
                 {
-                    new RecipientEntry { Recipient = "77017221502" },
+                    new RecipientEntry { Recipient = "77001234567" },
                     new RecipientEntry { Recipient = "77029932233" },
                 }
             });

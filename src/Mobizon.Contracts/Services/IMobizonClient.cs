@@ -1,11 +1,11 @@
-using System;
-
-namespace Mobizon.Contracts.Services
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the top-level Mobizon API client that provides access to all service groups.
+    /// Implementations created via DI are owned by the container; when you construct <c>MobizonClient</c>
+    /// yourself, dispose that concrete instance.
     /// </summary>
-    public interface IMobizonClient : IDisposable
+    public interface IMobizonClient
     {
         /// <summary>
         /// Gets the service for sending and managing SMS messages.

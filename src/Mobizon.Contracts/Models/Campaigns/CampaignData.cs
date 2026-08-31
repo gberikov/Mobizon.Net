@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 
-namespace Mobizon.Contracts.Models.Campaigns
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents the full data of an SMS campaign as returned by the Mobizon API

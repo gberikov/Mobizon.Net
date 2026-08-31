@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <PackageId>Mobizon.Net.Webhooks.AspNetCore</PackageId>
     <Description>ASP.NET Core integration for Mobizon webhooks: endpoint and DI helpers that bind the incoming request, verify the signature, parse the typed event, and acknowledge fast. Builds on Mobizon.Net.Webhooks.</Description>
   </PropertyGroup>

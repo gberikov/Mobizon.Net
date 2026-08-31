@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
-namespace Mobizon.Contracts.Models.ContactCards
+namespace Mobizon.Contracts
 {
     /// <summary>
     /// Represents a contact card entity for use with the EF Core-style query API.
@@ -64,7 +65,7 @@ namespace Mobizon.Contracts.Models.ContactCards
         public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public string? Gender { get; set; }
+        public Gender? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         public string? CompanyName { get; set; }
@@ -74,5 +75,20 @@ namespace Mobizon.Contracts.Models.ContactCards
 
         /// <summary>Gets or sets free-form notes about the contact.</summary>
         public string? Info { get; set; }
+
+        /// <summary>
+        /// Gets or sets the photo to upload with the next <c>AddAsync</c>/<c>UpdateAsync</c> call.
+        /// One-shot: the call consumes the stream and resets this property (and
+        /// <see cref="PhotoFileName"/>) to <see langword="null"/>; the caller still owns and disposes
+        /// the stream. Write-only: the API does not return the photo, so this is always
+        /// <see langword="null"/> on a card read back from the server.
+        /// </summary>
+        public Stream? Photo { get; set; }
+
+        /// <summary>
+        /// Gets or sets the file name sent with <see cref="Photo"/> (e.g. <c>"photo.jpg"</c>).
+        /// Used only when <see cref="Photo"/> is set.
+        /// </summary>
+        public string? PhotoFileName { get; set; }
     }
 }

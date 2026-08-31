@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Mobizon.Contracts.Models.Common;
-using Mobizon.Contracts.Models.Links;
+using Mobizon.Contracts;
 using Mobizon.Net;
 
 namespace Mobizon.Net.ConsoleSample.Samples
@@ -15,7 +14,7 @@ namespace Mobizon.Net.ConsoleSample.Samples
             var result = await client.Links.ListAsync(new LinkListRequest
             {
                 Pagination = new PaginationRequest { CurrentPage = 0, PageSize = 10 },
-                Sort       = new SortRequest { Field = "id", Direction = SortDirection.DESC }
+                Sort       = new SortRequest { Field = "id", Direction = SortDirection.Descending }
             });
             foreach (var l in result.Items)
                 Console.WriteLine($"  Id={l.Id}  Code={l.Code}  Url={l.FullLink}  Clicks={l.Clicks}");

@@ -1,4 +1,4 @@
-using Mobizon.Contracts.Models.Messages;
+using Mobizon.Contracts;
 
 namespace Mobizon.Net.Webhooks.Internal.Converters
 {
