@@ -20,9 +20,28 @@ namespace Mobizon.Contracts.Webhooks
         [JsonPropertyName("fieldId")]
         public long FieldId { get; set; }
 
-        /// <summary>Field type (e.g. <c>TEXT_STRING</c>, <c>EMAIL</c>, <c>MOBILE</c>). Kept as a string for forward compatibility.</summary>
+        /// <summary>Raw field type (e.g. <c>TEXT_STRING</c>, <c>EMAIL</c>, <c>MOBILE</c>). Kept as a string for forward compatibility; see <see cref="FieldTypeKind"/> for the typed view.</summary>
         [JsonPropertyName("fieldType")]
         public string FieldType { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Typed view of <see cref="FieldType"/>, or <see langword="null"/> when the value is not one of the
+        /// documented <see cref="WebhookFieldType"/> values.
+        /// </summary>
+        [JsonIgnore]
+        public WebhookFieldType? FieldTypeKind
+        {
+            get
+            {
+                switch (FieldType)
+                {
+                    case "TEXT_STRING": return WebhookFieldType.TextString;
+                    case "EMAIL":       return WebhookFieldType.Email;
+                    case "MOBILE":      return WebhookFieldType.Mobile;
+                    default:            return null;
+                }
+            }
+        }
 
         /// <summary>Field name as configured in the form.</summary>
         [JsonPropertyName("fieldName")]

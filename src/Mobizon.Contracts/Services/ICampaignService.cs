@@ -100,8 +100,16 @@ namespace Mobizon.Contracts
         /// <para>
         /// Phone-number and contact-card loads are synchronous. If the list exceeds 500 entries
         /// the SDK automatically splits it into sequential batches of up to 500 and aggregates
-        /// the results into a single response. Group and file loads are asynchronous and return
-        /// a background task ID.
+        /// the results into a single response (<c>Replace</c> is honoured by the first batch only).
+        /// Group and file loads are asynchronous: the API only queues them and returns a background task ID
+        /// (<see cref="AddRecipientsResult.IsQueued"/>); poll <see cref="ITaskQueueService.GetStatusAsync"/>
+        /// until the task finishes before sending the campaign.
+        /// </para>
+        /// <para>
+        /// If a later batch of a multi-batch send fails (API error, transport error or cancellation), the exception
+        /// carries an <see cref="AddRecipientsProgress"/> (<see cref="AddRecipientsProgress.FromException"/>) with
+        /// the confirmed batches and the size of the batch whose outcome is unknown. Do not resend the whole list
+        /// after a timeout: the in-flight batch may already have been applied.
         /// </para>
         /// </summary>
         /// <param name="request">The recipient data to add, including the campaign ID.</param>
@@ -111,7 +119,9 @@ namespace Mobizon.Contracts
         /// top-level result (AllAdded / PartiallyAdded / NoneAdded), and whose
         /// <see cref="AddRecipientsResult.Entries"/> contains per-recipient status entries (synchronous loads)
         /// or whose <see cref="AddRecipientsResult.TaskId"/> holds the background task ID (asynchronous loads).
-        /// For multi-batch sends, <c>Outcome</c> reflects the worst-case outcome across all batches.
+        /// For multi-batch sends, <c>Outcome</c> is aggregated: any accepted batch plus any rejected batch is
+        /// <see cref="AddRecipientsOutcome.PartiallyAdded"/>; <see cref="AddRecipientsOutcome.NoneAdded"/> only when
+        /// every batch was rejected.
         /// </returns>
         /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.

@@ -109,14 +109,19 @@ namespace Mobizon.Net
         /// <inheritdoc />
         public async Task<int> CountAsync(CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct).ConfigureAwait(false);
+            // Total is a property of the whole query, so the selected page is irrelevant; page 0 is always
+            // within range. One item is fetched because the API has no count-only call.
+            var response = await _service.ListAsync(BuildRequest(pageSize: 1, page: 0), ct).ConfigureAwait(false);
             return response?.TotalItemCount ?? 0;
         }
 
         /// <inheritdoc />
         public async Task<ContactCard?> FirstOrDefaultAsync(CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 1), ct).ConfigureAwait(false);
+            // With an explicit Page the window is the caller's: fetch it as configured and take its head.
+            // Otherwise "first" is the head of the whole query, which a one-item first page answers.
+            var request = _page.HasValue ? BuildRequest() : BuildRequest(pageSize: 1, page: 0);
+            var response = await _service.ListAsync(request, ct).ConfigureAwait(false);
             var items = ItemsOf(response);
             return items.Count > 0 ? ContactCardMapper.ToEntity(items[0]) : null;
         }
@@ -131,9 +136,11 @@ namespace Mobizon.Net
         /// <inheritdoc />
         public async Task<ContactCard?> SingleOrDefaultAsync(CancellationToken ct = default)
         {
-            var response = await _service.ListAsync(BuildRequest(takeOverride: 2), ct).ConfigureAwait(false);
+            // Uniqueness is a property of the whole query, never of one page: Page/Take are ignored and
+            // both the returned items and the server-side total are checked.
+            var response = await _service.ListAsync(BuildRequest(pageSize: 2, page: 0), ct).ConfigureAwait(false);
             var items = ItemsOf(response);
-            if (items.Count > 1)
+            if (items.Count > 1 || (response?.TotalItemCount ?? 0) > 1)
                 throw new InvalidOperationException("Sequence contains more than one element.");
             return items.Count == 1 ? ContactCardMapper.ToEntity(items[0]) : null;
         }
@@ -147,12 +154,15 @@ namespace Mobizon.Net
 
         // ── Internal helpers ──────────────────────────────────────────────────
 
-        private ContactCardListRequest BuildRequest(int? takeOverride = null)
+        /// <param name="pageSize">Overrides <see cref="Take"/> for this request.</param>
+        /// <param name="page">Overrides <see cref="Page"/> for this request.</param>
+        private ContactCardListRequest BuildRequest(int? pageSize = null, int? page = null)
         {
             PaginationRequest? pagination = null;
-            var pageSize = takeOverride ?? _take;
-            if (pageSize.HasValue || _page.HasValue)
-                pagination = new PaginationRequest { CurrentPage = _page ?? 0, PageSize = pageSize ?? DefaultPageSize };
+            var size = pageSize ?? _take;
+            var index = page ?? _page;
+            if (size.HasValue || index.HasValue)
+                pagination = new PaginationRequest { CurrentPage = index ?? 0, PageSize = size ?? DefaultPageSize };
 
             return new ContactCardListRequest
             {

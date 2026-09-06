@@ -54,7 +54,9 @@ namespace Mobizon.Contracts
         /// This is a full replace: every editable field of <paramref name="entity"/> is sent, and a
         /// <see langword="null"/> field clears the corresponding value on the server. Load the card with
         /// <see cref="FindAsync"/>, change what you need, then call this method. The only exception is
-        /// <see cref="ContactCard.Address"/>, which is left untouched on the server when it is <see langword="null"/>.
+        /// <see cref="ContactCard.Address"/>: when it is <see langword="null"/> the address block is not sent and the
+        /// server keeps the existing address. To clear the address, assign an empty
+        /// <see cref="AddressFieldInfo"/> (all members <see langword="null"/>), which sends every address field as empty.
         /// </para>
         /// </summary>
         Task UpdateAsync(ContactCard entity, CancellationToken cancellationToken = default);

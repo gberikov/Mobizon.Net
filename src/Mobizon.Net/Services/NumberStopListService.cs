@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -46,6 +47,9 @@ namespace Mobizon.Net.Services
             string? comment = null,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(number))
+                throw new ArgumentException("Number is required.", nameof(number));
+
             var parameters = new Dictionary<string, string>
             {
                 ["id"]      = string.Empty,
@@ -53,8 +57,8 @@ namespace Mobizon.Net.Services
                 ["comment"] = comment ?? string.Empty
             };
 
-            return (await _apiClient.SendAsync<long>(
-                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+            return await _apiClient.SendForIdAsync(
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task AddNumberRangeAsync(
@@ -63,6 +67,11 @@ namespace Mobizon.Net.Services
             string? comment = null,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(numberFrom))
+                throw new ArgumentException("Range start is required.", nameof(numberFrom));
+            if (string.IsNullOrWhiteSpace(numberTo))
+                throw new ArgumentException("Range end is required.", nameof(numberTo));
+
             // The API requires numberFrom <= numberTo. Swap the values if the caller
             // provided them in reverse order so that the request passes validation.
             if (ulong.TryParse(numberFrom, out var from) &&
@@ -78,7 +87,7 @@ namespace Mobizon.Net.Services
                 ["comment"]    = comment ?? string.Empty
             };
 
-            await _apiClient.SendAsync<bool>(
+            await _apiClient.SendCommandAsync(
                 ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -91,7 +100,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            await _apiClient.SendAsync<bool>(
+            await _apiClient.SendCommandAsync(
                 ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
     }

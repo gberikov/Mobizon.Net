@@ -19,7 +19,7 @@ namespace Mobizon.Net.Internal.Converters
                     var s = reader.GetString();
                     return decimal.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out var result)
                         ? result
-                        : throw new JsonException($"Cannot convert string \"{s}\" to decimal.");
+                        : throw new JsonException("Cannot convert string value to decimal.");
                 }
                 case JsonTokenType.Number:
                     return reader.GetDecimal();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -45,13 +46,16 @@ namespace Mobizon.Net.Services
             string name,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Group name is required.", nameof(name));
+
             var parameters = new Dictionary<string, string>
             {
                 ["data[name]"] = name
             };
 
-            return (await _apiClient.SendAsync<long>(
-                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+            return await _apiClient.SendForIdAsync(
+                ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task UpdateAsync(
@@ -59,13 +63,16 @@ namespace Mobizon.Net.Services
             string name,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Group name is required.", nameof(name));
+
             var parameters = new Dictionary<string, string>
             {
                 ["id"]          = ApiFormat.Int(id),
                 ["data[name]"]  = name
             };
 
-            await _apiClient.SendAsync<bool>(
+            await _apiClient.SendCommandAsync(
                 ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
 

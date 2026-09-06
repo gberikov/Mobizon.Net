@@ -58,8 +58,8 @@ namespace Mobizon.Net.Services
             if (request.ShortenLinks.HasValue)
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
-            return (await _apiClient.SendAsync<long>(
-                ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false)).Data;
+            return await _apiClient.SendForIdAsync(
+                ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(
@@ -70,7 +70,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            await _apiClient.SendAsync<object>(
+            await _apiClient.SendCommandAsync(
                 ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -172,7 +172,8 @@ namespace Mobizon.Net.Services
             var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) };
 
             var response = await _apiClient.SendAsync<long>(
-                ModuleName, "Send", parameters, cancellationToken).ConfigureAwait(false);
+                ModuleName, "Send", parameters, cancellationToken,
+                acceptedCodes: QueuedCodes).ConfigureAwait(false);
 
             return new CampaignSendResult
             {
@@ -183,9 +184,19 @@ namespace Mobizon.Net.Services
 
         private const int AddRecipientsMaxBatchSize = 500;
 
+        private static readonly int[] QueuedCodes = { (int)MobizonResponseCode.BackgroundTask };
+        private static readonly int[] SyncBatchCodes =
+        {
+            (int)AddRecipientsOutcome.PartiallyAdded,
+            (int)AddRecipientsOutcome.NoneAdded,
+            (int)MobizonResponseCode.BackgroundTask
+        };
+
         public async Task<AddRecipientsResult> AddRecipientsAsync(
             AddRecipientsRequest request, CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
             var sources = (request.Recipients != null ? 1 : 0)
                         + (request.RecipientContacts != null ? 1 : 0)
                         + (request.RecipientGroups != null ? 1 : 0)
@@ -195,6 +206,7 @@ namespace Mobizon.Net.Services
                     "Exactly one recipient source must be set (Recipients, RecipientContacts, RecipientGroups, or RecipientsFile).",
                     nameof(request));
 
+            // File and group loads are asynchronous: the only non-zero code they may answer with is 100.
             if (request.RecipientsFile != null)
             {
                 var fields = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.CampaignId) };
@@ -202,110 +214,126 @@ namespace Mobizon.Net.Services
                 return Finalize(await _apiClient.SendMultipartAsync<AddRecipientsResult>(
                     ModuleName, "AddRecipients", fields, request.RecipientsFile,
                     request.RecipientsFileName ?? "recipients.csv",
-                    cancellationToken, fileFieldName: "recipientsFile").ConfigureAwait(false));
+                    cancellationToken, acceptedCodes: QueuedCodes, fileFieldName: "recipientsFile",
+                    allowNullData: true).ConfigureAwait(false));
             }
 
-            // Groups are asynchronous — no limit applies, send as-is.
             if (request.RecipientGroups != null)
-                return Finalize(await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false));
+                return Finalize(await SendAddRecipientsAsync(request, QueuedCodes, cancellationToken).ConfigureAwait(false));
 
-            // Split synchronous recipients (phone numbers / contact cards) into batches of 500.
+            // Synchronous sources (phone numbers / contact cards) are limited to 500 per request.
             var recipients = request.Recipients;
             var contacts = request.RecipientContacts;
             var totalCount = (recipients?.Count ?? 0) + (contacts?.Count ?? 0);
 
-            // Fast path: fits within a single batch.
             if (totalCount <= AddRecipientsMaxBatchSize)
-                return Finalize(await SendAddRecipientsAsync(request, cancellationToken).ConfigureAwait(false));
+                return Finalize(await SendAddRecipientsAsync(request, SyncBatchCodes, cancellationToken).ConfigureAwait(false));
 
-            // Multi-batch path: aggregate all per-recipient entries into the first response.
-            MobizonResponse<AddRecipientsResult>? aggregated = null;
-
+            // Multi-batch path. Entries accumulate in one list (linear in the number of recipients) and the
+            // outcome aggregates the per-batch codes: any accepted + any rejected = partial.
+            var entries = new List<AddRecipientEntry>(totalCount);
+            var anyAccepted = false;
+            var anyRejected = false;
+            var confirmedCount = 0;
+            var inFlight = 0;
             var recipientOffset = 0;
             var contactOffset = 0;
 
-            while (recipientOffset < (recipients?.Count ?? 0) || contactOffset < (contacts?.Count ?? 0))
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var remaining = AddRecipientsMaxBatchSize;
-
-                IReadOnlyList<RecipientEntry>? batchRecipients = null;
-                IReadOnlyList<string>? batchContacts = null;
-
-                if (recipients != null && recipientOffset < recipients.Count)
+                while (recipientOffset < (recipients?.Count ?? 0) || contactOffset < (contacts?.Count ?? 0))
                 {
-                    var take = Math.Min(remaining, recipients.Count - recipientOffset);
-                    batchRecipients = Slice(recipients, recipientOffset, take);
-                    recipientOffset += take;
-                    remaining -= take;
-                }
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                if (contacts != null && contactOffset < contacts.Count && remaining > 0)
-                {
-                    var take = Math.Min(remaining, contacts.Count - contactOffset);
-                    batchContacts = Slice(contacts, contactOffset, take);
-                    contactOffset += take;
-                }
+                    var remaining = AddRecipientsMaxBatchSize;
+                    IReadOnlyList<RecipientEntry>? batchRecipients = null;
+                    IReadOnlyList<string>? batchContacts = null;
 
-                // Only the very first batch may honour Replace=true to avoid wiping already-added recipients.
-                var batchParams = request.Parameters;
-                if (aggregated != null && batchParams?.Replace == true)
-                {
-                    batchParams = new AddRecipientsParameters
+                    if (recipients != null && recipientOffset < recipients.Count)
                     {
-                        Replace = false,
-                        PlaceholdersFlag = request.Parameters!.PlaceholdersFlag,
-                        RecipientsFileEncoding = request.Parameters.RecipientsFileEncoding,
-                        RecipientsFileSkipHeader = request.Parameters.RecipientsFileSkipHeader,
-                        RecipientsFileDelimiter = request.Parameters.RecipientsFileDelimiter,
-                        RecipientsFileEnclosure = request.Parameters.RecipientsFileEnclosure
+                        var take = Math.Min(remaining, recipients.Count - recipientOffset);
+                        batchRecipients = Slice(recipients, recipientOffset, take);
+                        recipientOffset += take;
+                        remaining -= take;
+                    }
+
+                    if (contacts != null && contactOffset < contacts.Count && remaining > 0)
+                    {
+                        var take = Math.Min(remaining, contacts.Count - contactOffset);
+                        batchContacts = Slice(contacts, contactOffset, take);
+                        contactOffset += take;
+                    }
+
+                    // Only the very first batch may honour Replace=true to avoid wiping already-added recipients.
+                    var batchParams = request.Parameters;
+                    if (confirmedCount > 0 && batchParams?.Replace == true)
+                    {
+                        batchParams = new AddRecipientsParameters
+                        {
+                            Replace = false,
+                            PlaceholdersFlag = batchParams.PlaceholdersFlag,
+                            RecipientsFileEncoding = batchParams.RecipientsFileEncoding,
+                            RecipientsFileSkipHeader = batchParams.RecipientsFileSkipHeader,
+                            RecipientsFileDelimiter = batchParams.RecipientsFileDelimiter,
+                            RecipientsFileEnclosure = batchParams.RecipientsFileEnclosure
+                        };
+                    }
+
+                    var batchRequest = new AddRecipientsRequest
+                    {
+                        CampaignId = request.CampaignId,
+                        Recipients = batchRecipients,
+                        RecipientContacts = batchContacts,
+                        Parameters = batchParams
                     };
-                }
 
-                var batchRequest = new AddRecipientsRequest
-                {
-                    CampaignId = request.CampaignId,
-                    Recipients = batchRecipients,
-                    RecipientContacts = batchContacts,
-                    Parameters = batchParams
-                };
+                    inFlight = (batchRecipients?.Count ?? 0) + (batchContacts?.Count ?? 0);
+                    var response = await SendAddRecipientsAsync(batchRequest, SyncBatchCodes, cancellationToken).ConfigureAwait(false);
+                    confirmedCount += inFlight;
+                    inFlight = 0;
 
-                var response = await SendAddRecipientsAsync(batchRequest, cancellationToken).ConfigureAwait(false);
+                    if (response.RawCode == (int)AddRecipientsOutcome.NoneAdded)
+                        anyRejected = true;
+                    else if (response.RawCode == (int)AddRecipientsOutcome.PartiallyAdded)
+                        anyAccepted = anyRejected = true;
+                    else
+                        anyAccepted = true;
 
-                if (aggregated == null)
-                {
-                    aggregated = response;
-                }
-                else
-                {
-                    // If the first batch came back with a null payload, adopt the next batch's payload
-                    // so its entries are not silently dropped; otherwise merge into the aggregate.
-                    if (aggregated.Data == null)
-                        aggregated.Data = response.Data;
-                    else if (response.Data != null)
-                        aggregated.Data.MergeEntries(response.Data);
-
-                    // Reflect worst-case response code: prefer 99 (all failed) > 98 (partial) > 0 (success).
-                    if (response.RawCode > aggregated.RawCode)
-                        aggregated.RawCode = response.RawCode;
+                    if (response.Data?.Entries != null)
+                        entries.AddRange(response.Data.Entries);
                 }
             }
+            catch (Exception ex)
+            {
+                // Confirmed batches are not lost: the caller can inspect them and resume from ConfirmedCount.
+                // The in-flight batch (if any) has an unknown outcome and must not be blindly resent.
+                new AddRecipientsProgress(BuildResult(entries, anyAccepted, anyRejected), confirmedCount, inFlight).AttachTo(ex);
+                throw;
+            }
 
-            return Finalize(aggregated!);
+            return BuildResult(entries, anyAccepted, anyRejected);
         }
+
+        private static AddRecipientsResult BuildResult(List<AddRecipientEntry> entries, bool anyAccepted, bool anyRejected) =>
+            new AddRecipientsResult
+            {
+                Entries = entries,
+                Outcome = anyAccepted && anyRejected ? AddRecipientsOutcome.PartiallyAdded
+                        : anyRejected ? AddRecipientsOutcome.NoneAdded
+                        : AddRecipientsOutcome.AllAdded
+            };
 
         private static AddRecipientsResult Finalize(MobizonResponse<AddRecipientsResult> response)
         {
             var result = response.Data ?? new AddRecipientsResult();
-            result.Outcome = response.RawCode == 98 ? AddRecipientsOutcome.PartiallyAdded
-                           : response.RawCode == 99 ? AddRecipientsOutcome.NoneAdded
-                           : AddRecipientsOutcome.AllAdded; // 0 or 100 (async accepted)
+            result.Outcome = response.RawCode == (int)AddRecipientsOutcome.PartiallyAdded ? AddRecipientsOutcome.PartiallyAdded
+                           : response.RawCode == (int)AddRecipientsOutcome.NoneAdded ? AddRecipientsOutcome.NoneAdded
+                           : AddRecipientsOutcome.AllAdded; // 0, or 100 (queued: see IsQueued)
             return result;
         }
 
         private Task<MobizonResponse<AddRecipientsResult>> SendAddRecipientsAsync(
-            AddRecipientsRequest request, CancellationToken cancellationToken)
+            AddRecipientsRequest request, int[] acceptedCodes, CancellationToken cancellationToken)
         {
             var parameters = new Dictionary<string, string>
             {
@@ -335,9 +363,10 @@ namespace Mobizon.Net.Services
 
             AppendParams(parameters, request.Parameters);
 
+            // A rejected batch (99) still describes every recipient in `data`; a null payload is tolerated.
             return _apiClient.SendAsync<AddRecipientsResult>(
                 ModuleName, "AddRecipients", parameters, cancellationToken,
-                extraSuccessCodes: new[] { (int)AddRecipientsOutcome.PartiallyAdded, (int)AddRecipientsOutcome.NoneAdded });
+                acceptedCodes: acceptedCodes, allowNullData: true);
         }
 
         private static void AppendParams(IDictionary<string, string> parameters, AddRecipientsParameters? prm)

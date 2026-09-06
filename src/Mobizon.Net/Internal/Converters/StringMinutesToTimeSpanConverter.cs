@@ -26,7 +26,7 @@ namespace Mobizon.Net.Internal.Converters
                     if (string.IsNullOrWhiteSpace(s))
                         return null;
                     if (!int.TryParse(s, out minutes))
-                        throw new JsonException($"Cannot convert \"{s}\" to TimeSpan (expected minutes).");
+                        throw new JsonException("Cannot convert value to TimeSpan (expected minutes).");
                     break;
                 }
                 case JsonTokenType.Number:

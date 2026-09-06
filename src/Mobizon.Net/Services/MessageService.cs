@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -32,7 +33,11 @@ namespace Mobizon.Net.Services
             SendSmsMessageRequest request,
             CancellationToken cancellationToken = default)
         {
-            if (request == null) throw new System.ArgumentNullException(nameof(request));
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (string.IsNullOrWhiteSpace(request.Recipient))
+                throw new ArgumentException("Recipient is required.", nameof(request));
+            if (string.IsNullOrEmpty(request.Text))
+                throw new ArgumentException("Text is required.", nameof(request));
 
             var parameters = new Dictionary<string, string>
             {
@@ -74,10 +79,19 @@ namespace Mobizon.Net.Services
             return await GetSmsStatusAsync(new[] { id }, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>The API accepts at most this many message ids per <c>message/getSMSStatus</c> call.</summary>
+        public const int GetSmsStatusMaxIds = 100;
+
         public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long[] ids,
             CancellationToken cancellationToken = default)
         {
+            if (ids == null) throw new ArgumentNullException(nameof(ids));
+            if (ids.Length == 0 || ids.Length > GetSmsStatusMaxIds)
+                throw new ArgumentException(
+                    $"message/getSMSStatus accepts 1 to {GetSmsStatusMaxIds} message ids per request; split larger sets into several calls.",
+                    nameof(ids));
+
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {

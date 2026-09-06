@@ -20,7 +20,7 @@ namespace Mobizon.Net.Internal.Converters
                 {
                     var s = reader.GetString();
                     if (!int.TryParse(s, out value))
-                        throw new JsonException($"Cannot convert \"{s}\" to {typeof(T).Name}.");
+                        throw new JsonException($"Cannot convert string value to {typeof(T).Name}.");
                     break;
                 }
                 case JsonTokenType.Number:

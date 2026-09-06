@@ -155,9 +155,14 @@ namespace Mobizon.Net.Internal
             return path.ToArray();
         }
 
-        // Evaluates any constant or closed-over variable expression
+        // Evaluates any constant or closed-over variable expression. Literals and captured locals are read
+        // straight from the tree (no per-query IL compilation); anything else falls back to Compile().
+        // Nothing is cached: a captured variable may change between two executions of the same query.
         private static object? Evaluate(Expression expr)
         {
+            if (TryReadDirect(expr, out var direct))
+                return direct;
+
             try
             {
                 return Expression.Lambda(expr).Compile().DynamicInvoke();
@@ -173,6 +178,37 @@ namespace Mobizon.Net.Internal
                     "captured variable, and the contact-card member must be on the left-hand side. " +
                     "Supported: == (equal/empty), != (not_equal), >=, <=, .Contains(), &&.", ex);
             }
+        }
+
+        // Constant, closure field/property (`x.GroupId == id`), or either wrapped in a Convert node
+        // (nullable / widening casts). The conversion itself is skipped: Build formats by runtime type
+        // and restores enums from the member type, so int-vs-long or int-vs-enum makes no difference.
+        private static bool TryReadDirect(Expression expr, out object? value)
+        {
+            switch (expr)
+            {
+                case ConstantExpression c:
+                    value = c.Value;
+                    return true;
+
+                case MemberExpression { Expression: ConstantExpression closure } m:
+                    switch (m.Member)
+                    {
+                        case System.Reflection.FieldInfo f:
+                            value = f.GetValue(closure.Value);
+                            return true;
+                        case System.Reflection.PropertyInfo p when p.GetIndexParameters().Length == 0:
+                            value = p.GetValue(closure.Value);
+                            return true;
+                    }
+                    break;
+
+                case UnaryExpression { NodeType: ExpressionType.Convert } u:
+                    return TryReadDirect(u.Operand, out value);
+            }
+
+            value = null;
+            return false;
         }
 
         internal static string GetApiFieldName(string[] path) =>

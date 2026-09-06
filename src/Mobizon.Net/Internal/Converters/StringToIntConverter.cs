@@ -18,7 +18,7 @@ namespace Mobizon.Net.Internal.Converters
                     var s = reader.GetString();
                     return int.TryParse(s, out var result)
                         ? result
-                        : throw new JsonException($"Cannot convert string \"{s}\" to int.");
+                        : throw new JsonException("Cannot convert string value to int.");
                 }
                 case JsonTokenType.Number:
                     return reader.GetInt32();

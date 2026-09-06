@@ -82,8 +82,10 @@ namespace Mobizon.Contracts
 
         /// <summary>
         /// Retrieves the current delivery status of one or more SMS messages by their IDs.
+        /// The API accepts at most 100 IDs per call; larger sets must be split by the caller.
         /// </summary>
-        /// <param name="ids">An array of message IDs to query.</param>
+        /// <param name="ids">An array of 1 to 100 message IDs to query.</param>
+        /// <exception cref="System.ArgumentException">Thrown when <paramref name="ids"/> is empty or has more than 100 elements.</exception>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
         /// <returns>
         /// A list of <see cref="SmsStatusResult"/> entries, one for each requested message ID.

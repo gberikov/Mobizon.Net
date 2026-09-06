@@ -41,5 +41,9 @@ namespace Mobizon.Net.Internal
         /// </summary>
         [JsonPropertyName("message")]
         public string Message { get; set; } = string.Empty;
+
+        /// <summary>HTTP status of the response this envelope was read from (always 2xx for a returned response).</summary>
+        [JsonIgnore]
+        public System.Net.HttpStatusCode? StatusCode { get; set; }
     }
 }
