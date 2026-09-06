@@ -23,6 +23,10 @@ namespace Mobizon.Net
     {
         private const int DefaultPageSize = 25;
 
+        // Terminal operations that need only the head of a query still have to ask for a whole page: the
+        // documented list endpoints accept page sizes of 25, 50 or 100, so a one-item request is not portable.
+        private const int SmallestAllowedPageSize = 25;
+
         private readonly ContactCardService _service;
         private readonly Expression<Func<ContactCardFilterSpec, bool>>? _predicate;
         private readonly int? _take;
@@ -111,7 +115,7 @@ namespace Mobizon.Net
         {
             // Total is a property of the whole query, so the selected page is irrelevant; page 0 is always
             // within range. One item is fetched because the API has no count-only call.
-            var response = await _service.ListAsync(BuildRequest(pageSize: 1, page: 0), ct).ConfigureAwait(false);
+            var response = await _service.ListAsync(BuildRequest(pageSize: SmallestAllowedPageSize, page: 0), ct).ConfigureAwait(false);
             return response?.TotalItemCount ?? 0;
         }
 
@@ -120,7 +124,7 @@ namespace Mobizon.Net
         {
             // With an explicit Page the window is the caller's: fetch it as configured and take its head.
             // Otherwise "first" is the head of the whole query, which a one-item first page answers.
-            var request = _page.HasValue ? BuildRequest() : BuildRequest(pageSize: 1, page: 0);
+            var request = _page.HasValue ? BuildRequest() : BuildRequest(pageSize: SmallestAllowedPageSize, page: 0);
             var response = await _service.ListAsync(request, ct).ConfigureAwait(false);
             var items = ItemsOf(response);
             return items.Count > 0 ? ContactCardMapper.ToEntity(items[0]) : null;
@@ -138,7 +142,7 @@ namespace Mobizon.Net
         {
             // Uniqueness is a property of the whole query, never of one page: Page/Take are ignored and
             // both the returned items and the server-side total are checked.
-            var response = await _service.ListAsync(BuildRequest(pageSize: 2, page: 0), ct).ConfigureAwait(false);
+            var response = await _service.ListAsync(BuildRequest(pageSize: SmallestAllowedPageSize, page: 0), ct).ConfigureAwait(false);
             var items = ItemsOf(response);
             if (items.Count > 1 || (response?.TotalItemCount ?? 0) > 1)
                 throw new InvalidOperationException("Sequence contains more than one element.");

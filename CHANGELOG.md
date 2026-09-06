@@ -7,11 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Remediation of the 2026-09-06 code review (`docs/handoffs/2026-09-06-review-remediation.md`). The theme is
-"never report a success that did not happen, and never leak a payload while reporting a failure".
+Remediation of two code reviews: `docs/handoffs/2026-09-06-review-remediation.md` and
+`docs/reviews/2026-09-06-code-review.md`, which reviewed the result of the first. The theme is "never report a
+success that did not happen, never lose data that did arrive, and never leak a payload while reporting a failure".
+
+### Fixed (second review pass)
+
+- **A placeholder could redirect a message.** Placeholder values share the `recipients[i][…]` wire namespace with
+  the phone number, so `Placeholders["recipient"]` replaced the destination. The reserved name, empty names and
+  names containing `[`/`]` are now rejected with `ArgumentException`, and the whole list is validated before the
+  first batch is sent.
+- **The documented `groups` string broke campaign deserialization.** `campaign/get` documents `groups` as
+  `"12,34"`, while the SDK expected an array, so the whole campaign failed to parse. Both shapes are accepted now
+  (and a non-numeric element is a protocol error, not a dropped ID).
+- **Campaign settings nested in `extra` were lost.** Real responses put `validity`, `mclass` and
+  `trackShortLinkRecipients` inside `extra`; the SDK only read the top-level placement the documentation
+  describes, so `Validity` came back `null` for a real campaign. Both placements now work, and the object is
+  exposed as `CampaignExtra`.
+- **`campaign/list` discarded statistics.** The API documents list items as `campaign/getInfo` objects, so items
+  are read as `CampaignInfo` and callers no longer need a `GetInfoAsync` call per campaign to see counters.
+- **A missing add-recipients payload counted as success.** `code 0` with `data:null` produced
+  `Outcome = AllAdded, Entries = null`; a synchronous batch must now describe its recipients.
+- **The "tolerant" contact-card converter discarded real data.** Any array and any scalar became `null`, so
+  `"email":"alice@example.com"` silently vanished and the next update wrote an empty value over it. Only `[]`,
+  `""` and `null` mean "unset" now; a bare string maps onto `Value` (the shape the write path sends); anything
+  else is a protocol error. Unknown `type`/`gender` strings are preserved in `TypeRaw`/`GenderRaw` and echoed
+  back on update instead of being cleared.
+- **Fixture sanitizer produced invalid JSON and missed personal data.** Regex substitution turned
+  `{"id":12345678}` into the unquoted token `7000000XXXX`, and left e-mail addresses, Latin names and short
+  one-time codes untouched. It now walks the parsed JSON, redacts by field name and value shape while keeping
+  each value's JSON type, and re-parses its own output.
+- **Capture tool leaked the API key into the URL** and mis-polled TaskQueue: it treated a synchronous
+  `campaign/send` result as a task id and passed it as `ids[0]` instead of `id`. The key is a body field now, the
+  endpoint must be absolute HTTPS, and only a genuine code-100 response is polled.
+- `First`/`Count`/`Single` on contact cards asked for 1 or 2 items; the documented list endpoints accept 25, 50 or
+  100, so these probes now request 25.
 
 ### Fixed
 
+- Group/file recipient loads now require code 100 and a positive task ID; missing, null, array and non-positive
+  task payloads fail with a protocol error. Synchronous batches reject queued responses and scalar task payloads,
+  preserving confirmed progress if an earlier batch completed.
+- Contact-card filter values now execute numeric and user-defined casts before formatting instead of discarding
+  the conversion (for example, `(long)1.9` correctly sends `1`).
 - **API errors were masked by deserialization errors.** The envelope (`code`, `message`) is now read before `data`
   is bound to the result type, so `{"code":1,"data":{"text":["required"]}}` on `Campaigns.CreateAsync` throws
   `MobizonApiException` (`RawCode = 1`, `FieldErrors["text"]`) instead of a JSON error about `long`.
@@ -24,8 +62,8 @@ Remediation of the 2026-09-06 code review (`docs/handoffs/2026-09-06-review-reme
   when every batch was rejected. Entries accumulate in one list (linear) instead of re-concatenating per batch.
 - **`FirstOrDefaultAsync`/`FirstAsync` ignored the selected page offset.** `Take(50).Page(2).FirstOrDefaultAsync()`
   sent `currentPage=2&pageSize=1` (offset 2). With an explicit `Page` the configured page is fetched and its head
-  returned; without one, a single item of page 0 is requested (unchanged).
-- **`SingleOrDefaultAsync`/`SingleAsync`** now check uniqueness across the whole query (page 0, size 2, plus the
+  returned; without one, the first page is requested.
+- **`SingleOrDefaultAsync`/`SingleAsync`** now check uniqueness across the whole query (first page plus the
   server-side total) and ignore `Page`/`Take`. **`CountAsync`** always queries page 0.
 - **Payload leaks in diagnostics.** Exception messages no longer quote the response body or field values (neither in
   `Message`, `InnerException` nor `ToString()`); they carry the operation, HTTP status and JSON path instead. The
@@ -49,6 +87,8 @@ Remediation of the 2026-09-06 code review (`docs/handoffs/2026-09-06-review-reme
 - `MessageService.GetSmsStatusMaxIds` (100) and argument guards on public methods (`ArgumentNullException` /
   `ArgumentException` before any HTTP call).
 - `docs/coverage-matrix.md`: per-endpoint verification status (official docs / capture / unverified).
+- `CampaignExtra` and `CampaignData.Extra`; `ContactFieldInfo.TypeRaw`, `MobileFieldInfo.TypeRaw`,
+  `ContactCard.GenderRaw` (typed value plus the API's own spelling, as the webhook DTOs already do).
 
 ### Changed (behaviour; review before upgrading)
 
@@ -56,7 +96,7 @@ Remediation of the 2026-09-06 code review (`docs/handoffs/2026-09-06-review-reme
   Relative URLs, non-http(s) schemes, query strings, fragments and user info are rejected. A path prefix is allowed.
 - **`Timeout`** must be positive or `Timeout.InfiniteTimeSpan`; zero/negative no longer silently means "leave the
   default". The owning constructor and DI apply the value unconditionally (infinite included).
-- **Response code 100 is opt-in per operation.** Only `campaign/send` and `campaign/addRecipients` accept it; any
+- **Response code 100 is opt-in per operation.** Only `campaign/send` and group/file `campaign/addRecipients` accept it; any
   other operation answering 100 throws `MobizonApiException(RawCode = 100)` instead of returning a half-bound result.
   Group/file `addRecipients` no longer accept 98/99 (those are synchronous-batch codes).
 - **Multipart uploads are never retried by the Polly package**, even with `RetryNonIdempotentRequests = true`.
@@ -71,12 +111,27 @@ Remediation of the 2026-09-06 code review (`docs/handoffs/2026-09-06-review-reme
 - The JSON body is parsed straight from the buffered response stream (no intermediate UTF-16 string). Structural
   improvement; not benchmarked.
 
+### Changed (second review pass; review before upgrading)
+
+- **`campaign/list` items are `CampaignInfo` instances.** The method signature is unchanged
+  (`MobizonListResult<CampaignData>`), so existing code compiles; cast an item to read its counters.
+- **`ContactCard.Gender` and `ContactFieldInfo.Type`/`MobileFieldInfo.Type` are computed** over new raw string
+  properties. Reading and assigning them is unchanged; JSON now round-trips the API's own spelling.
+- **Contact fields with an unexpected non-empty shape throw** instead of reading as `null`.
+- **`RawMobizonApi.BuildUrl` no longer takes an API key** (capture tool, not a shipped package).
+- Contact-card `First`/`Count`/`Single` fetch 25 rows instead of 1 or 2.
+
 ### Migration
 
 - `http://` endpoints: switch to `https://` (Mobizon serves both) or set `AllowInsecureHttp = true` for a local test server.
 - `Timeout = TimeSpan.Zero` as "no timeout": use `System.Threading.Timeout.InfiniteTimeSpan`.
 - Code that expected an empty `AddRecipientsResult`/zeroed link statistics on odd payloads now gets a `MobizonException`.
 - Tests asserting on body snippets in `MobizonException.Message` need updating; assert on operation/status/path.
+- Code passing `Placeholders["recipient"]` must rename that placeholder: it now throws instead of silently
+  changing the destination number.
+- Code reading `Validity`/`MessageClass`/`TrackShortLinkRecipients` as always-null workarounds can drop them.
+- A link update that relied on "null preserves the expiration date" must now pass the existing date explicitly;
+  per the documentation an omitted date makes the link permanent.
 
 ## [0.1.0] - 2026-08-31
 

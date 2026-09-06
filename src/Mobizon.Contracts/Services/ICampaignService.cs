@@ -70,7 +70,12 @@ namespace Mobizon.Contracts
         /// Pass <see langword="null"/> to use API defaults.
         /// </param>
         /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
-        /// <returns>A <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items.</returns>
+        /// <returns>
+        /// A <see cref="MobizonListResult{T}"/> of <see cref="CampaignData"/> items. The API documents a list
+        /// item as a full <c>campaign/getInfo</c> object, so every element is in fact a <see cref="CampaignInfo"/>:
+        /// cast one to read <see cref="CampaignInfo.Counters"/> or <see cref="CampaignInfo.CreationWay"/> instead
+        /// of calling <see cref="GetInfoAsync"/> per campaign.
+        /// </returns>
         /// <exception cref="MobizonApiException">
         /// Thrown when the API returns a non-success response code.
         /// </exception>
@@ -94,6 +99,11 @@ namespace Mobizon.Contracts
 
         /// <summary>
         /// Adds recipients to an existing campaign.
+        /// <para>
+        /// Placeholder names live in the same wire namespace as the recipient's phone number, so
+        /// <c>recipient</c> is reserved and names containing <c>[</c> or <c>]</c> are rejected. Every entry is
+        /// validated before the first batch is sent, so a bad name never applies to part of the list.
+        /// </para>
         /// Only one recipient type (<see cref="AddRecipientsRequest.Recipients"/>,
         /// <see cref="AddRecipientsRequest.RecipientContacts"/>, or
         /// <see cref="AddRecipientsRequest.RecipientGroups"/>) may be specified per call.
@@ -104,6 +114,9 @@ namespace Mobizon.Contracts
         /// Group and file loads are asynchronous: the API only queues them and returns a background task ID
         /// (<see cref="AddRecipientsResult.IsQueued"/>); poll <see cref="ITaskQueueService.GetStatusAsync"/>
         /// until the task finishes before sending the campaign.
+        /// A group/file response must carry code 100 and a positive task ID; otherwise a
+        /// <see cref="MobizonException"/> is thrown. Synchronous batches reject queued responses;
+        /// any previously confirmed batches remain available through <see cref="AddRecipientsProgress.FromException"/>.
         /// </para>
         /// <para>
         /// If a later batch of a multi-batch send fails (API error, transport error or cancellation), the exception

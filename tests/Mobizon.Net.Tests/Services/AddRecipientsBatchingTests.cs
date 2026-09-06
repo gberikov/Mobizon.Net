@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -187,6 +189,109 @@ namespace Mobizon.Net.Tests.Services
             Assert.True(result.IsQueued);
             Assert.Equal(777, result.TaskId);
             Assert.Equal(AddRecipientsOutcome.AllAdded, result.Outcome);
+        }
+
+        public static IEnumerable<object[]> InvalidQueuedResponses()
+        {
+            var responses = new[]
+            {
+                "{\"code\":100}",
+                "{\"code\":100,\"data\":null}",
+                "{\"code\":100,\"data\":[]}",
+                "{\"code\":100,\"data\":0}",
+                "{\"code\":100,\"data\":-1}",
+                "{\"code\":100,\"data\":\"0\"}",
+                "{\"code\":100,\"data\":{}}",
+                "{\"code\":0,\"data\":777}",
+                "{\"code\":0,\"data\":null}"
+            };
+            foreach (var file in new[] { false, true })
+                foreach (var json in responses)
+                    yield return new object[] { file, json };
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidQueuedResponses))]
+        public async Task AsyncLoad_InvalidTaskResponse_ThrowsProtocolError(bool fileLoad, string json)
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, Url).Respond("application/json", json);
+            using var file = new MemoryStream(new byte[] { 1, 2, 3 });
+            using var client = Client(mockHttp);
+            var request = fileLoad
+                ? new AddRecipientsRequest { CampaignId = 1, RecipientsFile = file }
+                : new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { 5L } };
+
+            var ex = await Assert.ThrowsAsync<MobizonException>(() => client.Campaigns.AddRecipientsAsync(request));
+
+            Assert.Equal(HttpStatusCode.OK, ex.StatusCode);
+            Assert.Contains("Campaign/AddRecipients", ex.Message);
+            Assert.True(file.CanRead);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData(false, "777")]
+        [InlineData(false, "\"777\"")]
+        [InlineData(true, "777")]
+        [InlineData(true, "\"777\"")]
+        public async Task AsyncLoad_PositiveTaskId_IsQueued(bool fileLoad, string data)
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, Url).Respond("application/json", "{\"code\":100,\"data\":" + data + "}");
+            using var file = new MemoryStream(new byte[] { 1, 2, 3 });
+            using var client = Client(mockHttp);
+            var request = fileLoad
+                ? new AddRecipientsRequest { CampaignId = 1, RecipientsFile = file }
+                : new AddRecipientsRequest { CampaignId = 1, RecipientGroups = new[] { 5L } };
+
+            var result = await client.Campaigns.AddRecipientsAsync(request);
+
+            Assert.True(result.IsQueued);
+            Assert.Equal(777, result.TaskId);
+            Assert.Null(result.Entries);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData(false, 100)]
+        [InlineData(true, 100)]
+        [InlineData(false, 0)]
+        [InlineData(true, 0)]
+        public async Task SyncBatch_TaskResponse_StopsWithConfirmedProgress(bool contactLoad, int code)
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, Url).Respond("application/json", Batch(0, 0, 500));
+            mockHttp.Expect(HttpMethod.Post, Url).Respond("application/json", "{\"code\":" + code + ",\"data\":777}");
+            using var client = Client(mockHttp);
+            var request = contactLoad
+                ? new AddRecipientsRequest { CampaignId = 1, RecipientContacts = Enumerable.Range(1, 1001).Select(i => i.ToString()).ToArray() }
+                : Request(1001);
+
+            var ex = await Assert.ThrowsAnyAsync<MobizonException>(() => client.Campaigns.AddRecipientsAsync(request));
+
+            if (code == 100)
+                Assert.Equal(100, Assert.IsType<MobizonApiException>(ex).RawCode);
+            var progress = AddRecipientsProgress.FromException(ex)!;
+            Assert.NotNull(progress);
+            Assert.Equal(500, progress.ConfirmedCount);
+            Assert.Equal(500, progress.PendingCount);
+            Assert.Equal(500, progress.Confirmed.Entries!.Count);
+            Assert.False(progress.Confirmed.IsQueued);
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task SingleSyncBatch_QueuedResponse_IsRejected()
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, Url).Respond("application/json", "{\"code\":100,\"data\":777}");
+            using var client = Client(mockHttp);
+
+            var ex = await Assert.ThrowsAsync<MobizonApiException>(() => client.Campaigns.AddRecipientsAsync(Request(1)));
+
+            Assert.Equal(100, ex.RawCode);
+            Assert.Null(AddRecipientsProgress.FromException(ex));
         }
 
         [Fact]

@@ -58,12 +58,12 @@ namespace Mobizon.Net.Tests.Services
         }
 
         [Fact]
-        public async Task FirstOrDefault_WithoutPage_AsksForOneItemOnFirstPage()
+        public async Task FirstOrDefault_WithoutPage_AsksForTheFirstPage_AtADocumentedPageSize()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("pagination[currentPage]", "0")
-                .WithFormData("pagination[pageSize]", "1")
+                .WithFormData("pagination[pageSize]", "25")
                 .Respond("application/json", Page(3, 7));
 
             var first = await Client(mockHttp).ContactCards.Take(50).FirstOrDefaultAsync();
@@ -89,7 +89,7 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("pagination[currentPage]", "0")
-                .WithFormData("pagination[pageSize]", "1")
+                .WithFormData("pagination[pageSize]", "25")
                 .Respond("application/json", Page(42, 1));
 
             Assert.Equal(42, await Client(mockHttp).ContactCards.Take(10).Page(7).CountAsync());
@@ -106,7 +106,7 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("pagination[currentPage]", "0")
-                .WithFormData("pagination[pageSize]", "2")
+                .WithFormData("pagination[pageSize]", "25")
                 .Respond("application/json", Page(total, ids));
 
             var query = Client(mockHttp).ContactCards.Take(10).Page(3).Where(x => x.GroupId == 1);
@@ -171,6 +171,67 @@ namespace Mobizon.Net.Tests.Services
             await query.ToListAsync();
 
             mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Theory]
+        [InlineData("en-US")]
+        [InlineData("ru-RU")]
+        public async Task NumericCast_IsEvaluatedBeforeFormatting_AtEachExecution(string culture)
+        {
+            var original = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+            try
+            {
+                using var mockHttp = new MockHttpMessageHandler();
+                mockHttp.Expect(HttpMethod.Post, ListUrl).WithFormData("criteria[0][value]", "1").Respond("application/json", Page(0));
+                mockHttp.Expect(HttpMethod.Post, ListUrl).WithFormData("criteria[0][value]", "2").Respond("application/json", Page(0));
+                using var client = Client(mockHttp);
+                double value = 1.9;
+                var query = client.ContactCards.Where(x => x.GroupId == (long)value);
+
+                await query.ToListAsync();
+                value = 2.9;
+                await query.ToListAsync();
+
+                mockHttp.VerifyNoOutstandingExpectation();
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = original;
+            }
+        }
+
+        [Fact]
+        public async Task NarrowingCast_PreservesUncheckedTruncation()
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).WithFormData("criteria[0][value]", "1").Respond("application/json", Page(0));
+            using var client = Client(mockHttp);
+            long value = 4294967297L;
+
+            await client.ContactCards.Where(x => x.GroupId == unchecked((int)value)).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task UserDefinedCast_ExecutesConversionOperator()
+        {
+            using var mockHttp = new MockHttpMessageHandler();
+            mockHttp.Expect(HttpMethod.Post, ListUrl).WithFormData("criteria[0][value]", "42").Respond("application/json", Page(0));
+            using var client = Client(mockHttp);
+            var value = new GroupKey(41);
+
+            await client.ContactCards.Where(x => x.GroupId == (long)value).ToListAsync();
+
+            mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        private readonly struct GroupKey
+        {
+            private readonly long _value;
+            public GroupKey(long value) => _value = value;
+            public static explicit operator long(GroupKey value) => value._value + 1;
         }
 
         // ── R10: DTO completeness and converter strictness ────────────────────

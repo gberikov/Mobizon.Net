@@ -64,8 +64,21 @@ namespace Mobizon.Contracts
         /// <summary>Gets or sets the date of birth.</summary>
         public DateTime? BirthDate { get; set; }
 
-        /// <summary>Gets or sets the gender.</summary>
-        public Gender? Gender { get; set; }
+        /// <summary>
+        /// Gets or sets the gender exactly as the API spelled it (e.g. <c>male</c>). Preserved verbatim so a
+        /// value outside <see cref="Contracts.Gender"/> survives a read/write round trip.
+        /// </summary>
+        public string? GenderRaw { get; set; }
+
+        /// <summary>
+        /// Gets or sets the gender, or <see langword="null"/> when <see cref="GenderRaw"/> is absent or is not
+        /// one of the known <see cref="Contracts.Gender"/> values.
+        /// </summary>
+        public Gender? Gender
+        {
+            get => ContactEnumText.ParseGender(GenderRaw);
+            set => GenderRaw = ContactEnumText.Format(value);
+        }
 
         /// <summary>Gets or sets the company name.</summary>
         public string? CompanyName { get; set; }

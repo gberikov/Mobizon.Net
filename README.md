@@ -227,6 +227,20 @@ var links = await client.Campaigns.GetLinksAsync(campaignId);
 
 Other available methods: `GetAsync`, `ListAsync`, `DeleteAsync`, `GetLinksAsync`.
 
+`ListAsync` items are `CampaignInfo` objects, as the API documents: cast one to read its statistics instead of
+calling `GetInfoAsync` for every campaign.
+
+```csharp
+var page = await client.Campaigns.ListAsync();
+foreach (var campaign in page.Items)
+    if (campaign is CampaignInfo info && info.Counters is { } counters)
+        Console.WriteLine($"{info.Id}: {counters.TotalDelivrdMsgNum}/{counters.TotalMsgNum} delivered");
+```
+
+Delivery settings are readable through `Validity`, `MessageClass` and `TrackShortLinkRecipients` whichever way
+the server sent them: the documentation puts them at the top level, real responses nest them in `extra`
+(also exposed as `CampaignExtra`). `Groups` arrives as a comma-separated string and is parsed into a list.
+
 **Recipients from a file or contact groups are queued, not added.** The API answers with a background task;
 `IsQueued` is `true` and `Outcome` is `AllAdded` only in the sense of "accepted". Poll the task until it completes
 (or is rejected) before sending the campaign:
@@ -271,6 +285,21 @@ catch (Exception ex) when (AddRecipientsProgress.FromException(ex) is { } progre
 ```
 
 `Replace = true` is honoured by the first batch only, so later batches never wipe what earlier ones added.
+
+**Placeholder names share the wire namespace with the phone number.** A placeholder called `recipient` would
+replace the destination number, so it is rejected, as are empty names and names containing `[` or `]`. The whole
+list is checked before the first batch is sent, so a bad name never applies to part of it.
+
+```csharp
+Recipients = new[]
+{
+    new RecipientEntry
+    {
+        Recipient    = "77001111111",
+        Placeholders = new Dictionary<string, string> { ["name"] = "Ivan" }   // "recipient" would throw
+    }
+}
+```
 
 ---
 
@@ -344,6 +373,22 @@ if (!deleted.AllProcessed)
 
 Other available methods: `GetLinksAsync` (links by campaign ID), `ListAsync`.
 
+**Updating a link does not merge with what is stored.** The SDK sends only the properties you set, and the API
+documents an omitted `data[expirationDate]` as making the link valid indefinitely — a null `ExpirationDate` does
+not preserve the current one. Read the link first and pass the value back when you mean to keep it. This follows
+the published contract and has not been confirmed against a live account. `FullLink` is not among the documented
+update parameters; it is sent when set, but the server may ignore it.
+
+```csharp
+var link = await client.Links.GetByIdAsync(id);
+await client.Links.UpdateAsync(new UpdateLinkRequest
+{
+    Id             = id,
+    Comment        = "Q3 campaign",
+    ExpirationDate = link.ExpirationDate   // omit this and the link may become permanent
+});
+```
+
 ---
 
 ### User
@@ -405,6 +450,14 @@ existing!.Info    = "Preferred customer";
 existing.Address  = new AddressFieldInfo();                 // clear the address
 await client.ContactCards.UpdateAsync(existing);
 ```
+
+Contact fields arrive in more than one shape. An empty array or empty string means "not set" and reads as `null`;
+a bare string (the shape the SDK itself writes) is mapped onto `Value`; anything else raises `MobizonException`
+rather than silently reading as `null` and being cleared by the next update. A `type` or `gender` value the SDK
+does not know stays in `Mobile.TypeRaw` / `GenderRaw`, and an update sends it back unchanged.
+
+`CountAsync`, `FirstOrDefaultAsync` and `SingleOrDefaultAsync` request 25 items, the smallest page size the
+documented list endpoints accept (25, 50 or 100).
 
 Supported filter operators: `==` (including `== null` for "empty"), `!=`, `>=`, `<=`, `.Contains()`, combined with `&&`.
 The filtered member must be on the left-hand side (`x.GroupId == 33`, not `33 == x.GroupId`), and the value must be a
@@ -518,6 +571,11 @@ keeps its original `eventCreateTs`, so a short TTL would reject legitimate deliv
 carry no signature and `WebhookProcessor` (and `MapMobizonWebhook`) always rejects them with
 `SignatureMismatch` — it fails closed. If you deliberately run unsigned, parse with
 `new WebhookParser().Parse(body)` and protect the endpoint by other means (IP allow-list, private URL).
+
+**Timestamps have no time zone.** `eventCreateTs`, `statusUpdateTs` and the confirmation timestamps arrive as
+`yyyy-MM-dd HH:mm:ss` with no offset, and the webhook documentation does not state a zone. The SDK parses them as
+UTC. Treat that as an assumption: confirm it against your own account before using these values for ordering or
+SLA measurement, and deduplicate on `EventId` rather than on time.
 
 **Acknowledge fast**: Mobizon treats a webhook as failed if no `2xx` arrives within 5 seconds and
 retries up to 10 times. Verify → persist/enqueue → return `200`, then process asynchronously.
@@ -744,11 +802,13 @@ bodies will see the API key and message texts in every request. Do not log Mobiz
 | `BackgroundTask` | 100 | Operation queued as a background task |
 | `ServiceError` | 999 | General service error |
 
-Codes 98 (`BulkPartialSuccess`), 99 (`BulkCompleteFailure`), and 100 (`BackgroundTask`) are not
-surfaced as exceptions. Instead they are folded into structured result types: code 100 becomes
-`CampaignSendResult.IsQueued = true` (with `Id` holding the task ID); codes 98/99 become
-`AddRecipientsResult.Outcome` (`PartiallyAdded` / `NoneAdded`). `MobizonApiException` is thrown
-only for codes that represent actual failures.
+Codes 98 (`BulkPartialSuccess`) and 99 (`BulkCompleteFailure`) become `AddRecipientsResult.Outcome`
+(`PartiallyAdded` / `NoneAdded`) for synchronous recipient loads. Code 100 (`BackgroundTask`) is accepted
+by campaign sending and group/file recipient loads: `CampaignSendResult.IsQueued` or
+`AddRecipientsResult.IsQueued` identifies the queued result. Group/file loads require a positive `TaskId`;
+an invalid task response throws `MobizonException`. Other non-zero codes, including 100 on synchronous
+recipient batches, throw `MobizonApiException`. If a later batch fails, confirmed progress remains available
+through `AddRecipientsProgress.FromException`.
 
 ---
 

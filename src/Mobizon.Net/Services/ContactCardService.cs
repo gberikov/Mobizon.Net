@@ -144,10 +144,10 @@ namespace Mobizon.Net.Services
 
         private static Dictionary<string, string> BuildCardFields(
             string? title, string? name, string? surname,
-            string? mobileValue, ContactType? mobileType,
+            string? mobileValue, string? mobileType,
             string? email, string? viber, string? whatsapp, string? landline,
             string? skype, string? telegram, AddressFieldInfo? address,
-            DateTime? birthDate, Gender? gender, string? companyName, string? companyUrl,
+            DateTime? birthDate, string? gender, string? companyName, string? companyUrl,
             string? info)
         {
             var fields = new Dictionary<string, string>
@@ -156,7 +156,7 @@ namespace Mobizon.Net.Services
                 ["data[name]"]            = name        ?? string.Empty,
                 ["data[surname]"]         = surname     ?? string.Empty,
                 ["data[mobile][value]"]   = mobileValue ?? string.Empty,
-                ["data[mobile][type]"]    = mobileType?.ToString().ToUpperInvariant() ?? string.Empty,
+                ["data[mobile][type]"]    = mobileType ?? string.Empty,
                 ["data[email]"]           = email       ?? string.Empty,
                 ["data[viber]"]           = viber       ?? string.Empty,
                 ["data[whatsapp]"]        = whatsapp    ?? string.Empty,
@@ -164,7 +164,7 @@ namespace Mobizon.Net.Services
                 ["data[skype]"]           = skype       ?? string.Empty,
                 ["data[telegram]"]        = telegram    ?? string.Empty,
                 ["data[birth_date]"]      = birthDate.HasValue ? ApiFormat.Date(birthDate.Value) : string.Empty,
-                ["data[gender]"]          = ApiFormat.Gender(gender),
+                ["data[gender]"]          = gender ?? string.Empty,
                 ["data[company_name]"]    = companyName ?? string.Empty,
                 ["data[company_url]"]     = companyUrl  ?? string.Empty,
                 ["data[info]"]            = info        ?? string.Empty,
