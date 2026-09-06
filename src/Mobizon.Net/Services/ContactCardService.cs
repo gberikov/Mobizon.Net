@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -8,15 +7,9 @@ using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class ContactCardService
+    internal class ContactCardService(MobizonApiClient apiClient)
     {
         private const string ModuleName = "contactcard";
-        private readonly MobizonApiClient _apiClient;
-
-        public ContactCardService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<MobizonListResult<ContactCardData>> ListAsync(
             ContactCardListRequest? request = null,
@@ -48,7 +41,7 @@ namespace Mobizon.Net.Services
             }
 
             // contactcard/list has been observed answering code 0 with data:null for an empty result.
-            return (await _apiClient.SendAsync<MobizonListResult<ContactCardData>>(
+            return (await apiClient.SendAsync<MobizonListResult<ContactCardData>>(
                 ModuleName, "list", parameters, cancellationToken, allowNullData: true).ConfigureAwait(false)).Data!;
         }
 
@@ -62,7 +55,7 @@ namespace Mobizon.Net.Services
             };
 
             // A missing card answers with a null payload, which FindAsync maps to null.
-            return (await _apiClient.SendAsync<ContactCardData>(
+            return (await apiClient.SendAsync<ContactCardData>(
                 ModuleName, "get", parameters, cancellationToken, allowNullData: true).ConfigureAwait(false)).Data!;
         }
 
@@ -76,7 +69,7 @@ namespace Mobizon.Net.Services
                 request.Skype, request.Telegram, request.Address, request.BirthDate,
                 request.Gender, request.CompanyName, request.CompanyUrl, request.Info);
 
-            var response = await _apiClient.SendMultipartAsync<long>(
+            var response = await apiClient.SendMultipartAsync<long>(
                 ModuleName, "create", fields,
                 request.Photo, request.PhotoFileName,
                 cancellationToken).ConfigureAwait(false);
@@ -95,7 +88,7 @@ namespace Mobizon.Net.Services
 
             fields["id"] = request.Id;
 
-            await _apiClient.SendMultipartAsync<bool>(
+            await apiClient.SendMultipartAsync<bool>(
                 ModuleName, "update", fields,
                 request.Photo, request.PhotoFileName,
                 cancellationToken, allowNullData: true).ConfigureAwait(false);
@@ -116,7 +109,7 @@ namespace Mobizon.Net.Services
             for (var i = 0; i < groupIds.Count; i++)
                 parameters[$"groupIds[{i}]"] = ApiFormat.Int(groupIds[i]);
 
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "setgroups", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -129,7 +122,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id
             };
 
-            return (await _apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
+            return (await apiClient.SendAsync<IReadOnlyList<ContactGroupRef>>(
                 ModuleName, "getgroups", parameters, cancellationToken, allowNullData: true).ConfigureAwait(false)).Data!;
         }
 
@@ -138,7 +131,7 @@ namespace Mobizon.Net.Services
             CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string> { ["id"] = id };
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 

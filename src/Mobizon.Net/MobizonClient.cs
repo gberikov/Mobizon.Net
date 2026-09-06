@@ -4,7 +4,6 @@ using Mobizon.Contracts;
 using Mobizon.Net.Internal;
 using Mobizon.Net.Services;
 
-using Mobizon.Net;
 
 namespace Mobizon.Net
 {

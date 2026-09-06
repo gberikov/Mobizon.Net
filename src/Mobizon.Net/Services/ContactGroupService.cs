@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -8,15 +7,9 @@ using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class ContactGroupService : IContactGroupService
+    internal class ContactGroupService(MobizonApiClient apiClient) : IContactGroupService
     {
         private const string ModuleName = "contactgroup";
-        private readonly MobizonApiClient _apiClient;
-
-        public ContactGroupService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<ContactGroupListResponse> ListAsync(
             ContactGroupListRequest? request = null,
@@ -38,7 +31,7 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
-            return (await _apiClient.SendAsync<ContactGroupListResponse>(
+            return (await apiClient.SendAsync<ContactGroupListResponse>(
                 ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -54,7 +47,7 @@ namespace Mobizon.Net.Services
                 ["data[name]"] = name
             };
 
-            return await _apiClient.SendForIdAsync(
+            return await apiClient.SendForIdAsync(
                 ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -72,7 +65,7 @@ namespace Mobizon.Net.Services
                 ["data[name]"]  = name
             };
 
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -85,7 +78,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            return (await _apiClient.SendAsync<DeleteResult>(
+            return (await apiClient.SendAsync<DeleteResult>(
                 ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -98,7 +91,7 @@ namespace Mobizon.Net.Services
                 ["id"] = id.HasValue ? ApiFormat.Int(id.Value) : "-1"
             };
 
-            return (await _apiClient.SendAsync<long>(
+            return (await apiClient.SendAsync<long>(
                 ModuleName, "getcardscount", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }

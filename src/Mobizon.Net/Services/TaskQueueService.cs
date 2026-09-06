@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -7,15 +6,9 @@ using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class TaskQueueService : ITaskQueueService
+    internal class TaskQueueService(MobizonApiClient apiClient) : ITaskQueueService
     {
         private const string ModuleName = "taskqueue";
-        private readonly MobizonApiClient _apiClient;
-
-        public TaskQueueService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<TaskQueueStatus> GetStatusAsync(
             long id, CancellationToken cancellationToken = default)
@@ -25,7 +18,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            return (await _apiClient.SendAsync<TaskQueueStatus>(ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
+            return (await apiClient.SendAsync<TaskQueueStatus>(ModuleName, "getstatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }
 }

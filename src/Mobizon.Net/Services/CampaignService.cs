@@ -10,15 +10,9 @@ using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
-    internal class CampaignService : ICampaignService
+    internal class CampaignService(MobizonApiClient apiClient) : ICampaignService
     {
         private const string ModuleName = "Campaign";
-        private readonly MobizonApiClient _apiClient;
-
-        public CampaignService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<long> CreateAsync(
             CreateCampaignRequest request, CancellationToken cancellationToken = default)
@@ -58,7 +52,7 @@ namespace Mobizon.Net.Services
             if (request.ShortenLinks.HasValue)
                 parameters["data[shortenLinks]"] = request.ShortenLinks.Value ? "1" : "0";
 
-            return await _apiClient.SendForIdAsync(
+            return await apiClient.SendForIdAsync(
                 ModuleName, "Create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -70,7 +64,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "Delete", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -82,7 +76,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            return (await _apiClient.SendAsync<CampaignData>(
+            return (await apiClient.SendAsync<CampaignData>(
                 ModuleName, "Get", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
@@ -97,7 +91,7 @@ namespace Mobizon.Net.Services
             if (fillTemplateText.HasValue)
                 parameters["getFilledTplCampaignText"] = ApiFormat.Bool(fillTemplateText.Value);
 
-            return (await _apiClient.SendAsync<CampaignInfo>(
+            return (await apiClient.SendAsync<CampaignInfo>(
                 ModuleName, "GetInfo", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
@@ -165,7 +159,7 @@ namespace Mobizon.Net.Services
             // The documentation defines a list item as a campaign/getInfo object, so items are read as
             // CampaignInfo and handed back through the covariant Items list: statistics survive, and callers
             // that only need CampaignData keep compiling.
-            var page = (await _apiClient.SendAsync<MobizonListResult<CampaignInfo>>(
+            var page = (await apiClient.SendAsync<MobizonListResult<CampaignInfo>>(
                 ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
 
             return new MobizonListResult<CampaignData>
@@ -180,7 +174,7 @@ namespace Mobizon.Net.Services
         {
             var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(id) };
 
-            var response = await _apiClient.SendAsync<long>(
+            var response = await apiClient.SendAsync<long>(
                 ModuleName, "Send", parameters, cancellationToken,
                 acceptedCodes: QueuedCodes).ConfigureAwait(false);
 
@@ -221,7 +215,7 @@ namespace Mobizon.Net.Services
             {
                 var fields = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.CampaignId) };
                 AppendParams(fields, request.Parameters);
-                return Finalize(await _apiClient.SendMultipartAsync<AddRecipientsResult>(
+                return Finalize(await apiClient.SendMultipartAsync<AddRecipientsResult>(
                     ModuleName, "AddRecipients", fields, request.RecipientsFile,
                     request.RecipientsFileName ?? "recipients.csv",
                     cancellationToken, acceptedCodes: QueuedCodes, fileFieldName: "recipientsFile",
@@ -432,7 +426,7 @@ namespace Mobizon.Net.Services
             AppendParams(parameters, request.Parameters);
 
             // A rejected batch (99) still describes every recipient in `data`; a null payload is tolerated.
-            return _apiClient.SendAsync<AddRecipientsResult>(
+            return apiClient.SendAsync<AddRecipientsResult>(
                 ModuleName, "AddRecipients", parameters, cancellationToken,
                 acceptedCodes: acceptedCodes, allowNullData: true);
         }
@@ -465,7 +459,7 @@ namespace Mobizon.Net.Services
             long campaignId, CancellationToken cancellationToken = default)
         {
             var parameters = new Dictionary<string, string> { ["campaignId"] = ApiFormat.Int(campaignId) };
-            return (await _apiClient.SendAsync<IReadOnlyList<LinkData>>(
+            return (await apiClient.SendAsync<IReadOnlyList<LinkData>>(
                 "link", "getlinks", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
