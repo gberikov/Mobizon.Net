@@ -1,0 +1,25 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/samples/">
+    <Project Path="samples/Mobizon.Net.ConsoleSample/Mobizon.Net.ConsoleSample.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Mobizon.Contracts/Mobizon.Contracts.csproj" />
+    <Project Path="src/Mobizon.Net.Extensions.DependencyInjection/Mobizon.Net.Extensions.DependencyInjection.csproj" />
+    <Project Path="src/Mobizon.Net.Extensions.Polly/Mobizon.Net.Extensions.Polly.csproj" />
+    <Project Path="src/Mobizon.Net.Webhooks.AspNetCore/Mobizon.Net.Webhooks.AspNetCore.csproj" />
+    <Project Path="src/Mobizon.Net.Webhooks/Mobizon.Net.Webhooks.csproj" />
+    <Project Path="src/Mobizon.Net/Mobizon.Net.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Mobizon.Net.Tests/Mobizon.Net.Tests.csproj" />
+    <Project Path="tests/Mobizon.Net.Webhooks.Tests/Mobizon.Net.Webhooks.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Mobizon.Net.ApiCapture/Mobizon.Net.ApiCapture.csproj" />
+  </Folder>
+</Solution>

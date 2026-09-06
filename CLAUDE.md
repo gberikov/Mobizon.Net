@@ -29,14 +29,29 @@ docs/api-shapes.md                             response shapes as actually captu
 Six shipped packages target `netstandard2.0` and `net8.0`, except `Mobizon.Net.Webhooks.AspNetCore`, which
 targets `net8.0` and `net10.0`. Tests, sample and capture tool are `net8.0`.
 
-`Directory.Build.props` applies to every project: `LangVersion` 8.0, nullable reference types enabled,
+`global.json` pins the SDK to 10.0.4xx or newer; `Mobizon.Net.Webhooks.AspNetCore` targets `net10.0`, so an
+older SDK cannot build the solution.
+
+`Directory.Build.props` applies to every project: `LangVersion` 14.0, nullable reference types enabled,
 warnings as errors, XML documentation generated (`CS1591` suppressed), MinVer versioning from `v*` tags,
-SourceLink and symbol packages. C# 9+ syntax will not compile.
+SourceLink and symbol packages.
+
+The language version is a compiler setting only — the emitted assemblies still target `netstandard2.0` and
+`net8.0`, and a consumer on .NET 8 or .NET Framework is unaffected. A few features need BCL types the older
+targets lack, and those fail loudly at compile time on the `netstandard2.0` leg: `record`, `init` and
+`required` need `IsExternalInit`, `RequiredMemberAttribute`, `CompilerFeatureRequired` and
+`SetsRequiredMembers` declared as internal shims; `allows ref struct` needs .NET 9 and cannot be polyfilled.
+Everything syntax-only — primary constructors, file-scoped namespaces, collection expressions, the `field`
+keyword, null-conditional assignment — compiles on both targets as is.
+
+`Directory.Packages.props` holds every package version (central package management): a `PackageReference` in
+a csproj carries no `Version`. Shipped packages stay on 8.0.x because that version is the floor a consumer
+inherits; the sample, the capture tool and the test packages are free to track current.
 
 ```bash
-dotnet build Mobizon.Net.sln
-dotnet test  Mobizon.Net.sln          # 517 tests, no network required
-dotnet build Mobizon.Net.sln -c Release
+dotnet build                          # the solution is Mobizon.Net.slnx (XML format, SDK 9.0.200+)
+dotnet test                           # 517 tests, no network required
+dotnet build -c Release
 ```
 
 ## Conventions that matter
