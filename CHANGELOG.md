@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Remediation of two code reviews: `docs/handoffs/2026-09-06-review-remediation.md` and
-`docs/reviews/2026-09-06-code-review.md`, which reviewed the result of the first. The theme is "never report a
-success that did not happen, never lose data that did arrive, and never leak a payload while reporting a failure".
+Remediation of two code reviews, the second of which reviewed the result of the first. The theme is "never
+report a success that did not happen, never lose data that did arrive, and never leak a payload while reporting
+a failure".
 
 ### Fixed (second review pass)
 

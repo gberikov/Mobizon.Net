@@ -1,32 +1,82 @@
-# mobizon Development Guidelines
+# Mobizon.Net — working notes
 
-Auto-generated from all feature plans. Last updated: 2026-02-24
+An unofficial .NET SDK for the Mobizon SMS gateway REST API v1. This file records the conventions that are not
+obvious from the code. `README.md` is the user-facing documentation; keep it and the XML docs in step with any
+behaviour change.
 
-## Active Technologies
-- C# 8.0+ — core packages target `netstandard2.0`; the ASP.NET Core integration package and the console sample target `net8.0` (current LTS). + `System.Text.Json` 8.0.5 (matches existing projects); BCL `System.Security.Cryptography` (`SHA1`) — no third-party dependencies in the core. The ASP.NET Core package uses the `Microsoft.AspNetCore.App` framework reference and references `Mobizon.Net.Webhooks`. (002-webhooks)
-- N/A (stateless parsing/verification; idempotency persistence is the consumer's responsibility). (002-webhooks)
+Everything committed here is in English: source, comments, XML documentation, tests, fixtures and docs. The
+library is used internationally, so English is the only language in the repository.
 
-- C# 8.0+ / .NET Standard 2.0 + System.Text.Json (NuGet), System.Net.Http (001-mobizon-net-sdk)
-
-## Project Structure
+## Layout
 
 ```text
-src/
-tests/
+src/Mobizon.Contracts                          DTOs, enums, exceptions, service interfaces (no HTTP)
+src/Mobizon.Net                                HTTP client, services, JSON converters, contact-card query
+src/Mobizon.Net.Extensions.DependencyInjection AddMobizon() for IServiceCollection
+src/Mobizon.Net.Extensions.Polly               AddMobizonResilience(): retry + circuit breaker
+src/Mobizon.Net.Webhooks                       signature verification and typed parsing of inbound events
+src/Mobizon.Net.Webhooks.AspNetCore            MapMobizonWebhook() endpoint helpers
+tests/Mobizon.Net.Tests                        SDK tests (MockHttp; no network)
+tests/Mobizon.Net.Webhooks.Tests               webhook tests
+samples/Mobizon.Net.ConsoleSample              one runnable sample per endpoint
+tools/Mobizon.Net.ApiCapture                   captures and sanitizes live responses into test fixtures
+docs/coverage-matrix.md                        per-endpoint coverage and how each field was verified
+docs/api-shapes.md                             response shapes as actually captured on 2026-06-24
 ```
 
-## Commands
+## Targets and build settings
 
-# Add commands for C# 8.0+ / .NET Standard 2.0
+Six shipped packages target `netstandard2.0` and `net8.0`, except `Mobizon.Net.Webhooks.AspNetCore`, which
+targets `net8.0` and `net10.0`. Tests, sample and capture tool are `net8.0`.
 
-## Code Style
+`Directory.Build.props` applies to every project: `LangVersion` 8.0, nullable reference types enabled,
+warnings as errors, XML documentation generated (`CS1591` suppressed), MinVer versioning from `v*` tags,
+SourceLink and symbol packages. C# 9+ syntax will not compile.
 
-C# 8.0+ / .NET Standard 2.0: Follow standard conventions
+```bash
+dotnet build Mobizon.Net.sln
+dotnet test  Mobizon.Net.sln          # 517 tests, no network required
+dotnet build Mobizon.Net.sln -c Release
+```
 
-## Recent Changes
-- 002-webhooks: Added C# 8.0+ — core packages target `netstandard2.0`; the ASP.NET Core integration package and the console sample target `net8.0` (current LTS). + `System.Text.Json` 8.0.5 (matches existing projects); BCL `System.Security.Cryptography` (`SHA1`) — no third-party dependencies in the core. The ASP.NET Core package uses the `Microsoft.AspNetCore.App` framework reference and references `Mobizon.Net.Webhooks`.
+## Conventions that matter
 
-- 001-mobizon-net-sdk: Added C# 8.0+ / .NET Standard 2.0 + System.Text.Json (NuGet), System.Net.Http
+**Transport.** The API key is a body field on every request and must never appear in a URL. Every call is a
+POST. The envelope (`code`, `message`) is parsed before `data` is bound to a result type, because an error
+response puts field errors where the success payload would be. Response code 100 is opt-in per operation.
 
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
+**Errors.** `MobizonApiException` for an API error code, `MobizonException` for transport and protocol
+failures; a caller's `CancellationToken` is never wrapped. Exception messages carry the operation, HTTP status
+and JSON path — never the response body or a field value, in `Message`, `InnerException` or `ToString()`. SMS
+text, phone numbers and one-time codes must not reach a log through an exception.
+
+**Never lose data.** A value the SDK does not recognise is preserved, not dropped: an unknown contact `type` or
+`gender` keeps its raw string and is echoed back on update, an unknown webhook event becomes
+`UnknownWebhookEvent`, and an unknown field value leaves the typed property null beside a raw one. A payload
+shape the SDK cannot map is a protocol error, never a silent null or zero. Public DTOs stay domain types;
+`JsonElement` is fine internally and, for a genuinely unknown webhook event, on `UnknownWebhookEvent.RawData`.
+
+**Formatting.** All wire values go through `ApiFormat` and are culture-invariant. A test that touches dates or
+enum casing should run under `tr-TR` as well.
+
+**Ownership.** Streams passed in by the caller are read but never closed. An `HttpClient` the SDK creates gets
+the configured timeout and response-size cap; an injected one is left alone. Writes are not retried by default,
+and multipart uploads are never retried.
+
+**Verification.** `docs/coverage-matrix.md` distinguishes "confirmed by documentation", "confirmed by capture"
+and "unverified". Do not upgrade a claim there without evidence, and do not invent enum values or fields.
+
+## Fixtures and captures
+
+Fixtures in `tests/Mobizon.Net.Tests/Payloads/` come from the capture tool, which writes raw responses to
+`artifacts/api-captures/` (git-ignored, may contain personal data). Sanitize before copying:
+
+```bash
+dotnet run --project tools/Mobizon.Net.ApiCapture              # read-only calls
+dotnet run --project tools/Mobizon.Net.ApiCapture -- --send    # also sends a real SMS and spends balance
+dotnet run --project tools/Mobizon.Net.ApiCapture -- --sanitize
+```
+
+The sanitizer walks the parsed JSON, redacts by field name and value shape, keeps each value's JSON type and
+re-parses its output. It is best effort: read the diff before committing a fixture. Never commit a raw capture,
+a real API key, or `appsettings.Development.json`.

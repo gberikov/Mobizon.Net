@@ -1,8 +1,12 @@
 # Mobizon API — captured response shapes (2026-06-24)
 
 Source: live capture via `tools/Mobizon.Net.ApiCapture` against `api.mobizon.kz`,
-sanitized fixtures in `tests/Mobizon.Net.Tests/Payloads/`. This file is the ground
-truth for Phases 1–4.
+sanitized fixtures in `tests/Mobizon.Net.Tests/Payloads/`. It records what the server
+actually sent on that date, which is not always what the published documentation
+describes; `coverage-matrix.md` tracks which of the two each field is confirmed by.
+
+The "SDK delta" column below is the state of the SDK at capture time, kept as the
+rationale for the models that exist today. Do not read it as a to-do list.
 
 **Conventions**
 - Envelope is always `{ "code": int, "data": <varies>, "message": string }`.
