@@ -33,7 +33,7 @@ targets `net8.0` and `net10.0`. Tests, sample and capture tool are `net8.0`.
 older SDK cannot build the solution.
 
 `Directory.Build.props` applies to every project: `LangVersion` 14.0, nullable reference types enabled,
-warnings as errors, XML documentation generated (`CS1591` suppressed), MinVer versioning from `v*` tags,
+warnings as errors, XML documentation generated (`CS1591` suppressed), MinVer versioning from version tags,
 SourceLink and symbol packages.
 
 The language version is a compiler setting only — the emitted assemblies still target `netstandard2.0` and
