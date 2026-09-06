@@ -22,7 +22,12 @@ samples/Mobizon.Net.ConsoleSample              one runnable sample per endpoint
 tools/Mobizon.Net.ApiCapture                   captures and sanitizes live responses into test fixtures
 docs/coverage-matrix.md                        per-endpoint coverage and how each field was verified
 docs/api-shapes.md                             response shapes as actually captured on 2026-06-24
+docs/{api-modules,webhooks,configuration,error-handling}.md   the guides README links out to
 ```
+
+`README.md` is shipped as the NuGet package readme, so every link in it must be absolute
+(`https://github.com/gberikov/Mobizon.Net/blob/master/...`) — nuget.org does not resolve relative
+paths. Links inside `docs/` may stay relative; those pages are only ever read on GitHub.
 
 ## Targets and build settings
 
