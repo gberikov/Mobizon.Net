@@ -493,7 +493,7 @@ namespace Mobizon.Net.Tests.Services
                 })
                 .Respond("application/json", @"{""code"":0,""data"":""777"",""message"":""""}");
 
-            await CreateService(mockHttp).CreateAsync(new CreateContactCardRequest { Name = "A", Gender = Gender.Female });
+            await CreateService(mockHttp).CreateAsync(new CreateContactCardRequest { Name = "A", Gender = "female" });
 
             mockHttp.VerifyNoOutstandingExpectation();
         }

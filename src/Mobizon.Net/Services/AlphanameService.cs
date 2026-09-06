@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -7,11 +6,9 @@ using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class AlphanameService : IAlphanameService
+    internal class AlphanameService(MobizonApiClient apiClient) : IAlphanameService
     {
         private const string ModuleName = "alphaname";
-        private readonly MobizonApiClient _apiClient;
-        public AlphanameService(MobizonApiClient apiClient) => _apiClient = apiClient;
 
         public async Task<MobizonListResult<AlphanameData>> ListAsync(
             PaginationRequest? pagination = null, CancellationToken cancellationToken = default)
@@ -23,7 +20,7 @@ namespace Mobizon.Net.Services
                     ["pagination[currentPage]"] = ApiFormat.Int(pagination.CurrentPage),
                     ["pagination[pageSize]"] = ApiFormat.Int(pagination.PageSize)
                 };
-            return (await _apiClient.SendAsync<MobizonListResult<AlphanameData>>(
+            return (await apiClient.SendAsync<MobizonListResult<AlphanameData>>(
                 ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
     }

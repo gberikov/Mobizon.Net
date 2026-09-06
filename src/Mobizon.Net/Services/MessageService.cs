@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -8,15 +8,9 @@ using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
-    internal class MessageService : IMessageService
+    internal class MessageService(MobizonApiClient apiClient) : IMessageService
     {
         private const string ModuleName = "Message";
-        private readonly MobizonApiClient _apiClient;
-
-        public MessageService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<SendSmsResult> QuickSendAsync(
             string recipient,
@@ -32,7 +26,11 @@ namespace Mobizon.Net.Services
             SendSmsMessageRequest request,
             CancellationToken cancellationToken = default)
         {
-            if (request == null) throw new System.ArgumentNullException(nameof(request));
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (string.IsNullOrWhiteSpace(request.Recipient))
+                throw new ArgumentException("Recipient is required.", nameof(request));
+            if (string.IsNullOrEmpty(request.Text))
+                throw new ArgumentException("Text is required.", nameof(request));
 
             var parameters = new Dictionary<string, string>
             {
@@ -63,7 +61,7 @@ namespace Mobizon.Net.Services
                     parameters["params[shortenLinks]"] = ApiFormat.Bool(p.ShortenLinks.Value);
             }
 
-            return (await _apiClient.SendAsync<SendSmsResult>(
+            return (await apiClient.SendAsync<SendSmsResult>(
                 ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
@@ -74,17 +72,26 @@ namespace Mobizon.Net.Services
             return await GetSmsStatusAsync(new[] { id }, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>The API accepts at most this many message ids per <c>message/getSMSStatus</c> call.</summary>
+        public const int GetSmsStatusMaxIds = 100;
+
         public async Task<IReadOnlyList<SmsStatusResult>> GetSmsStatusAsync(
             long[] ids,
             CancellationToken cancellationToken = default)
         {
+            if (ids == null) throw new ArgumentNullException(nameof(ids));
+            if (ids.Length == 0 || ids.Length > GetSmsStatusMaxIds)
+                throw new ArgumentException(
+                    $"message/getSMSStatus accepts 1 to {GetSmsStatusMaxIds} message ids per request; split larger sets into several calls.",
+                    nameof(ids));
+
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
                 parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
-            return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
+            return (await apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
                 ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -165,7 +172,7 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return (await _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
+            return (await apiClient.SendAsync<MobizonListResult<MessageInfo>>(
                 ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }

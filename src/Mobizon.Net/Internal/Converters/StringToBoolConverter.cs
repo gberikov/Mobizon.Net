@@ -26,7 +26,7 @@ namespace Mobizon.Net.Internal.Converters
                         case "0": case "false": case "False": case "FALSE": return false;
                         case "1": case "true":  case "True":  case "TRUE":  return true;
                         default:
-                            throw new JsonException($"Cannot convert \"{s}\" to bool.");
+                            throw new JsonException("Cannot convert value to bool.");
                     }
                 }
                 default:

@@ -79,16 +79,16 @@ namespace Mobizon.Net.Extensions.DependencyInjection
                 return new MobizonClient(httpClient, options);
             });
 
-            // Apply the configured timeout to the named HttpClient. The MobizonClient constructor only
-            // sets Timeout when it owns the HttpClient, so for the DI path (externally-owned client) the
-            // timeout must be applied here — otherwise a configured value is silently ignored and the
-            // HttpClient default (100s) is used instead.
+            // The named HttpClient is SDK-owned in spirit: apply the configured timeout and the response
+            // size cap here, exactly as the owning MobizonClient constructor does. (The constructor itself
+            // never touches an injected client, so without this a configured Timeout would be ignored.)
             return services.AddHttpClient("Mobizon")
                 .ConfigureHttpClient((sp, client) =>
                 {
                     var options = sp.GetRequiredService<IOptions<MobizonClientOptions>>().Value;
-                    if (options.Timeout > TimeSpan.Zero)
-                        client.Timeout = options.Timeout;
+                    options.Validate();
+                    client.Timeout = options.Timeout;
+                    client.MaxResponseContentBufferSize = MobizonClient.MaxResponseContentBufferSize;
                 });
         }
     }

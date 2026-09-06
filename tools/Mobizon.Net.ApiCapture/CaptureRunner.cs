@@ -186,10 +186,9 @@ namespace Mobizon.Net.ApiCapture
                 });
                 WriteCapture("campaign.send.json", campaignSendJson);
 
-                // Poll taskqueue if we got a task id
-                string? taskId = TryReadDataField(campaignSendJson, "taskId");
-                if (taskId == null)
-                    taskId = TryReadDataField(campaignSendJson, "id");
+                // Poll taskqueue only for a genuinely queued send. A synchronous send answers code 0 with a
+                // result scalar that is not a task id, and getStatus takes a single `id`, not an `ids[]` array.
+                string? taskId = TryReadQueuedTaskId(campaignSendJson);
 
                 if (taskId != null)
                 {
@@ -198,14 +197,14 @@ namespace Mobizon.Net.ApiCapture
                         await Task.Delay(2000);
                         var taskStatusJson = await _api.CallAsync("taskqueue", "getStatus", new Dictionary<string, string>
                         {
-                            ["ids[0]"] = taskId
+                            ["id"] = taskId
                         });
                         WriteCapture($"taskqueue.getStatus.poll{i + 1}.json", taskStatusJson);
                     }
                 }
                 else
                 {
-                    Console.WriteLine("[capture] taskqueue/getStatus skipped — no taskId from campaign/send");
+                    Console.WriteLine("[capture] taskqueue/getStatus skipped — campaign/send did not queue a background task (code 100)");
                 }
 
                 var campaignInfoJson = await _api.CallAsync("campaign", "getInfo", new Dictionary<string, string>
@@ -286,6 +285,40 @@ namespace Mobizon.Net.ApiCapture
         /// <summary>
         /// Reads a named field from the data object (not array).
         /// </summary>
+        /// <summary>
+        /// Background task id of a queued operation. Only response code 100 carries one, and <c>data</c> is then
+        /// the bare identifier; any other code means the operation ran synchronously and there is nothing to poll.
+        /// </summary>
+        private static string? TryReadQueuedTaskId(string json)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("code", out var code))
+                    return null;
+
+                int codeValue;
+                if (code.ValueKind == JsonValueKind.Number)
+                    codeValue = code.GetInt32();
+                else if (code.ValueKind != JsonValueKind.String || !int.TryParse(code.GetString(), out codeValue))
+                    return null;
+
+                if (codeValue != 100 || !root.TryGetProperty("data", out var data))
+                    return null;
+
+                if (data.ValueKind == JsonValueKind.Number)
+                    return data.GetRawText();
+
+                return data.ValueKind == JsonValueKind.String ? data.GetString() : null;
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"[capture] JSON parse error reading the queued task id: {ex.Message}");
+                return null;
+            }
+        }
+
         private static string? TryReadDataField(string json, string field)
         {
             try

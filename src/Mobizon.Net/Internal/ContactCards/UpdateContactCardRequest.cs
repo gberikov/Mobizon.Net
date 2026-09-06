@@ -25,7 +25,7 @@ namespace Mobizon.Net.Internal
         public string? MobileValue { get; set; }
 
         /// <summary>Gets or sets the mobile phone type (e.g. HOME, JOB, MAIN).</summary>
-        public ContactType? MobileType { get; set; }
+        public string? MobileType { get; set; }
 
         /// <summary>Gets or sets the email address.</summary>
         public string? Email { get; set; }
@@ -52,7 +52,7 @@ namespace Mobizon.Net.Internal
         public DateTime? BirthDate { get; set; }
 
         /// <summary>Gets or sets the gender.</summary>
-        public Gender? Gender { get; set; }
+        public string? Gender { get; set; }
 
         /// <summary>Gets or sets the company name.</summary>
         public string? CompanyName { get; set; }

@@ -18,6 +18,7 @@ namespace Mobizon.Net.Internal.Converters
     ///     <description>A background task ID; mapped to <see cref="AddRecipientsResult.TaskId"/>.</description>
     ///   </item>
     /// </list>
+    /// Any other shape is a protocol error (<see cref="JsonException"/>), never an empty success.
     /// </summary>
     internal sealed class AddRecipientsResultConverter : JsonConverter<AddRecipientsResult>
     {
@@ -39,7 +40,9 @@ namespace Mobizon.Net.Internal.Converters
             }
             else
             {
-                reader.Skip();
+                // Neither the documented per-recipient array nor a task id: surface it instead of returning
+                // an empty (false-success) result.
+                throw new JsonException("campaign/addRecipients data is neither a per-recipient result array nor a background task id.");
             }
 
             return result;

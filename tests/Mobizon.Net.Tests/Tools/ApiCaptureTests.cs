@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 using Mobizon.Net.ApiCapture;
 using Xunit;
 
@@ -8,50 +10,118 @@ namespace Mobizon.Net.Tests.Tools
     public class ApiCaptureTests
     {
         [Fact]
-        public void BuildUrl_Composes_Service_Path_With_Auth_Query()
+        public void BuildUrl_Composes_Service_Path_Without_Credentials()
         {
-            var url = RawMobizonApi.BuildUrl("https://api.mobizon.kz/", "v1", "KEY", "user", "getOwnBalance");
-            Assert.Equal(
-                "https://api.mobizon.kz/service/user/getOwnBalance?output=json&api=v1&apiKey=KEY",
-                url);
+            var url = RawMobizonApi.BuildUrl("https://api.mobizon.kz/", "v1", "user", "getOwnBalance");
+
+            Assert.Equal("https://api.mobizon.kz/service/user/getOwnBalance?output=json&api=v1", url);
+            Assert.DoesNotContain("apiKey", url);
+        }
+
+        [Theory]
+        [InlineData("http://api.mobizon.kz")]
+        [InlineData("api.mobizon.kz")]
+        public void Constructor_RejectsEndpointThatIsNotAbsoluteHttps(string apiUrl)
+        {
+            using var http = new HttpClient();
+            Assert.Throws<ArgumentException>(() => new RawMobizonApi(http, apiUrl, "KEY"));
         }
 
         [Fact]
-        public void Scrub_Masks_Phone_Like_Digit_Runs()
+        public void Constructor_RequiresApiKey()
         {
-            var outp = Sanitizer.Scrub("{\"to\":\"77011234567\"}");
-            Assert.DoesNotContain("77011234567", outp);
-            Assert.Contains("7000000XXXX", outp);
+            using var http = new HttpClient();
+            Assert.Throws<ArgumentException>(() => new RawMobizonApi(http, "https://api.mobizon.kz", " "));
+        }
+
+        // ── Scrubbing ────────────────────────────────────────────────────────
+
+        private static JsonElement Scrubbed(string json) =>
+            JsonDocument.Parse(Sanitizer.Scrub(json)).RootElement;
+
+        [Fact]
+        public void Scrub_Masks_Phone_Fields()
+        {
+            var result = Scrubbed("{\"to\":\"77011234567\",\"mobile\":{\"value\":\"77019998877\"}}");
+
+            Assert.DoesNotContain("77011234567", result.ToString());
+            Assert.DoesNotContain("77019998877", result.ToString());
+            Assert.Equal("70000000000", result.GetProperty("to").GetString());
+            Assert.Equal("70000000000", result.GetProperty("mobile").GetProperty("value").GetString());
         }
 
         [Fact]
-        public void Scrub_Masks_Balance_Value()
+        public void Scrub_Masks_Balance_Value_And_Keeps_Currency()
         {
-            var outp = Sanitizer.Scrub("{\"balance\":\"4043.0656\",\"currency\":\"KZT\"}");
-            Assert.DoesNotContain("4043.0656", outp);
-            Assert.Contains("\"currency\":\"KZT\"", outp);
+            var result = Scrubbed("{\"balance\":\"4043.0656\",\"currency\":\"KZT\"}");
+
+            Assert.Equal("0.0000", result.GetProperty("balance").GetString());
+            Assert.Equal("KZT", result.GetProperty("currency").GetString());
         }
 
         [Fact]
-        public void Scrub_Replaces_Cyrillic_Free_Text()
+        public void Scrub_Masks_LatinPersonalData_And_OneTimeCodes()
         {
-            // Captured payloads carry real account free text; fixtures are committed to a public
-            // repo and kept Latin-only, so the generator must scrub it rather than a human after
-            // each capture.
-            var outp = Sanitizer.Scrub(
-                "{\"details\":{\"description\":\"\u0412\u0441\u0435 \u043e\u0431 \u0418\u0422\"},\"name\":\"Profit\"}");
+            // The regex-only scrubber left all of these in place: they are Latin, short, or both.
+            var result = Scrubbed(
+                "{\"email\":\"alice@example.com\",\"surname\":\"Smith\",\"text\":\"Your OTP is 8421\"}");
+            var text = result.ToString();
 
-            Assert.DoesNotContain("\u0412\u0441\u0435", outp);
-            Assert.Contains("REDACTED", outp);
-            Assert.Contains("\"name\":\"Profit\"", outp);
+            Assert.DoesNotContain("alice@example.com", text);
+            Assert.DoesNotContain("Smith", text);
+            Assert.DoesNotContain("8421", text);
         }
 
         [Fact]
-        public void Scrub_Keeps_Separator_After_Cyrillic_Run()
+        public void Scrub_Masks_Email_Inside_A_Field_It_Does_Not_Know()
         {
-            // "\u0418\u0432\u0430\u043d\u043e\u0432 Smith" / "\u0422\u0435\u0441\u0442 123": the trailing space belongs to the Latin neighbour.
-            Assert.Equal("{\"a\":\"REDACTED Smith\",\"b\":\"REDACTED 123\"}",
-                Sanitizer.Scrub("{\"a\":\"\u0418\u0432\u0430\u043d\u043e\u0432 Smith\",\"b\":\"\u0422\u0435\u0441\u0442 123\"}"));
+            var result = Scrubbed("{\"someFutureField\":\"write to alice@example.com today\"}");
+
+            Assert.Equal("write to user@example.com today", result.GetProperty("someFutureField").GetString());
+        }
+
+        [Fact]
+        public void Scrub_Replaces_NonLatin_Free_Text_Keeping_The_Separator()
+        {
+            var result = Scrubbed("{\"someFutureField\":\"\u0418\u0432\u0430\u043d\u043e\u0432 Smith\"}");
+
+            Assert.Equal("REDACTED Smith", result.GetProperty("someFutureField").GetString());
+        }
+
+        [Fact]
+        public void Scrub_Preserves_Numeric_Json()
+        {
+            // The regex scrubber rewrote this to the unquoted token 7000000XXXX, producing invalid JSON.
+            var result = Scrubbed("{\"id\":12345678,\"nested\":{\"count\":7}}");
+
+            Assert.Equal(JsonValueKind.Number, result.GetProperty("id").ValueKind);
+            Assert.Equal(12345678, result.GetProperty("id").GetInt32());
+            Assert.Equal(7, result.GetProperty("nested").GetProperty("count").GetInt32());
+        }
+
+        [Fact]
+        public void Scrub_Keeps_The_Json_Type_Of_A_Numeric_Sensitive_Field()
+        {
+            var result = Scrubbed("{\"to\":77011234567}");
+
+            Assert.Equal(JsonValueKind.Number, result.GetProperty("to").ValueKind);
+            Assert.Equal(70000000000L, result.GetProperty("to").GetInt64());
+        }
+
+        [Fact]
+        public void Scrub_Preserves_Envelope_Shape_And_Nulls()
+        {
+            var result = Scrubbed("{\"code\":0,\"data\":{\"items\":[],\"deletedTs\":null},\"message\":\"\"}");
+
+            Assert.Equal(0, result.GetProperty("code").GetInt32());
+            Assert.Equal(JsonValueKind.Array, result.GetProperty("data").GetProperty("items").ValueKind);
+            Assert.Equal(JsonValueKind.Null, result.GetProperty("data").GetProperty("deletedTs").ValueKind);
+        }
+
+        [Fact]
+        public void Scrub_Rejects_Input_That_Is_Not_Json()
+        {
+            Assert.ThrowsAny<JsonException>(() => Sanitizer.Scrub("<html>502 Bad Gateway</html>"));
         }
 
         [Fact]

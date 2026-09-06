@@ -164,7 +164,7 @@ namespace Mobizon.Net.Tests.Internal
         }
 
         [Fact]
-        public async Task SendAsync_BackgroundTask_ReturnsNormally()
+        public async Task SendAsync_BackgroundTask_ReturnsNormally_WhenOperationAcceptsIt()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
@@ -173,10 +173,23 @@ namespace Mobizon.Net.Tests.Internal
 
             var client = CreateClient(mockHttp);
             var result = await client.SendAsync<TestTaskResult>(
-                "campaign", "send", null);
+                "campaign", "send", null, acceptedCodes: new[] { 100 });
 
             Assert.Equal(MobizonResponseCode.BackgroundTask, result.Code);
             Assert.Equal(42, result.Data.TaskId);
+        }
+
+        [Fact]
+        public async Task SendAsync_BackgroundTask_IsAnApiError_ForOperationsThatDoNotOptIn()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
+                .Respond("application/json", @"{""code"":100,""data"":42,""message"":""""}");
+
+            var ex = await Assert.ThrowsAsync<MobizonApiException>(() =>
+                CreateClient(mockHttp).SendAsync<long>("campaign", "create", null));
+
+            Assert.Equal(100, ex.RawCode);
         }
 
         [Fact]
@@ -278,7 +291,7 @@ namespace Mobizon.Net.Tests.Internal
         }
 
         [Fact]
-        public async Task SendAsync_Non2xxWithHtmlBody_ThrowsMobizonExceptionWithStatusAndSnippet()
+        public async Task SendAsync_Non2xxWithHtmlBody_ThrowsMobizonExceptionWithStatus_WithoutQuotingBody()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
@@ -290,11 +303,13 @@ namespace Mobizon.Net.Tests.Internal
             Assert.IsNotType<MobizonApiException>(ex);
             Assert.Equal(HttpStatusCode.BadGateway, ex.StatusCode);
             Assert.Contains("HTTP 502", ex.Message);
-            Assert.Contains("502 Bad Gateway", ex.Message);
+            Assert.Contains("message/sendsmsmessage", ex.Message);
+            Assert.Contains("text/html", ex.Message);
+            Assert.DoesNotContain("<html>", ex.ToString());
         }
 
         [Fact]
-        public async Task SendAsync_2xxWithGarbageBody_ThrowsMobizonExceptionWithStatus()
+        public async Task SendAsync_2xxWithGarbageBody_ThrowsMobizonExceptionWithStatus_WithoutQuotingBody()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.When(HttpMethod.Post, "https://api.mobizon.kz/service/*")
@@ -304,8 +319,8 @@ namespace Mobizon.Net.Tests.Internal
                 CreateClient(mockHttp).SendAsync<object>("message", "sendsmsmessage", null));
 
             Assert.Equal(HttpStatusCode.OK, ex.StatusCode);
-            Assert.Contains("Failed to deserialize", ex.Message);
-            Assert.Contains("not json at all", ex.Message);
+            Assert.Contains("not valid JSON", ex.Message);
+            Assert.DoesNotContain("not json at all", ex.ToString());
         }
 
         [Fact]
