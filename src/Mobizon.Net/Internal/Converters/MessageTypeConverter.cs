@@ -17,7 +17,7 @@ namespace Mobizon.Net.Internal.Converters
             {
                 case "SMS": return MessageType.Sms;
                 default:
-                    throw new JsonException($"Unknown MessageType value: \"{value}\".");
+                    throw new JsonException("Unknown MessageType value.");
             }
         }
 

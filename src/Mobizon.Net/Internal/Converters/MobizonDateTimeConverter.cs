@@ -27,7 +27,7 @@ namespace Mobizon.Net.Internal.Converters
             if (DateTime.TryParseExact(s, Formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
                 return dt;
 
-            throw new JsonException($"Cannot parse \"{s}\" as DateTime (expected \"yyyy-MM-dd HH:mm:ss\" or \"yyyy-MM-dd\").");
+            throw new JsonException("Cannot parse value as DateTime (expected \"yyyy-MM-dd HH:mm:ss\" or \"yyyy-MM-dd\").");
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)

@@ -22,6 +22,10 @@ namespace Mobizon.Net.Services
         public async Task<LinkData> CreateAsync(
             CreateLinkRequest request, CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (string.IsNullOrWhiteSpace(request.FullLink))
+                throw new ArgumentException("FullLink is required.", nameof(request));
+
             var parameters = new Dictionary<string, string>
             {
                 ["data[fullLink]"] = request.FullLink
@@ -43,6 +47,9 @@ namespace Mobizon.Net.Services
         public async Task<DeleteResult> DeleteAsync(
             long[] ids, CancellationToken cancellationToken = default)
         {
+            if (ids == null) throw new ArgumentNullException(nameof(ids));
+            if (ids.Length == 0) throw new ArgumentException("At least one link id is required.", nameof(ids));
+
             var parameters = new Dictionary<string, string>();
             for (var i = 0; i < ids.Length; i++)
             {
@@ -80,6 +87,7 @@ namespace Mobizon.Net.Services
         public async Task<LinkStatsResult> GetStatsAsync(
             GetLinkStatsRequest request, CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new ArgumentNullException(nameof(request));
             if (request.Ids == null || request.Ids.Length == 0 || request.Ids.Length > 5)
                 throw new ArgumentException("link/getStats accepts 1 to 5 link ids per request.", nameof(request));
 
@@ -156,12 +164,14 @@ namespace Mobizon.Net.Services
 
         public async Task UpdateAsync(UpdateLinkRequest request, CancellationToken cancellationToken = default)
         {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
             var parameters = new Dictionary<string, string> { ["id"] = ApiFormat.Int(request.Id) };
             if (request.FullLink != null) parameters["data[fullLink]"] = request.FullLink;
             if (request.Status.HasValue) parameters["data[status]"] = ((int)request.Status.Value).ToString(CultureInfo.InvariantCulture);
             if (request.ExpirationDate.HasValue) parameters["data[expirationDate]"] = ApiFormat.Date(request.ExpirationDate.Value);
             if (request.Comment != null) parameters["data[comment]"] = request.Comment;
-            await _apiClient.SendAsync<object>(ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
+            await _apiClient.SendCommandAsync(ModuleName, "update", parameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

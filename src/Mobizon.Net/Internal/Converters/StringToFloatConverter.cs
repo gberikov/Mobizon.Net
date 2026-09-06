@@ -19,7 +19,7 @@ namespace Mobizon.Net.Internal.Converters
                     var s = reader.GetString();
                     return float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)
                         ? result
-                        : throw new JsonException($"Cannot convert string \"{s}\" to float.");
+                        : throw new JsonException("Cannot convert string value to float.");
                 }
                 case JsonTokenType.Number:
                     return reader.GetSingle();

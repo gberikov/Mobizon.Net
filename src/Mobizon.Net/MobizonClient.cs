@@ -93,15 +93,47 @@ namespace Mobizon.Net
         {
         }
 
+        /// <summary>
+        /// Upper bound on a buffered API response body, applied to an <see cref="HttpClient"/> the SDK owns
+        /// (this constructor or the DI registration). The largest documented responses (100-item list pages,
+        /// link statistics) are well under 1 MB; a larger body is a protocol error, not data.
+        /// </summary>
+        public const long MaxResponseContentBufferSize = 16 * 1024 * 1024;
+
         private MobizonClient(HttpClient httpClient, MobizonClientOptions options, bool ownsHttpClient)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            if (httpClient == null)
+            {
+                throw new ArgumentNullException(nameof(httpClient));
+            }
+
+            if (options == null)
+            {
+                if (ownsHttpClient) httpClient.Dispose();
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            _httpClient = httpClient;
             _ownsHttpClient = ownsHttpClient;
 
-            if (ownsHttpClient && options.Timeout > TimeSpan.Zero)
-                _httpClient.Timeout = options.Timeout;
+            MobizonApiClient apiClient;
+            try
+            {
+                apiClient = new MobizonApiClient(httpClient, options); // validates options
+            }
+            catch
+            {
+                if (ownsHttpClient) httpClient.Dispose();
+                throw;
+            }
 
-            var apiClient = new MobizonApiClient(httpClient, options);
+            // A caller-supplied HttpClient keeps its own timeout and buffer limit: its lifetime and settings
+            // belong to the caller (see the DI package for the named-client equivalent).
+            if (ownsHttpClient)
+            {
+                _httpClient.Timeout = options.Timeout;
+                _httpClient.MaxResponseContentBufferSize = MaxResponseContentBufferSize;
+            }
 
             Messages = new MessageService(apiClient);
             Campaigns = new CampaignService(apiClient);

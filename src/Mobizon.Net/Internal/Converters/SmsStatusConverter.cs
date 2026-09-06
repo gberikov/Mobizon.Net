@@ -25,7 +25,7 @@ namespace Mobizon.Net.Internal.Converters
                 case "DELETED": return SmsStatus.Deleted;
                 case "SCHEDUL": return SmsStatus.Scheduled;
                 default:
-                    throw new JsonException($"Unknown SmsStatus value: \"{value}\".");
+                    throw new JsonException("Unknown SmsStatus value.");
             }
         }
 

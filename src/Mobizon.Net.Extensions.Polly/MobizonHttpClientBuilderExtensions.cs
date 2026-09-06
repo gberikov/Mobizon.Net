@@ -17,6 +17,11 @@ namespace Mobizon.Net.Extensions.Polly
         /// Adds the default Mobizon resilience policies (exponential retry and circuit breaker) to the HTTP client.
         /// By default, retry covers read-only calls only (<c>get*</c> / <c>list</c>); see
         /// <see cref="MobizonResilienceOptions.RetryNonIdempotentRequests"/> to retry every call.
+        /// <para>
+        /// Both policies react to <em>transport-level</em> faults only: <see cref="HttpRequestException"/>,
+        /// HTTP 5xx and HTTP 408. An API error inside an HTTP 200 envelope (for example rate-limit code 30) is
+        /// not retried, and HTTP 429 is not treated as transient.
+        /// </para>
         /// </summary>
         /// <param name="builder">The <see cref="IHttpClientBuilder"/> returned by <c>AddMobizon</c>.</param>
         /// <returns>The same <see cref="IHttpClientBuilder"/> for further chaining.</returns>
@@ -66,13 +71,19 @@ namespace Mobizon.Net.Extensions.Polly
 
             var options = new MobizonResilienceOptions();
             configure(options);
+            options.Validate();
 
             var retry = GetRetryPolicy(options.RetryCount, options.RetryBaseDelay);
             var noRetry = Policy.NoOpAsync<HttpResponseMessage>();
             var retryAll = options.RetryNonIdempotentRequests;
 
+            // Multipart uploads are never retried: the file stream has been read to EOF by the first attempt,
+            // so a resend would silently carry an empty or truncated file.
             return builder
-                .AddPolicyHandler(request => retryAll || RequestMarkers.IsIdempotent(request) ? retry : noRetry)
+                .AddPolicyHandler(request =>
+                    !(request.Content is MultipartFormDataContent) && (retryAll || RequestMarkers.IsIdempotent(request))
+                        ? retry
+                        : noRetry)
                 .AddPolicyHandler(GetCircuitBreakerPolicy(
                     options.CircuitBreakerFailureThreshold,
                     options.CircuitBreakerDuration));
@@ -84,8 +95,7 @@ namespace Mobizon.Net.Extensions.Polly
             var delay = baseDelay ?? TimeSpan.FromSeconds(1);
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .WaitAndRetryAsync(retryCount, attempt =>
-                    TimeSpan.FromTicks(delay.Ticks * (long)Math.Pow(2, attempt - 1)));
+                .WaitAndRetryAsync(retryCount, attempt => MobizonResilienceOptions.DelayForAttempt(delay, attempt));
         }
 
         private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy(

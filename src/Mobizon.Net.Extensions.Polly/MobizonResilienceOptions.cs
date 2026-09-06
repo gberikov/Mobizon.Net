@@ -42,5 +42,36 @@ namespace Mobizon.Net.Extensions.Polly
         /// no content.
         /// </summary>
         public bool RetryNonIdempotentRequests { get; set; }
+
+        /// <summary>
+        /// Validates the options up front so a bad value fails at registration time rather than during an outage:
+        /// non-negative <see cref="RetryCount"/> and <see cref="RetryBaseDelay"/>, a positive duration, a threshold of at least 1, and a
+        /// back-off schedule whose longest delay still fits in a <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when any option is out of range.</exception>
+        public void Validate()
+        {
+            if (RetryCount < 0)
+                throw new ArgumentOutOfRangeException(nameof(RetryCount), "RetryCount must not be negative.");
+            if (RetryBaseDelay < TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(RetryBaseDelay), "RetryBaseDelay must not be negative.");
+            if (CircuitBreakerFailureThreshold < 1)
+                throw new ArgumentOutOfRangeException(nameof(CircuitBreakerFailureThreshold), "CircuitBreakerFailureThreshold must be at least 1.");
+            if (CircuitBreakerDuration <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(CircuitBreakerDuration), "CircuitBreakerDuration must be positive.");
+            if (RetryCount > 0 && DelayForAttempt(RetryBaseDelay, RetryCount) == TimeSpan.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(RetryCount), "RetryBaseDelay * 2^(RetryCount - 1) overflows TimeSpan.");
+        }
+
+        /// <summary>
+        /// Exponential back-off <c>baseDelay * 2^(attempt-1)</c>, computed in floating point so it cannot silently
+        /// wrap around; a schedule that does not fit in a <see cref="TimeSpan"/> yields <see cref="TimeSpan.MaxValue"/>
+        /// (rejected by <see cref="Validate"/>).
+        /// </summary>
+        internal static TimeSpan DelayForAttempt(TimeSpan baseDelay, int attempt)
+        {
+            var ms = baseDelay.TotalMilliseconds * Math.Pow(2, attempt - 1);
+            return ms < TimeSpan.MaxValue.TotalMilliseconds ? TimeSpan.FromMilliseconds(ms) : TimeSpan.MaxValue;
+        }
     }
 }

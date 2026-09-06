@@ -92,7 +92,7 @@ namespace Mobizon.Net
             ForgetPhoto(entity);
         }
 
-        // The photo stream is consumed by the send (and disposed by HttpClient on .NET Framework),
+        // The photo stream has been read to EOF by the send (the SDK never closes it — the caller owns it),
         // so a later UpdateAsync on the same entity must not try to re-send it.
         private static void ForgetPhoto(ContactCard entity)
         {

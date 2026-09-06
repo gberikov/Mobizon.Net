@@ -52,7 +52,7 @@ namespace Mobizon.Net.Webhooks.AspNetCore
         /// <list type="bullet">
         ///   <item><description>200 OK — signature verified, event parsed, handler invoked (enqueue heavy work to stay within Mobizon's 5-second window).</description></item>
         ///   <item><description>413 Payload Too Large (JSON <c>{"error":"payload_too_large"}</c>) — the request body exceeds <see cref="MobizonWebhookOptions.MaxRequestBodyBytes"/> (enforced by a bounded read, so a chunked or absent <c>Content-Length</c> is still capped).</description></item>
-        ///   <item><description>403 Forbidden (JSON <c>{"error":"signature_mismatch"}</c>) — HMAC verification failed.</description></item>
+        ///   <item><description>403 Forbidden (JSON <c>{"error":"signature_mismatch"}</c>) — the <c>sign</c> field did not match <c>SHA1(eventId|attempt|eventCreateTs|secretKey)</c>, or the secret/signature was missing (fails closed).</description></item>
         ///   <item><description>400 Bad Request (JSON <c>{"error":"parse_error"}</c>) — body could not be parsed.</description></item>
         /// </list>
         /// </para>

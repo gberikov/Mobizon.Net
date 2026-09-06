@@ -15,7 +15,7 @@ namespace Mobizon.Net.Internal.Converters
                     var s = reader.GetString();
                     return long.TryParse(s, out var result)
                         ? result
-                        : throw new JsonException($"Cannot convert string \"{s}\" to long.");
+                        : throw new JsonException("Cannot convert string value to long.");
                 case JsonTokenType.Number:
                     return reader.GetInt64();
                 default:

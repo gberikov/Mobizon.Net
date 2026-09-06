@@ -28,8 +28,12 @@ namespace Mobizon.Net.Internal.Converters
             using var doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
             var result = new LinkStatsResult();
-            if (root.ValueKind != JsonValueKind.Object)
+
+            // PHP serialises an empty result set as `[]`; anything else that is not an object is corrupt.
+            if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() == 0)
                 return result;
+            if (root.ValueKind != JsonValueKind.Object)
+                throw new JsonException("link/getStats data is neither a statistics object nor an empty array.");
 
             var indices = new SortedSet<int>();
 
@@ -115,17 +119,30 @@ namespace Mobizon.Net.Internal.Converters
                 out index);
         }
 
+        /// <summary>
+        /// Counters arrive as numbers or numeric strings; <c>null</c>/<c>""</c> (PHP "no value") count as 0.
+        /// A non-numeric or out-of-range value is corruption and must not silently become 0.
+        /// </summary>
         private static int ToInt(JsonElement element)
         {
             switch (element.ValueKind)
             {
                 case JsonValueKind.Number:
-                    return element.TryGetInt32(out var n) ? n : 0;
+                    if (element.TryGetInt32(out var n))
+                        return n;
+                    break;
                 case JsonValueKind.String:
-                    return int.TryParse(element.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var s) ? s : 0;
-                default:
+                    var text = element.GetString();
+                    if (string.IsNullOrEmpty(text))
+                        return 0;
+                    if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var s))
+                        return s;
+                    break;
+                case JsonValueKind.Null:
                     return 0;
             }
+
+            throw new JsonException("link/getStats counter is not a 32-bit integer.");
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Mobizon.Net.Internal.Converters
                 case "SENT":                return CampaignCommonStatus.Sent;
                 case "DONE":                return CampaignCommonStatus.Done;
                 default:
-                    throw new JsonException($"Unknown CampaignCommonStatus value: \"{value}\".");
+                    throw new JsonException("Unknown CampaignCommonStatus value.");
             }
         }
 
