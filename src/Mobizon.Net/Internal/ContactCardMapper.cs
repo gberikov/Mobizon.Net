@@ -25,7 +25,7 @@ namespace Mobizon.Net.Internal
             Telegram    = d.Fields?.Telegram,
             Address     = d.Fields?.Address,
             BirthDate   = ParseDate(d.Fields?.BirthDate),
-            Gender      = d.Fields?.Gender,
+            GenderRaw   = d.Fields?.GenderRaw,
             CompanyName = d.Fields?.CompanyName,
             CompanyUrl  = d.Fields?.CompanyUrl,
             Info        = d.Fields?.Info
@@ -38,7 +38,7 @@ namespace Mobizon.Net.Internal
                 Name        = e.Name,
                 Surname     = e.Surname,
                 MobileValue = e.Mobile?.Value,
-                MobileType  = e.Mobile?.Type,
+                MobileType  = WireType(e.Mobile),
                 Email       = e.Email?.Value,
                 Viber       = e.Viber?.Value,
                 WhatsApp    = e.WhatsApp?.Value,
@@ -47,13 +47,18 @@ namespace Mobizon.Net.Internal
                 Telegram    = e.Telegram?.Value,
                 Address     = e.Address,
                 BirthDate   = e.BirthDate,
-                Gender      = e.Gender,
+                Gender      = e.GenderRaw,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
                 Info        = e.Info,
                 Photo         = e.Photo,
                 PhotoFileName = e.PhotoFileName
             };
+
+        // A type the SDK knows is written in its canonical wire spelling; one it does not know is echoed
+        // back exactly as received, so an update never clears a value just because it is newer than the SDK.
+        private static string? WireType(MobileFieldInfo? mobile) =>
+            mobile == null ? null : (mobile.Type.HasValue ? mobile.TypeRaw?.ToUpperInvariant() : mobile.TypeRaw);
 
         internal static UpdateContactCardRequest ToUpdateRequest(ContactCard e) =>
             new UpdateContactCardRequest
@@ -63,7 +68,7 @@ namespace Mobizon.Net.Internal
                 Name        = e.Name,
                 Surname     = e.Surname,
                 MobileValue = e.Mobile?.Value,
-                MobileType  = e.Mobile?.Type,
+                MobileType  = WireType(e.Mobile),
                 Email       = e.Email?.Value,
                 Viber       = e.Viber?.Value,
                 WhatsApp    = e.WhatsApp?.Value,
@@ -72,7 +77,7 @@ namespace Mobizon.Net.Internal
                 Telegram    = e.Telegram?.Value,
                 Address     = e.Address,
                 BirthDate   = e.BirthDate,
-                Gender      = e.Gender,
+                Gender      = e.GenderRaw,
                 CompanyName = e.CompanyName,
                 CompanyUrl  = e.CompanyUrl,
                 Info        = e.Info,

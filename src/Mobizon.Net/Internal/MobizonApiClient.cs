@@ -39,11 +39,14 @@ namespace Mobizon.Net.Internal
                 new StringToNumericEnumConverter<CampaignStatus>(),
                 new StringToNumericEnumConverter<MessageClass>(),
                 new MobizonDateTimeConverter(),
-                new TolerantStringEnumConverter<ContactType>(),
-                new TolerantStringEnumConverter<Gender>(),
-                // Contact-card fields the PHP API may emit as `[]`/`""` when unset — tolerate that.
-                new EmptyTolerantObjectConverter<Mobizon.Contracts.ContactFieldInfo>(),
-                new EmptyTolerantObjectConverter<Mobizon.Contracts.MobileFieldInfo>(),
+                // `groups` is documented as a comma-separated string; `link/delete` sends real arrays.
+                new CsvOrArrayLongListConverter(),
+                // Contact-card fields the PHP API may emit as `[]`/`""` when unset — tolerate exactly that,
+                // and map a bare string onto the single-value form the write path uses.
+                new EmptyTolerantObjectConverter<Mobizon.Contracts.ContactFieldInfo>(
+                    value => new Mobizon.Contracts.ContactFieldInfo { Value = value }),
+                new EmptyTolerantObjectConverter<Mobizon.Contracts.MobileFieldInfo>(
+                    value => new Mobizon.Contracts.MobileFieldInfo { Value = value }),
                 new EmptyTolerantObjectConverter<Mobizon.Contracts.AddressFieldInfo>(),
                 new AddRecipientsResultConverter(),
                 new LinkStatsResultConverter()

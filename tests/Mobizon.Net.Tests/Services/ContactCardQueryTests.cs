@@ -296,7 +296,7 @@ namespace Mobizon.Net.Tests.Services
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("pagination[currentPage]", "0")
-                .WithFormData("pagination[pageSize]",    "1")
+                .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", SingleItemJson);
 
             var card = await CreateSet(mockHttp)
@@ -588,12 +588,12 @@ namespace Mobizon.Net.Tests.Services
         // ── CountAsync ────────────────────────────────────────────────────────
 
         [Fact]
-        public async Task CountAsync_SendsPageSizeOne()
+        public async Task CountAsync_SendsTheSmallestDocumentedPageSize()
         {
             var mockHttp = new MockHttpMessageHandler();
             mockHttp.Expect(HttpMethod.Post, ListUrl)
                 .WithFormData("pagination[currentPage]", "0")
-                .WithFormData("pagination[pageSize]",    "1")
+                .WithFormData("pagination[pageSize]",    "25")
                 .Respond("application/json", EmptyListJson);
 
             await CreateSet(mockHttp).Where(x => x.GroupId == 100604).CountAsync();

@@ -14,7 +14,8 @@ namespace Mobizon.Contracts
         public int CurrentPage { get; set; }
 
         /// <summary>
-        /// Items per page. API default is 25; maximum 100.
+        /// Items per page. The documented list endpoints accept 25, 50 or 100 and default to 25; other values
+        /// are not documented and may be rejected with response code 12.
         /// </summary>
         public int PageSize { get; set; } = 25;
     }

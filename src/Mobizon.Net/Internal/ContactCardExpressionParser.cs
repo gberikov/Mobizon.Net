@@ -180,9 +180,8 @@ namespace Mobizon.Net.Internal
             }
         }
 
-        // Constant, closure field/property (`x.GroupId == id`), or either wrapped in a Convert node
-        // (nullable / widening casts). The conversion itself is skipped: Build formats by runtime type
-        // and restores enums from the member type, so int-vs-long or int-vs-enum makes no difference.
+        // Read constants and closure members directly. Only lifting T to Nullable<T> preserves the
+        // boxed value without evaluation; numeric and user-defined conversions must run via Compile().
         private static bool TryReadDirect(Expression expr, out object? value)
         {
             switch (expr)
@@ -203,7 +202,8 @@ namespace Mobizon.Net.Internal
                     }
                     break;
 
-                case UnaryExpression { NodeType: ExpressionType.Convert } u:
+                case UnaryExpression { NodeType: ExpressionType.Convert } u
+                    when u.Method == null && Nullable.GetUnderlyingType(u.Type) == u.Operand.Type:
                     return TryReadDirect(u.Operand, out value);
             }
 

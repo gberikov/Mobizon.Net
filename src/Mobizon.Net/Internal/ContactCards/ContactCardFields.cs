@@ -45,8 +45,18 @@ namespace Mobizon.Net.Internal
         [JsonPropertyName("birth_date")]
         public string? BirthDate { get; set; }
 
-        /// <summary>Gets or sets the gender.</summary>
-        public Gender? Gender { get; set; }
+        /// <summary>Gets or sets the gender exactly as the API spelled it.</summary>
+        [JsonPropertyName("gender")]
+        [JsonConverter(typeof(PhpScalarStringConverter))]
+        public string? GenderRaw { get; set; }
+
+        /// <summary>Gets or sets the gender; <see langword="null"/> when the raw value is unset or unknown.</summary>
+        [JsonIgnore]
+        public Gender? Gender
+        {
+            get => ContactEnumText.ParseGender(GenderRaw);
+            set => GenderRaw = ContactEnumText.Format(value);
+        }
 
         /// <summary>Gets or sets the company name.</summary>
         [JsonPropertyName("company_name")]

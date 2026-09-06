@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -9,15 +8,9 @@ using Mobizon.Net.Internal.Converters;
 
 namespace Mobizon.Net.Services
 {
-    internal class MessageService : IMessageService
+    internal class MessageService(MobizonApiClient apiClient) : IMessageService
     {
         private const string ModuleName = "Message";
-        private readonly MobizonApiClient _apiClient;
-
-        public MessageService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<SendSmsResult> QuickSendAsync(
             string recipient,
@@ -68,7 +61,7 @@ namespace Mobizon.Net.Services
                     parameters["params[shortenLinks]"] = ApiFormat.Bool(p.ShortenLinks.Value);
             }
 
-            return (await _apiClient.SendAsync<SendSmsResult>(
+            return (await apiClient.SendAsync<SendSmsResult>(
                 ModuleName, "SendSmsMessage", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
 
@@ -98,7 +91,7 @@ namespace Mobizon.Net.Services
                 parameters[$"ids[{i}]"] = ApiFormat.Int(ids[i]);
             }
 
-            return (await _apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
+            return (await apiClient.SendAsync<IReadOnlyList<SmsStatusResult>>(
                 ModuleName, "GetSMSStatus", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -179,7 +172,7 @@ namespace Mobizon.Net.Services
                 }
             }
 
-            return (await _apiClient.SendAsync<MobizonListResult<MessageInfo>>(
+            return (await apiClient.SendAsync<MobizonListResult<MessageInfo>>(
                 ModuleName, "List", parameters, cancellationToken).ConfigureAwait(false)).Data;
         }
     }

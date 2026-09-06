@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Mobizon.Contracts;
@@ -8,15 +7,9 @@ using Mobizon.Net.Internal;
 
 namespace Mobizon.Net.Services
 {
-    internal class NumberStopListService : INumberStopListService
+    internal class NumberStopListService(MobizonApiClient apiClient) : INumberStopListService
     {
         private const string ModuleName = "numberstoplist";
-        private readonly MobizonApiClient _apiClient;
-
-        public NumberStopListService(MobizonApiClient apiClient)
-        {
-            _apiClient = apiClient;
-        }
 
         public async Task<StopListListResponse> ListAsync(
             StopListListRequest? request = null,
@@ -38,7 +31,7 @@ namespace Mobizon.Net.Services
                     parameters[$"sort[{request.Sort.Field}]"] = ApiFormat.Sort(request.Sort.Direction);
             }
 
-            return (await _apiClient.SendAsync<StopListListResponse>(
+            return (await apiClient.SendAsync<StopListListResponse>(
                 ModuleName, "list", parameters, cancellationToken).ConfigureAwait(false)).Data!;
         }
 
@@ -57,7 +50,7 @@ namespace Mobizon.Net.Services
                 ["comment"] = comment ?? string.Empty
             };
 
-            return await _apiClient.SendForIdAsync(
+            return await apiClient.SendForIdAsync(
                 ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -87,7 +80,7 @@ namespace Mobizon.Net.Services
                 ["comment"]    = comment ?? string.Empty
             };
 
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "create", parameters, cancellationToken).ConfigureAwait(false);
         }
 
@@ -100,7 +93,7 @@ namespace Mobizon.Net.Services
                 ["id"] = ApiFormat.Int(id)
             };
 
-            await _apiClient.SendCommandAsync(
+            await apiClient.SendCommandAsync(
                 ModuleName, "delete", parameters, cancellationToken).ConfigureAwait(false);
         }
     }

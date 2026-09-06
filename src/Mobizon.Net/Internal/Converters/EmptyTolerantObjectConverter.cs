@@ -13,15 +13,27 @@ namespace Mobizon.Net.Internal.Converters
     }
 
     /// <summary>
-    /// Deserializes a complex contact field object (e.g. <c>email</c>, <c>mobile</c>, <c>address</c>)
-    /// that the Mobizon PHP API may serialise as an empty array <c>[]</c> or empty string <c>""</c>
-    /// when the field is unset. Such values are mapped to <see langword="null"/> instead of failing
-    /// deserialization of the entire contact card. A real object is deserialized normally.
+    /// Deserializes a complex contact field object (e.g. <c>email</c>, <c>mobile</c>, <c>address</c>) that the
+    /// Mobizon PHP API may serialise as an empty array <c>[]</c> or an empty string <c>""</c> when the field is
+    /// unset. Only those confirmed "no value" shapes become <see langword="null"/>.
+    /// <para>
+    /// A non-empty scalar is data, not absence: for the field types that carry a single <c>value</c> it is
+    /// mapped onto that value, matching the write path, which sends these fields as bare strings. Any other
+    /// incompatible shape — a populated array, a number, a boolean, or a scalar for a field
+    /// with no single-value form — raises a protocol error instead of quietly discarding the value.
+    /// </para>
     /// </summary>
     internal sealed class EmptyTolerantObjectConverter<T> : JsonConverter<T>, IEmptyTolerantConverter
         where T : class
     {
+        private readonly Func<string, T>? _fromScalar;
         private JsonSerializerOptions? _inner;
+
+        /// <param name="fromScalar">
+        /// Builds an instance from a non-empty scalar string, or <see langword="null"/> when the type has no
+        /// meaningful single-value form (an address, for instance).
+        /// </param>
+        public EmptyTolerantObjectConverter(Func<string, T>? fromScalar = null) => _fromScalar = fromScalar;
 
         public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -30,14 +42,27 @@ namespace Mobizon.Net.Internal.Converters
                 case JsonTokenType.StartObject:
                     return JsonSerializer.Deserialize<T>(ref reader, Inner(options));
 
-                case JsonTokenType.StartArray:
-                    // PHP serialises an empty associative field as an empty JSON array.
-                    reader.Skip();
+                case JsonTokenType.Null:
                     return null;
 
-                // Null / empty string / any other scalar → treat as "no value".
+                case JsonTokenType.StartArray:
+                    // PHP serialises an empty associative field as an empty JSON array. A populated array is
+                    // an unknown shape and must not be dropped.
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                        return null;
+                    throw Unexpected("a non-empty array");
+
+                case JsonTokenType.String:
+                    var text = reader.GetString();
+                    if (string.IsNullOrWhiteSpace(text))
+                        return null;
+                    if (_fromScalar != null)
+                        return _fromScalar(text!);
+                    throw Unexpected("a non-empty string");
+
                 default:
-                    return null;
+                    throw Unexpected(reader.TokenType.ToString());
             }
         }
 
@@ -48,6 +73,9 @@ namespace Mobizon.Net.Internal.Converters
             else
                 JsonSerializer.Serialize(writer, value, Inner(options));
         }
+
+        private static JsonException Unexpected(string shape) =>
+            new JsonException($"Contact field of type {typeof(T).Name} arrived as {shape}, which the SDK cannot map.");
 
         // A copy of the serializer options with the empty-tolerant converters removed, so the
         // default object (de)serializer is used for T instead of recursing back into this converter.

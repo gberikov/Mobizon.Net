@@ -11,6 +11,10 @@ namespace Mobizon.Contracts
     /// </summary>
     public class CampaignData
     {
+        private TimeSpan? _validity;
+        private MessageClass? _messageClass;
+        private bool? _trackShortLinkRecipients;
+
         /// <summary>Gets or sets the unique ID of the campaign.</summary>
         public long Id { get; set; }
 
@@ -75,21 +79,50 @@ namespace Mobizon.Contracts
         public string? Text { get; set; }
 
         /// <summary>
+        /// Gets or sets the settings the API nests in the <c>extra</c> object. The documentation places these
+        /// at the top level; captured responses nest them. Reading <see cref="Validity"/>,
+        /// <see cref="MessageClass"/> or <see cref="TrackShortLinkRecipients"/> transparently uses whichever
+        /// placement the server actually sent.
+        /// </summary>
+        [JsonPropertyName("extra")]
+        public CampaignExtra? Extra { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum message delivery wait time.
         /// The API represents this value in minutes (e.g. <c>"1440"</c> = 24 hours).
+        /// Falls back to <see cref="CampaignExtra.Validity"/> when the server nested it in <c>extra</c>.
         /// </summary>
-        public TimeSpan? Validity { get; set; }
+        public TimeSpan? Validity
+        {
+            get => _validity ?? Extra?.Validity;
+            set => _validity = value;
+        }
 
-        /// <summary>Gets or sets the SMS message class (Flash or Normal).</summary>
+        /// <summary>
+        /// Gets or sets the SMS message class (Flash or Normal).
+        /// Falls back to <see cref="CampaignExtra.MessageClass"/> when the server nested it in <c>extra</c>.
+        /// </summary>
         [JsonPropertyName("mclass")]
-        public MessageClass? MessageClass { get; set; }
+        public MessageClass? MessageClass
+        {
+            get => _messageClass ?? Extra?.MessageClass;
+            set => _messageClass = value;
+        }
 
         /// <summary>
         /// Gets or sets whether recipient click-tracking on short links is enabled.
+        /// Falls back to <see cref="CampaignExtra.TrackShortLinkRecipients"/> when the server nested it in <c>extra</c>.
         /// </summary>
-        public bool? TrackShortLinkRecipients { get; set; }
+        public bool? TrackShortLinkRecipients
+        {
+            get => _trackShortLinkRecipients ?? Extra?.TrackShortLinkRecipients;
+            set => _trackShortLinkRecipients = value;
+        }
 
-        /// <summary>Gets or sets the contact group IDs used in the campaign.</summary>
+        /// <summary>
+        /// Gets or sets the contact group IDs used in the campaign.
+        /// The API sends them as a comma-separated string; the SDK parses it into a list.
+        /// </summary>
         public IReadOnlyList<long>? Groups { get; set; }
 
         /// <summary>Gets or sets the moderator's comment if the campaign was declined.</summary>
